@@ -2,7 +2,7 @@
 const SUPABASE_URL = "https://vvagucmjmjoxnyumxtcq.supabase.co";
 
 // ضع هنا Publishable Key الخاص بمشروعك
-const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_4jVHbUXOKy4TWG19LvQJJg_4f656sU2";
 
 const statusElement = document.getElementById("app-status");
 
