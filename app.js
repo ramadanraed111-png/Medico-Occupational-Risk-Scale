@@ -13,28 +13,42 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 
+const USER_MANAGEMENT_FUNCTION = "mors-user-management";
+
 // ==========================================
-// اكتشاف رابط استعادة كلمة المرور
+// اكتشاف رابط استعادة كلمة المرور أو دعوة مستخدم
 // ==========================================
+
+function getAuthFlowType() {
+  const query = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(
+    window.location.hash.replace(/^#/, "")
+  );
+
+  return query.get("type") || hash.get("type") || "";
+}
 
 function isPasswordRecoveryUrl() {
   const query = new URLSearchParams(window.location.search);
   const hash = new URLSearchParams(
     window.location.hash.replace(/^#/, "")
   );
+  const flowType = getAuthFlowType();
 
   return (
     query.has("code") ||
-    query.get("type") === "recovery" ||
-    hash.get("type") === "recovery"
+    flowType === "recovery" ||
+    flowType === "invite"
   );
 }
 
 let recoveryMode = isPasswordRecoveryUrl();
+let inviteMode = getAuthFlowType() === "invite";
 let handlingSession = false;
 let currentUser = null;
 let currentRole = null;
 let adminAssessments = [];
+let managedUsers = [];
 
 // ==========================================
 // عناصر الواجهة
@@ -55,6 +69,9 @@ const forgotPasswordButton =
 const recoveryForm = document.getElementById("recovery-form");
 const recoveryButton = document.getElementById("recovery-button");
 const recoveryMessage = document.getElementById("recovery-message");
+const recoveryEyebrow = document.getElementById("recovery-eyebrow");
+const recoveryHeading = document.getElementById("recovery-heading");
+const recoveryDescription = document.getElementById("recovery-description");
 
 const userInfo = document.getElementById("user-info");
 const userRole = document.getElementById("user-role");
@@ -89,6 +106,18 @@ const refreshAssessmentsButton =
 const exportExcelButton =
   document.getElementById("export-excel-button");
 
+// عناصر إدارة المستخدمين
+const userManagementPanel =
+  document.getElementById("user-management-panel");
+const inviteUserForm = document.getElementById("invite-user-form");
+const inviteUserEmail = document.getElementById("invite-user-email");
+const inviteUserRole = document.getElementById("invite-user-role");
+const inviteUserButton = document.getElementById("invite-user-button");
+const refreshUsersButton = document.getElementById("refresh-users-button");
+const userManagementMessage =
+  document.getElementById("user-management-message");
+const usersTableBody = document.getElementById("users-table-body");
+
 // ==========================================
 // رسائل الواجهة
 // ==========================================
@@ -114,6 +143,12 @@ function showAdminMessage(message, type = "") {
   adminMessage.className = "status" + (type ? " " + type : "");
 }
 
+function showUserManagementMessage(message, type = "") {
+  userManagementMessage.textContent = message;
+  userManagementMessage.className = "status" + (type ? " " + type : "");
+  userManagementMessage.hidden = false;
+}
+
 function showLogin() {
   authPanel.hidden = false;
   appPanel.hidden = true;
@@ -130,11 +165,26 @@ function showRecovery() {
   authPanel.hidden = true;
   appPanel.hidden = true;
   recoveryPanel.hidden = false;
+
+  if (inviteMode) {
+    recoveryEyebrow.textContent = "تفعيل حساب مستخدم جديد";
+    recoveryHeading.textContent = "إنشاء كلمة المرور الخاصة بك";
+    recoveryDescription.textContent =
+      "مرحباً بك في MORS. أنشئ كلمة مرور لحسابك ثم أكدها لإكمال تفعيل الحساب.";
+    recoveryButton.textContent = "تفعيل الحساب وحفظ كلمة المرور";
+  } else {
+    recoveryEyebrow.textContent = "استعادة كلمة المرور";
+    recoveryHeading.textContent = "تعيين كلمة مرور جديدة";
+    recoveryDescription.textContent =
+      "أدخل كلمة المرور الجديدة ثم أكدها.";
+    recoveryButton.textContent = "حفظ كلمة المرور الجديدة";
+  }
 }
 
 function hideRolePanels() {
   adminPanel.hidden = true;
   dataEntryPanel.hidden = true;
+  userManagementPanel.hidden = true;
 }
 
 // ==========================================
@@ -236,6 +286,321 @@ document.querySelectorAll(".score-input").forEach((input) => {
 });
 
 // ==========================================
+// استدعاء وظيفة إدارة المستخدمين الآمنة
+// ==========================================
+
+async function invokeUserManagement(payload) {
+  const { data, error } = await supabaseClient.functions.invoke(
+    USER_MANAGEMENT_FUNCTION,
+    { body: payload }
+  );
+
+  if (error) {
+    let message = error.message || "تعذر الاتصال بوظيفة إدارة المستخدمين.";
+
+    // تحصيل رسالة الخطأ التي أعادتها الوظيفة، إن توفرت.
+    if (error.context && typeof error.context.json === "function") {
+      try {
+        const responseBody = await error.context.json();
+        if (responseBody && responseBody.error) {
+          message = responseBody.error;
+        }
+      } catch (_parseError) {
+        // نستخدم رسالة الخطأ الأصلية عند تعذر قراءة الاستجابة.
+      }
+    }
+
+    throw new Error(message);
+  }
+
+  if (data && data.error) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+function translateUserRole(role) {
+  if (role === "admin") return "مسؤول النظام";
+  if (role === "data_entry") return "إدخال البيانات";
+  return "غير معروف";
+}
+
+function translateUserStatus(status) {
+  if (status === "active") return "نشط";
+  if (status === "pending") return "بانتظار التفعيل";
+  if (status === "disabled") return "معطّل";
+  return "غير معروف";
+}
+
+function formatLastSignIn(value) {
+  if (!value) return "لم يسجل الدخول بعد";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "غير متاح";
+
+  return date.toLocaleString("ar-EG", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function renderManagedUsersTable() {
+  if (!usersTableBody) return;
+
+  if (!managedUsers.length) {
+    usersTableBody.innerHTML = `
+      <tr><td colspan="6">لا توجد حسابات مسجلة في قائمة MORS.</td></tr>
+    `;
+    return;
+  }
+
+  usersTableBody.innerHTML = managedUsers.map((user) => {
+    const isCurrentUser = currentUser && user.id === currentUser.id;
+    const statusClass = ["active", "pending", "disabled"].includes(user.status)
+      ? user.status
+      : "unknown";
+    const isActive = user.status === "active";
+    const isUnknown = user.status === "unknown";
+
+    const roleControl = isCurrentUser
+      ? `<span class="user-self-label">لا يمكن تعديل صلاحيتك من هنا</span>`
+      : `
+        <div class="user-role-cell">
+          <select class="managed-user-role" data-user-id="${escapeHtml(user.id)}" aria-label="الصلاحية الجديدة">
+            <option value="data_entry" ${user.role === "data_entry" ? "selected" : ""}>إدخال البيانات</option>
+            <option value="admin" ${user.role === "admin" ? "selected" : ""}>مسؤول النظام</option>
+          </select>
+          <button type="button" class="user-action-button" data-action="update-role" data-user-id="${escapeHtml(user.id)}">حفظ</button>
+        </div>
+      `;
+
+    let accountControl = "—";
+    if (isCurrentUser) {
+      accountControl = `<span class="user-self-label">الحساب الحالي</span>`;
+    } else if (!isUnknown) {
+      accountControl = isActive
+        ? `<button type="button" class="user-action-button danger-button" data-action="disable-user" data-user-id="${escapeHtml(user.id)}">تعطيل الحساب</button>`
+        : `<button type="button" class="user-action-button activate-button" data-action="activate-user" data-user-id="${escapeHtml(user.id)}">إعادة التفعيل</button>`;
+    }
+
+    return `
+      <tr>
+        <td>${escapeHtml(user.email)}</td>
+        <td>${escapeHtml(translateUserRole(user.role))}</td>
+        <td><span class="user-status ${statusClass}">${escapeHtml(translateUserStatus(user.status))}</span></td>
+        <td>${escapeHtml(formatLastSignIn(user.last_sign_in_at))}</td>
+        <td>${roleControl}</td>
+        <td>${accountControl}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function loadManagedUsers(options = {}) {
+  const silent = options.silent === true;
+
+  if (currentRole !== "admin") return;
+
+  if (!silent) {
+    refreshUsersButton.disabled = true;
+    refreshUsersButton.textContent = "جارٍ التحديث...";
+    showUserManagementMessage("جارٍ تحميل قائمة المستخدمين...");
+  }
+
+  try {
+    const result = await invokeUserManagement({ action: "list_users" });
+    managedUsers = Array.isArray(result.users) ? result.users : [];
+    renderManagedUsersTable();
+
+    if (!silent) {
+      showUserManagementMessage(
+        "تم تحميل " + managedUsers.length + " حساب.",
+        "success"
+      );
+    }
+  } catch (error) {
+    console.error("Loading users error:", error);
+    if (!silent) {
+      showUserManagementMessage(
+        "تعذر تحميل المستخدمين: " + error.message,
+        "error"
+      );
+    }
+  } finally {
+    if (!silent) {
+      refreshUsersButton.disabled = false;
+      refreshUsersButton.textContent = "تحديث قائمة المستخدمين";
+    }
+  }
+}
+
+// إرسال دعوة لمستخدم جديد
+inviteUserForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (currentRole !== "admin") {
+    showUserManagementMessage(
+      "هذه العملية متاحة لمسؤول النظام فقط.",
+      "error"
+    );
+    return;
+  }
+
+  const email = inviteUserEmail.value.trim().toLowerCase();
+  const role = inviteUserRole.value;
+
+  if (!email) {
+    showUserManagementMessage("أدخل البريد الإلكتروني للمستخدم.", "error");
+    inviteUserEmail.focus();
+    return;
+  }
+
+  inviteUserButton.disabled = true;
+  inviteUserButton.textContent = "جارٍ إرسال الدعوة...";
+
+  try {
+    await invokeUserManagement({
+      action: "invite_user",
+      email,
+      role
+    });
+
+    inviteUserForm.reset();
+    inviteUserRole.value = "data_entry";
+
+    await loadManagedUsers({ silent: true });
+
+    showUserManagementMessage(
+      "تم إرسال دعوة إلى " + email + ". سيحتاج المستخدم إلى فتح رسالة البريد وتعيين كلمة مرور قبل تسجيل الدخول.",
+      "success"
+    );
+  } catch (error) {
+    console.error("Invite user error:", error);
+    showUserManagementMessage(
+      "تعذر إرسال الدعوة: " + error.message,
+      "error"
+    );
+  } finally {
+    inviteUserButton.disabled = false;
+    inviteUserButton.textContent = "إرسال دعوة المستخدم";
+  }
+});
+
+// تحديث قائمة المستخدمين
+refreshUsersButton.addEventListener("click", async () => {
+  await loadManagedUsers();
+});
+
+// التعامل مع أزرار تغيير الصلاحية والتفعيل/التعطيل داخل الجدول
+usersTableBody.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  if (currentRole !== "admin") {
+    showUserManagementMessage(
+      "هذه العملية متاحة لمسؤول النظام فقط.",
+      "error"
+    );
+    return;
+  }
+
+  const userId = button.dataset.userId;
+  const action = button.dataset.action;
+  const targetUser = managedUsers.find((user) => user.id === userId);
+
+  if (!targetUser) {
+    showUserManagementMessage("لم يتم العثور على الحساب المطلوب.", "error");
+    return;
+  }
+
+  if (action === "update-role") {
+    const select = usersTableBody.querySelector(
+      `select.managed-user-role[data-user-id="${CSS.escape(userId)}"]`
+    );
+    const newRole = select ? select.value : "";
+
+    if (!newRole || !["admin", "data_entry"].includes(newRole)) {
+      showUserManagementMessage("اختر صلاحية صحيحة.", "error");
+      return;
+    }
+
+    if (newRole === targetUser.role) {
+      showUserManagementMessage("هذه هي الصلاحية الحالية بالفعل.");
+      return;
+    }
+
+    const confirmation = window.confirm(
+      "هل تريد تغيير صلاحية " + targetUser.email + " إلى " +
+      translateUserRole(newRole) + "؟"
+    );
+    if (!confirmation) return;
+
+    button.disabled = true;
+    button.textContent = "جارٍ الحفظ...";
+
+    try {
+      await invokeUserManagement({
+        action: "update_role",
+        user_id: userId,
+        role: newRole
+      });
+
+      await loadManagedUsers({ silent: true });
+      showUserManagementMessage(
+        "تم تحديث صلاحية " + targetUser.email + " بنجاح.",
+        "success"
+      );
+    } catch (error) {
+      console.error("Update role error:", error);
+      showUserManagementMessage(
+        "تعذر تغيير الصلاحية: " + error.message,
+        "error"
+      );
+    }
+
+    return;
+  }
+
+  if (action === "disable-user" || action === "activate-user") {
+    const active = action === "activate-user";
+    const confirmationText = active
+      ? "هل تريد إعادة تفعيل حساب " + targetUser.email + "؟"
+      : "هل تريد تعطيل حساب " + targetUser.email + "؟ لن يتم حذف الحساب أو سجلات تقييماته.";
+
+    if (!window.confirm(confirmationText)) return;
+
+    button.disabled = true;
+    button.textContent = active ? "جارٍ التفعيل..." : "جارٍ التعطيل...";
+
+    try {
+      await invokeUserManagement({
+        action: "set_active",
+        user_id: userId,
+        active
+      });
+
+      await loadManagedUsers({ silent: true });
+      showUserManagementMessage(
+        active
+          ? "تمت إعادة تفعيل حساب " + targetUser.email + "."
+          : "تم تعطيل حساب " + targetUser.email + " دون حذف بياناته أو تقييماته.",
+        "success"
+      );
+    } catch (error) {
+      console.error("Change account status error:", error);
+      showUserManagementMessage(
+        "تعذر تغيير حالة الحساب: " + error.message,
+        "error"
+      );
+    }
+  }
+});
+
+// ==========================================
 // التحقق من صلاحيات المستخدم
 // ==========================================
 
@@ -248,6 +613,8 @@ async function handleSession(session) {
   if (!session) {
     currentUser = null;
     currentRole = null;
+    managedUsers = [];
+    adminAssessments = [];
     showLogin();
     return;
   }
@@ -330,15 +697,18 @@ async function handleSession(session) {
       "صلاحية المستخدم: مسؤول النظام";
 
     adminPanel.hidden = false;
+    userManagementPanel.hidden = false;
 
-    // تحميل السجلات للمسؤول فقط
+    // تحميل السجلات وقائمة المستخدمين للمسؤول فقط
     await loadAdminAssessments();
+    await loadManagedUsers();
 
   } else {
     userRole.textContent =
       "صلاحية المستخدم: إدخال البيانات";
 
     adminPanel.hidden = true;
+    userManagementPanel.hidden = true;
   }
 }
 
@@ -434,7 +804,7 @@ forgotPasswordButton.addEventListener("click", async () => {
 });
 
 // ==========================================
-// حفظ كلمة المرور الجديدة
+// حفظ كلمة المرور الجديدة أو تفعيل الدعوة
 // ==========================================
 
 recoveryForm.addEventListener("submit", async (event) => {
@@ -466,15 +836,16 @@ recoveryForm.addEventListener("submit", async (event) => {
 
   recoveryButton.disabled = true;
   recoveryButton.textContent =
-    "جارٍ حفظ كلمة المرور...";
+    inviteMode ? "جارٍ تفعيل الحساب..." : "جارٍ حفظ كلمة المرور...";
 
   const { error } = await supabaseClient.auth.updateUser({
     password: password
   });
 
   recoveryButton.disabled = false;
-  recoveryButton.textContent =
-    "حفظ كلمة المرور الجديدة";
+  recoveryButton.textContent = inviteMode
+    ? "تفعيل الحساب وحفظ كلمة المرور"
+    : "حفظ كلمة المرور الجديدة";
 
   if (error) {
     console.error(
@@ -483,14 +854,17 @@ recoveryForm.addEventListener("submit", async (event) => {
     );
 
     showRecoveryMessage(
-      "لم نتمكن من تغيير كلمة المرور. قد يكون رابط الاستعادة منتهي الصلاحية. اطلب رسالة جديدة وحاول مرة أخرى.",
+      "لم نتمكن من تغيير كلمة المرور. قد يكون رابط الدعوة أو الاستعادة منتهي الصلاحية. اطلب رابطاً جديداً وحاول مرة أخرى.",
       "error"
     );
 
     return;
   }
 
+  const completedInvitation = inviteMode;
+
   recoveryMode = false;
+  inviteMode = false;
 
   window.history.replaceState(
     {},
@@ -509,7 +883,9 @@ recoveryForm.addEventListener("submit", async (event) => {
   showLogin();
 
   showLoginMessage(
-    "تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.",
+    completedInvitation
+      ? "تم تفعيل حسابك وتعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول."
+      : "تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.",
     "success"
   );
 });
@@ -539,6 +915,7 @@ logoutButton.addEventListener("click", async () => {
   currentUser = null;
   currentRole = null;
   adminAssessments = [];
+  managedUsers = [];
 
   loginForm.reset();
 
@@ -999,6 +1376,7 @@ exportExcelButton.addEventListener("click", () => {
 supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === "PASSWORD_RECOVERY") {
     recoveryMode = true;
+    inviteMode = false;
 
     showRecovery();
 
@@ -1013,6 +1391,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     currentUser = null;
     currentRole = null;
     adminAssessments = [];
+    managedUsers = [];
 
     if (!recoveryMode) {
       showLogin();
@@ -1052,7 +1431,9 @@ async function initializeApp() {
     showRecovery();
 
     showRecoveryMessage(
-      "جارٍ التحقق من رابط الاستعادة..."
+      inviteMode
+        ? "جارٍ التحقق من رابط الدعوة..."
+        : "جارٍ التحقق من رابط الاستعادة..."
     );
 
     const { data, error } =
@@ -1060,12 +1441,12 @@ async function initializeApp() {
 
     if (error || !data.session) {
       console.error(
-        "Recovery session error:",
+        "Recovery / invitation session error:",
         error?.message
       );
 
       showRecoveryMessage(
-        "تعذر التحقق من رابط الاستعادة. قد يكون الرابط منتهي الصلاحية. اطلب رسالة استعادة جديدة.",
+        "تعذر التحقق من الرابط. قد يكون رابط الدعوة أو الاستعادة منتهي الصلاحية أو سبق استخدامه. اطلب رابطاً جديداً من مسؤول النظام.",
         "error"
       );
 
@@ -1075,7 +1456,9 @@ async function initializeApp() {
     showRecovery();
 
     showRecoveryMessage(
-      "أدخل كلمة المرور الجديدة لحسابك."
+      inviteMode
+        ? "تم التحقق من الدعوة. أنشئ كلمة المرور لإكمال تفعيل حسابك."
+        : "تم التحقق من الرابط. أدخل كلمة المرور الجديدة لحسابك."
     );
 
     return;
