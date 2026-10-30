@@ -1,19 +1,30 @@
 
 const SUPABASE_URL = "https://vvagucmjmjoxnyumxtcq.supabase.co";
 
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_4jVHbUXOKy4TWG19LvQJJg_4f656sU2";
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_4jVHbUXOKy4TWG19LvQJJg_4f656sU2";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
 
+// عناصر الواجهة
 const authPanel = document.getElementById("auth-panel");
 const appPanel = document.getElementById("app-panel");
+const recoveryPanel = document.getElementById("recovery-panel");
+
 const loginForm = document.getElementById("login-form");
 const loginButton = document.getElementById("login-button");
 const loginMessage = document.getElementById("login-message");
 const logoutButton = document.getElementById("logout-button");
+
+const forgotPasswordButton =
+  document.getElementById("forgot-password-button");
+
+const recoveryForm = document.getElementById("recovery-form");
+const recoveryButton = document.getElementById("recovery-button");
+const recoveryMessage = document.getElementById("recovery-message");
 
 const userInfo = document.getElementById("user-info");
 const userRole = document.getElementById("user-role");
@@ -21,18 +32,34 @@ const userRole = document.getElementById("user-role");
 const adminPanel = document.getElementById("admin-panel");
 const dataEntryPanel = document.getElementById("data-entry-panel");
 
+let recoveryMode = false;
+let handlingSession = false;
+
+// رسائل الواجهة
 function showLoginMessage(message) {
   loginMessage.textContent = message;
+}
+
+function showRecoveryMessage(message) {
+  recoveryMessage.textContent = message;
 }
 
 function showLogin() {
   authPanel.hidden = false;
   appPanel.hidden = true;
+  recoveryPanel.hidden = true;
 }
 
 function showWorkspace() {
   authPanel.hidden = true;
   appPanel.hidden = false;
+  recoveryPanel.hidden = true;
+}
+
+function showRecovery() {
+  authPanel.hidden = true;
+  appPanel.hidden = true;
+  recoveryPanel.hidden = false;
 }
 
 function hideRolePanels() {
@@ -40,7 +67,13 @@ function hideRolePanels() {
   dataEntryPanel.hidden = true;
 }
 
+// التحقق من صلاحيات المستخدم
 async function handleSession(session) {
+  if (recoveryMode) {
+    showRecovery();
+    return;
+  }
+
   if (!session) {
     showLogin();
     return;
@@ -58,6 +91,7 @@ async function handleSession(session) {
 
   if (error) {
     console.error("Role lookup error:", error.message);
+    await supabaseClient.auth.signOut();
     showLogin();
     showLoginMessage(
       "تعذر التحقق من صلاحيات الحساب. يرجى مراجعة مسؤول النظام."
@@ -120,6 +154,87 @@ loginForm.addEventListener("submit", async (event) => {
   await handleSession(data.session);
 });
 
+// طلب رسالة استعادة كلمة المرور
+forgotPasswordButton.addEventListener("click", async () => {
+  const email = document.getElementById("login-email").value.trim();
+
+  if (!email) {
+    showLoginMessage("أدخل بريدك الإلكتروني أولاً، ثم اضغط نسيت كلمة المرور.");
+    return;
+  }
+
+  forgotPasswordButton.disabled = true;
+  forgotPasswordButton.textContent = "جارٍ إرسال الرسالة...";
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + "/"
+  });
+
+  forgotPasswordButton.disabled = false;
+  forgotPasswordButton.textContent = "نسيت كلمة المرور؟";
+
+  if (error) {
+    console.error("Password reset request error:", error.message);
+    showLoginMessage(
+      "تعذر إرسال رسالة الاستعادة. يرجى المحاولة لاحقاً."
+    );
+    return;
+  }
+
+  showLoginMessage(
+    "إذا كان البريد مسجلاً، فستصلك رسالة استعادة كلمة المرور. افحص البريد الوارد والرسائل غير المرغوب فيها."
+  );
+});
+
+// حفظ كلمة المرور الجديدة
+recoveryForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const password = document.getElementById("new-password").value;
+  const confirmation =
+    document.getElementById("confirm-password").value;
+
+  if (password.length < 8) {
+    showRecoveryMessage("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
+    return;
+  }
+
+  if (password !== confirmation) {
+    showRecoveryMessage("كلمتا المرور غير متطابقتين.");
+    return;
+  }
+
+  recoveryButton.disabled = true;
+  recoveryButton.textContent = "جارٍ حفظ كلمة المرور...";
+
+  const { error } = await supabaseClient.auth.updateUser({
+    password: password
+  });
+
+  recoveryButton.disabled = false;
+  recoveryButton.textContent = "حفظ كلمة المرور الجديدة";
+
+  if (error) {
+    console.error("Password update error:", error.message);
+    showRecoveryMessage(
+      "لم نتمكن من تغيير كلمة المرور. قد يكون رابط الاستعادة منتهي الصلاحية. اطلب رسالة جديدة وحاول مرة أخرى."
+    );
+    return;
+  }
+
+  recoveryMode = false;
+
+  await supabaseClient.auth.signOut();
+
+  recoveryForm.reset();
+  loginForm.reset();
+
+  showLogin();
+  showLoginMessage(
+    "تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة."
+  );
+});
+
 // تسجيل الخروج
 logoutButton.addEventListener("click", async () => {
   logoutButton.disabled = true;
@@ -139,7 +254,36 @@ logoutButton.addEventListener("click", async () => {
   showLoginMessage("تم تسجيل الخروج بنجاح.");
 });
 
-// استعادة جلسة الدخول عند فتح الموقع
+// متابعة أحداث المصادقة
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === "PASSWORD_RECOVERY") {
+    recoveryMode = true;
+    showRecovery();
+    showRecoveryMessage("أدخل كلمة المرور الجديدة لحسابك.");
+    return;
+  }
+
+  if (event === "SIGNED_OUT") {
+    recoveryMode = false;
+    showLogin();
+    return;
+  }
+
+  if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+    if (recoveryMode || handlingSession) return;
+
+    Promise.resolve().then(async () => {
+      handlingSession = true;
+      try {
+        await handleSession(session);
+      } finally {
+        handlingSession = false;
+      }
+    });
+  }
+});
+
+// استعادة الجلسة عند فتح التطبيق
 async function initializeApp() {
   const { data, error } = await supabaseClient.auth.getSession();
 
@@ -150,19 +294,9 @@ async function initializeApp() {
     return;
   }
 
-  await handleSession(data.session);
+  if (!recoveryMode) {
+    await handleSession(data.session);
+  }
 }
-
-// متابعة تغييرات جلسة الدخول
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_OUT") {
-    showLogin();
-    return;
-  }
-
-  if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-    Promise.resolve().then(() => handleSession(session));
-  }
-});
 
 initializeApp();
