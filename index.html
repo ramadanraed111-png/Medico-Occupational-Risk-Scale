@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -10,8 +9,6 @@
 </head>
 
 <body>
-
-  <!-- Header -->
   <header class="topbar">
     <div class="brand">MORS</div>
     <div>
@@ -22,189 +19,265 @@
 
   <main class="container">
 
-    <!-- Login panel -->
+    <!-- تسجيل الدخول -->
     <section id="auth-panel" class="welcome-card">
-
       <span class="eyebrow">بوابة الدخول الآمنة</span>
-
       <h2>مرحباً بك في MORS</h2>
-
-      <p>
-        يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور
-        المخصصين لك.
-      </p>
+      <p>يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور المخصصين لك.</p>
 
       <form id="login-form">
-
         <div class="form-group">
           <label for="login-email">البريد الإلكتروني</label>
-
-          <input
-            type="email"
-            id="login-email"
-            autocomplete="username"
-            required
-            placeholder="name@example.com"
-          >
+          <input type="email" id="login-email" autocomplete="username"
+                 required placeholder="name@example.com">
         </div>
 
         <div class="form-group">
           <label for="login-password">كلمة المرور</label>
-
-          <input
-            type="password"
-            id="login-password"
-            autocomplete="current-password"
-            required
-            placeholder="أدخل كلمة المرور"
-          >
+          <input type="password" id="login-password"
+                 autocomplete="current-password" required
+                 placeholder="أدخل كلمة المرور">
         </div>
 
-        <button type="submit" id="login-button">
-          تسجيل الدخول
-        </button>
-
+        <button type="submit" id="login-button">تسجيل الدخول</button>
       </form>
 
-      <button
-        type="button"
-        id="forgot-password-button"
-        class="secondary-button"
-      >
+      <button type="button" id="forgot-password-button" class="secondary-button">
         نسيت كلمة المرور؟
       </button>
 
       <div id="login-message" class="status" role="status">
         الدخول متاح للمستخدمين الذين تمت دعوتهم فقط.
       </div>
-
     </section>
 
-
-    <!-- Password recovery panel -->
-    <section
-      id="recovery-panel"
-      class="welcome-card"
-      hidden
-    >
-
+    <!-- استعادة كلمة المرور -->
+    <section id="recovery-panel" class="welcome-card" hidden>
       <span class="eyebrow">استعادة كلمة المرور</span>
-
       <h2>تعيين كلمة مرور جديدة</h2>
-
-      <p>
-        أدخل كلمة المرور الجديدة ثم أكدها.
-      </p>
+      <p>أدخل كلمة المرور الجديدة ثم أكدها.</p>
 
       <form id="recovery-form">
-
         <div class="form-group">
-          <label for="new-password">
-            كلمة المرور الجديدة
-          </label>
-
-          <input
-            type="password"
-            id="new-password"
-            minlength="8"
-            autocomplete="new-password"
-            required
-            placeholder="8 أحرف على الأقل"
-          >
+          <label for="new-password">كلمة المرور الجديدة</label>
+          <input type="password" id="new-password" minlength="8"
+                 autocomplete="new-password" required
+                 placeholder="8 أحرف على الأقل">
         </div>
 
         <div class="form-group">
-          <label for="confirm-password">
-            تأكيد كلمة المرور
-          </label>
-
-          <input
-            type="password"
-            id="confirm-password"
-            minlength="8"
-            autocomplete="new-password"
-            required
-            placeholder="أعد إدخال كلمة المرور"
-          >
+          <label for="confirm-password">تأكيد كلمة المرور</label>
+          <input type="password" id="confirm-password" minlength="8"
+                 autocomplete="new-password" required
+                 placeholder="أعد إدخال كلمة المرور">
         </div>
 
         <button type="submit" id="recovery-button">
           حفظ كلمة المرور الجديدة
         </button>
-
       </form>
 
-      <div
-        id="recovery-message"
-        class="status"
-        role="status"
-      >
+      <div id="recovery-message" class="status" role="status">
         أدخل كلمة المرور الجديدة.
       </div>
-
     </section>
 
-
-    <!-- Main application panel -->
-    <section
-      id="app-panel"
-      class="welcome-card"
-      hidden
-    >
-
-      <span class="eyebrow">مساحة العمل</span>
-
-      <h2>مرحباً بك</h2>
+    <!-- مساحة العمل -->
+    <section id="app-panel" class="welcome-card" hidden>
+      <div class="workspace-heading">
+        <div>
+          <span class="eyebrow">مساحة العمل</span>
+          <h2>نظام MORS للتقييم الطبي والمهني</h2>
+        </div>
+        <button type="button" id="logout-button" class="secondary-button">
+          تسجيل الخروج
+        </button>
+      </div>
 
       <p id="user-info"></p>
-
       <div id="user-role" class="status"></div>
 
-      <!-- Data entry user panel -->
-      <div id="data-entry-panel" hidden>
-
-        <h3>تسجيل تقييم جديد</h3>
-
-        <p>
-          سيتم تجهيز نموذج التقييم في الخطوة التالية.
+      <!-- نموذج التقييم: يظهر للمسؤول ومدخل البيانات -->
+      <section id="data-entry-panel" class="inner-panel" hidden>
+        <h3>تسجيل تقييم طبي ومهني جديد</h3>
+        <p class="section-description">
+          أدخل بيانات العامل ودرجات المخاطر. سيحسب النظام المؤشر والتصنيف تلقائياً.
         </p>
 
-      </div>
+        <form id="assessment-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="employee-name">اسم العامل *</label>
+              <input type="text" id="employee-name" required maxlength="200">
+            </div>
 
-      <!-- Admin panel -->
-      <div id="admin-panel" hidden>
+            <div class="form-group">
+              <label for="registration-number">الرقم الوظيفي / رقم التسجيل *</label>
+              <input type="text" id="registration-number" required maxlength="100">
+            </div>
 
+            <div class="form-group">
+              <label for="job-title">المسمى الوظيفي *</label>
+              <input type="text" id="job-title" required maxlength="200">
+            </div>
+
+            <div class="form-group">
+              <label for="assessment-date">تاريخ التقييم *</label>
+              <input type="date" id="assessment-date" required>
+            </div>
+
+            <div class="form-group">
+              <label for="site">موقع العمل *</label>
+              <select id="site" required>
+                <option value="">اختر الموقع</option>
+                <option value="بدر-3">بدر-3</option>
+                <option value="الأبيض">الأبيض</option>
+                <option value="علم الشاويش">علم الشاويش</option>
+                <option value="نياج-1">نياج-1</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="evaluator-name">اسم الطبيب / القائم بالتقييم *</label>
+              <input type="text" id="evaluator-name" required maxlength="200">
+            </div>
+          </div>
+
+          <div class="score-section">
+            <h4>درجات التقييم</h4>
+            <p class="section-description">
+              اختر درجة من 1 إلى 4 لكل عنصر وفقاً لدليل التقييم المعتمد لديكم.
+            </p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="hazard-severity">H – شدة مخاطر الوظيفة *</label>
+                <select id="hazard-severity" class="score-input" required>
+                  <option value="">اختر الدرجة</option>
+                  <option value="1">1 – منخفضة</option>
+                  <option value="2">2 – متوسطة</option>
+                  <option value="3">3 – مرتفعة</option>
+                  <option value="4">4 – مرتفعة جداً</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="exposure-severity">E – شدة التعرض *</label>
+                <select id="exposure-severity" class="score-input" required>
+                  <option value="">اختر الدرجة</option>
+                  <option value="1">1 – منخفضة</option>
+                  <option value="2">2 – متوسطة</option>
+                  <option value="3">3 – مرتفعة</option>
+                  <option value="4">4 – مرتفعة جداً</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="health-condition">M – الحالة الصحية *</label>
+                <select id="health-condition" class="score-input" required>
+                  <option value="">اختر الدرجة</option>
+                  <option value="1">1 – منخفضة</option>
+                  <option value="2">2 – متوسطة</option>
+                  <option value="3">3 – مرتفعة</option>
+                  <option value="4">4 – مرتفعة جداً</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- معاينة المؤشر -->
+          <div id="result-preview" class="result-preview" hidden>
+            <h4>نتيجة التقييم الأولية</h4>
+            <div class="result-number">
+              <span id="preview-index">--</span>
+              <small>من 100</small>
+            </div>
+            <p id="preview-classification" class="classification"></p>
+            <p id="preview-recommendation" class="recommendation"></p>
+            <p class="preview-note">
+              هذه نتيجة حسابية مساعدة، ويجب مراجعتها واعتمادها من الطبيب المختص.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="restrictions">القيود والتوصيات الوظيفية</label>
+            <textarea id="restrictions" rows="3" maxlength="3000"
+              placeholder="تُستكمل عند تصنيف العامل مناسباً مع بعض القيود."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="deep-assessment-notes">ملاحظات التقييم المتعمق</label>
+            <textarea id="deep-assessment-notes" rows="4" maxlength="5000"
+              placeholder="تُستكمل عند تصنيف العامل غير مناسب مؤقتاً، مع توضيح التقييم أو المتابعة المطلوبة."></textarea>
+          </div>
+
+          <button type="submit" id="save-assessment-button">
+            حفظ التقييم
+          </button>
+
+          <div id="assessment-message" class="status" role="status" hidden></div>
+        </form>
+      </section>
+
+      <!-- لوحة المسؤول -->
+      <section id="admin-panel" class="inner-panel" hidden>
         <h3>لوحة تحكم المسؤول</h3>
-
-        <p>
-          سيتم تجهيز إدارة التقييمات والمستخدمين والتقارير لاحقاً.
+        <p class="section-description">
+          تعرض هذه اللوحة سجلات التقييمات المتاحة لمسؤول النظام فقط.
         </p>
 
-      </div>
+        <div class="admin-toolbar">
+          <input type="search" id="assessment-search"
+                 placeholder="ابحث بالاسم أو الرقم الوظيفي أو الوظيفة أو الموقع">
+          <button type="button" id="refresh-assessments-button"
+                  class="secondary-button">تحديث السجلات</button>
+          <button type="button" id="export-excel-button"
+                  class="secondary-button">تصدير Excel</button>
+        </div>
 
-      <button
-        type="button"
-        id="logout-button"
-      >
-        تسجيل الخروج
-      </button>
+        <div id="admin-message" class="status" role="status">
+          اضغط على تحديث السجلات لعرض البيانات.
+        </div>
 
+        <div class="table-wrapper">
+          <table id="assessments-table">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>اسم العامل</th>
+                <th>الرقم الوظيفي</th>
+                <th>الوظيفة</th>
+                <th>الموقع</th>
+                <th>H</th>
+                <th>E</th>
+                <th>M</th>
+                <th>المؤشر</th>
+                <th>التصنيف</th>
+                <th>القائم بالتقييم</th>
+              </tr>
+            </thead>
+            <tbody id="assessments-table-body">
+              <tr>
+                <td colspan="11">لم يتم تحميل السجلات بعد.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="table-note">
+          لا تمنح هذه اللوحة صلاحية تعديل أو حذف السجلات. إدارة المستخدمين والتقارير المتقدمة مرحلة لاحقة.
+        </p>
+      </section>
     </section>
 
-
-    <!-- Footer -->
     <footer>
-      أداة مساعدة للتقييم المهني، ولا تُعد بديلاً عن القرار الطبي
-      الصادر عن الطبيب المختص.
+      MORS أداة مساعدة للتقييم المهني، ولا تُعد تشخيصاً طبياً أو بديلاً عن القرار الطبي
+      الصادر عن الطبيب المختص. يجب اعتماد المنهجية والتحقق من صلاحيتها قبل الاستخدام السريري.
     </footer>
-
   </main>
 
-  <!-- Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Application script -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
-
 </body>
 </html>
