@@ -10,6 +10,8 @@
 </head>
 
 <body>
+
+  <!-- Header -->
   <header class="topbar">
     <div class="brand">MORS</div>
     <div>
@@ -22,16 +24,21 @@
 
     <!-- Login panel -->
     <section id="auth-panel" class="welcome-card">
+
       <span class="eyebrow">بوابة الدخول الآمنة</span>
+
       <h2>مرحباً بك في MORS</h2>
+
       <p>
         يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور
         المخصصين لك.
       </p>
 
       <form id="login-form">
+
         <div class="form-group">
           <label for="login-email">البريد الإلكتروني</label>
+
           <input
             type="email"
             id="login-email"
@@ -43,6 +50,7 @@
 
         <div class="form-group">
           <label for="login-password">كلمة المرور</label>
+
           <input
             type="password"
             id="login-password"
@@ -55,37 +63,136 @@
         <button type="submit" id="login-button">
           تسجيل الدخول
         </button>
+
       </form>
+
+      <button
+        type="button"
+        id="forgot-password-button"
+        class="secondary-button"
+      >
+        نسيت كلمة المرور؟
+      </button>
 
       <div id="login-message" class="status" role="status">
         الدخول متاح للمستخدمين الذين تمت دعوتهم فقط.
       </div>
+
     </section>
 
+
+    <!-- Password recovery panel -->
+    <section
+      id="recovery-panel"
+      class="welcome-card"
+      hidden
+    >
+
+      <span class="eyebrow">استعادة كلمة المرور</span>
+
+      <h2>تعيين كلمة مرور جديدة</h2>
+
+      <p>
+        أدخل كلمة المرور الجديدة ثم أكدها.
+      </p>
+
+      <form id="recovery-form">
+
+        <div class="form-group">
+          <label for="new-password">
+            كلمة المرور الجديدة
+          </label>
+
+          <input
+            type="password"
+            id="new-password"
+            minlength="8"
+            autocomplete="new-password"
+            required
+            placeholder="8 أحرف على الأقل"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password">
+            تأكيد كلمة المرور
+          </label>
+
+          <input
+            type="password"
+            id="confirm-password"
+            minlength="8"
+            autocomplete="new-password"
+            required
+            placeholder="أعد إدخال كلمة المرور"
+          >
+        </div>
+
+        <button type="submit" id="recovery-button">
+          حفظ كلمة المرور الجديدة
+        </button>
+
+      </form>
+
+      <div
+        id="recovery-message"
+        class="status"
+        role="status"
+      >
+        أدخل كلمة المرور الجديدة.
+      </div>
+
+    </section>
+
+
     <!-- Main application panel -->
-    <section id="app-panel" class="welcome-card" hidden>
+    <section
+      id="app-panel"
+      class="welcome-card"
+      hidden
+    >
+
       <span class="eyebrow">مساحة العمل</span>
+
       <h2>مرحباً بك</h2>
 
       <p id="user-info"></p>
 
       <div id="user-role" class="status"></div>
 
+      <!-- Data entry user panel -->
       <div id="data-entry-panel" hidden>
+
         <h3>تسجيل تقييم جديد</h3>
-        <p>سيتم تجهيز نموذج التقييم في الخطوة التالية.</p>
+
+        <p>
+          سيتم تجهيز نموذج التقييم في الخطوة التالية.
+        </p>
+
       </div>
 
+      <!-- Admin panel -->
       <div id="admin-panel" hidden>
+
         <h3>لوحة تحكم المسؤول</h3>
-        <p>سيتم تجهيز إدارة التقييمات والمستخدمين والتقارير لاحقاً.</p>
+
+        <p>
+          سيتم تجهيز إدارة التقييمات والمستخدمين والتقارير لاحقاً.
+        </p>
+
       </div>
 
-      <button type="button" id="logout-button">
+      <button
+        type="button"
+        id="logout-button"
+      >
         تسجيل الخروج
       </button>
+
     </section>
 
+
+    <!-- Footer -->
     <footer>
       أداة مساعدة للتقييم المهني، ولا تُعد بديلاً عن القرار الطبي
       الصادر عن الطبيب المختص.
@@ -93,7 +200,11 @@
 
   </main>
 
+  <!-- Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Application script -->
   <script src="app.js"></script>
+
 </body>
 </html>
