@@ -5,9 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#123b4a">
-  <title>Medico-Occupational Risk Scale</title>
+  <title>MORS | نظام التقييم الطبي والمهني</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <header class="topbar">
     <div class="brand">MORS</div>
@@ -18,22 +19,78 @@
   </header>
 
   <main class="container">
-    <section class="welcome-card">
-      <span class="eyebrow">نظام التقييم الطبي والمهني</span>
-      <h2>مرحباً بك</h2>
+
+    <!-- Login panel -->
+    <section id="auth-panel" class="welcome-card">
+      <span class="eyebrow">بوابة الدخول الآمنة</span>
+      <h2>مرحباً بك في MORS</h2>
       <p>
-        منصة مخصصة لتسجيل ومتابعة تقييمات التوافق الطبي والمهني
-        للعاملين في مواقع إنتاج البترول والغاز.
+        يرجى تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور
+        المخصصين لك.
       </p>
-      <div id="app-status" class="status">
-        جاري تجهيز النظام...
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">البريد الإلكتروني</label>
+          <input
+            type="email"
+            id="login-email"
+            autocomplete="username"
+            required
+            placeholder="name@example.com"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">كلمة المرور</label>
+          <input
+            type="password"
+            id="login-password"
+            autocomplete="current-password"
+            required
+            placeholder="أدخل كلمة المرور"
+          >
+        </div>
+
+        <button type="submit" id="login-button">
+          تسجيل الدخول
+        </button>
+      </form>
+
+      <div id="login-message" class="status" role="status">
+        الدخول متاح للمستخدمين الذين تمت دعوتهم فقط.
       </div>
+    </section>
+
+    <!-- Main application panel -->
+    <section id="app-panel" class="welcome-card" hidden>
+      <span class="eyebrow">مساحة العمل</span>
+      <h2>مرحباً بك</h2>
+
+      <p id="user-info"></p>
+
+      <div id="user-role" class="status"></div>
+
+      <div id="data-entry-panel" hidden>
+        <h3>تسجيل تقييم جديد</h3>
+        <p>سيتم تجهيز نموذج التقييم في الخطوة التالية.</p>
+      </div>
+
+      <div id="admin-panel" hidden>
+        <h3>لوحة تحكم المسؤول</h3>
+        <p>سيتم تجهيز إدارة التقييمات والمستخدمين والتقارير لاحقاً.</p>
+      </div>
+
+      <button type="button" id="logout-button">
+        تسجيل الخروج
+      </button>
     </section>
 
     <footer>
       أداة مساعدة للتقييم المهني، ولا تُعد بديلاً عن القرار الطبي
       الصادر عن الطبيب المختص.
     </footer>
+
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
