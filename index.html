@@ -51,11 +51,11 @@
       </div>
     </section>
 
-    <!-- استعادة كلمة المرور -->
+    <!-- تفعيل الحساب الجديد / استعادة كلمة المرور -->
     <section id="recovery-panel" class="welcome-card" hidden>
-      <span class="eyebrow">استعادة كلمة المرور</span>
-      <h2>تعيين كلمة مرور جديدة</h2>
-      <p>أدخل كلمة المرور الجديدة ثم أكدها.</p>
+      <span class="eyebrow" id="recovery-eyebrow">تفعيل الحساب / استعادة كلمة المرور</span>
+      <h2 id="recovery-heading">تعيين كلمة مرور جديدة</h2>
+      <p id="recovery-description">أدخل كلمة المرور الجديدة ثم أكدها.</p>
 
       <form id="recovery-form">
         <div class="form-group">
@@ -265,8 +265,75 @@
         </div>
 
         <p class="table-note">
-          لا تمنح هذه اللوحة صلاحية تعديل أو حذف السجلات. إدارة المستخدمين والتقارير المتقدمة مرحلة لاحقة.
+          لا تمنح هذه اللوحة صلاحية تعديل أو حذف السجلات.
         </p>
+
+        <!-- إدارة المستخدمين والصلاحيات: للمسؤول فقط -->
+        <section id="user-management-panel" class="user-management-section" hidden>
+          <div class="user-management-heading">
+            <div>
+              <h3>إدارة المستخدمين والصلاحيات</h3>
+              <p class="section-description">
+                أرسل دعوات للمستخدمين، وعدّل أدوارهم، أو عطّل حساباتهم وأعد تفعيلها.
+              </p>
+            </div>
+            <button type="button" id="refresh-users-button" class="secondary-button">
+              تحديث قائمة المستخدمين
+            </button>
+          </div>
+
+          <form id="invite-user-form" class="invite-user-form">
+            <div class="form-group invite-email-group">
+              <label for="invite-user-email">البريد الإلكتروني للمستخدم الجديد</label>
+              <input type="email" id="invite-user-email" required maxlength="254"
+                     placeholder="user@example.com" autocomplete="off">
+            </div>
+
+            <div class="form-group invite-role-group">
+              <label for="invite-user-role">الصلاحية الممنوحة</label>
+              <select id="invite-user-role" required>
+                <option value="data_entry" selected>إدخال البيانات</option>
+                <option value="admin">مسؤول النظام</option>
+              </select>
+            </div>
+
+            <button type="submit" id="invite-user-button">
+              إرسال دعوة المستخدم
+            </button>
+          </form>
+
+          <p class="user-management-note">
+            سيصل إلى المستخدم بريد إلكتروني لدعوة الدخول وتعيين كلمة المرور. لا تشارك كلمة مرورك أو بيانات دخول المسؤول.
+          </p>
+
+          <div id="user-management-message" class="status" role="status" aria-live="polite">
+            يمكنك تحديث القائمة لعرض الحسابات وصلاحياتها.
+          </div>
+
+          <div class="table-wrapper users-table-wrapper">
+            <table id="users-table">
+              <thead>
+                <tr>
+                  <th>البريد الإلكتروني</th>
+                  <th>الصلاحية الحالية</th>
+                  <th>حالة الحساب</th>
+                  <th>آخر تسجيل دخول</th>
+                  <th>تعديل الصلاحية</th>
+                  <th>حالة الحساب</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr>
+                  <td colspan="6">لم يتم تحميل المستخدمين بعد.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="table-note">
+            لا يمكن للمسؤول تعطيل حسابه أو سحب صلاحية المسؤول من نفسه. كما يمنع النظام تعطيل أو تخفيض صلاحية آخر مسؤول نشط.
+          </p>
+        </section>
       </section>
     </section>
 
