@@ -342,11 +342,138 @@ tbody tr:hover {
   font-size: 12px;
 }
 
+/* إدارة المستخدمين */
+.user-management-section {
+  margin-top: 32px;
+  padding-top: 26px;
+  border-top: 2px solid var(--border);
+}
+
+.user-management-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.user-management-heading h3 {
+  margin: 0 0 6px;
+}
+
+.invite-user-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(170px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.invite-user-form .form-group {
+  margin: 0;
+}
+
+.invite-user-form button {
+  min-height: 45px;
+  margin-bottom: 0;
+}
+
+.user-management-note {
+  margin: 12px 0;
+  font-size: 12px;
+}
+
+.users-table-wrapper table {
+  min-width: 940px;
+}
+
+.user-role-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-role-cell select {
+  min-width: 145px;
+  min-height: 38px;
+  padding: 5px 8px;
+}
+
+.user-action-button {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.user-action-button.danger-button {
+  background: #fff2f2;
+  border: 1px solid #ebcaca;
+  color: var(--danger);
+}
+
+.user-action-button.danger-button:hover {
+  background: #fbe3e3;
+}
+
+.user-action-button.activate-button {
+  background: #eff9f4;
+  border: 1px solid #b8dfcf;
+  color: var(--success);
+}
+
+.user-action-button.activate-button:hover {
+  background: #dff2e9;
+}
+
+.user-status {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.user-status.active {
+  background: #eff9f4;
+  color: var(--success);
+}
+
+.user-status.pending {
+  background: #fff8e8;
+  color: #87651b;
+}
+
+.user-status.disabled,
+.user-status.unknown {
+  background: #fff1f1;
+  color: var(--danger);
+}
+
+.user-self-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 footer {
   margin-top: 35px;
   color: var(--muted);
   text-align: center;
   font-size: 12px;
+}
+
+@media (max-width: 850px) {
+  .invite-user-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .invite-user-form button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
 }
 
 @media (max-width: 700px) {
@@ -400,5 +527,21 @@ footer {
 
   .admin-toolbar button {
     width: 100%;
+  }
+
+  .user-management-heading {
+    flex-direction: column;
+  }
+
+  .user-management-heading button {
+    width: 100%;
+  }
+
+  .invite-user-form {
+    grid-template-columns: 1fr;
+  }
+
+  .invite-user-form button {
+    grid-column: auto;
   }
 }
