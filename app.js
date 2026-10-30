@@ -9,6 +9,23 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 
+// اكتشاف رابط استعادة كلمة المرور قبل عرض أي لوحة
+function isPasswordRecoveryUrl() {
+  const query = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(
+    window.location.hash.replace(/^#/, "")
+  );
+
+  return (
+    query.has("code") ||
+    query.get("type") === "recovery" ||
+    hash.get("type") === "recovery"
+  );
+}
+
+let recoveryMode = isPasswordRecoveryUrl();
+let handlingSession = false;
+
 // عناصر الواجهة
 const authPanel = document.getElementById("auth-panel");
 const appPanel = document.getElementById("app-panel");
@@ -31,9 +48,6 @@ const userRole = document.getElementById("user-role");
 
 const adminPanel = document.getElementById("admin-panel");
 const dataEntryPanel = document.getElementById("data-entry-panel");
-
-let recoveryMode = false;
-let handlingSession = false;
 
 // رسائل الواجهة
 function showLoginMessage(message) {
@@ -159,7 +173,9 @@ forgotPasswordButton.addEventListener("click", async () => {
   const email = document.getElementById("login-email").value.trim();
 
   if (!email) {
-    showLoginMessage("أدخل بريدك الإلكتروني أولاً، ثم اضغط نسيت كلمة المرور.");
+    showLoginMessage(
+      "أدخل بريدك الإلكتروني أولاً، ثم اضغط نسيت كلمة المرور."
+    );
     return;
   }
 
@@ -195,7 +211,9 @@ recoveryForm.addEventListener("submit", async (event) => {
     document.getElementById("confirm-password").value;
 
   if (password.length < 8) {
-    showRecoveryMessage("يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.");
+    showRecoveryMessage(
+      "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل."
+    );
     return;
   }
 
@@ -224,10 +242,17 @@ recoveryForm.addEventListener("submit", async (event) => {
 
   recoveryMode = false;
 
-  await supabaseClient.auth.signOut();
+  // إزالة بيانات رابط الاستعادة من شريط العنوان
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
 
   recoveryForm.reset();
   loginForm.reset();
+
+  await supabaseClient.auth.signOut();
 
   showLogin();
   showLoginMessage(
@@ -264,8 +289,9 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 
   if (event === "SIGNED_OUT") {
-    recoveryMode = false;
-    showLogin();
+    if (!recoveryMode) {
+      showLogin();
+    }
     return;
   }
 
@@ -274,6 +300,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 
     Promise.resolve().then(async () => {
       handlingSession = true;
+
       try {
         await handleSession(session);
       } finally {
@@ -283,8 +310,30 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 });
 
-// استعادة الجلسة عند فتح التطبيق
+// بدء التطبيق
 async function initializeApp() {
+  // إذا كان الرابط خاصاً باستعادة كلمة المرور،
+  // نعرض شاشة الاستعادة ولا نعرض مساحة العمل.
+  if (recoveryMode) {
+    showRecovery();
+    showRecoveryMessage("جارٍ التحقق من رابط الاستعادة...");
+
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error || !data.session) {
+      console.error("Recovery session error:", error?.message);
+
+      showRecoveryMessage(
+        "تعذر التحقق من رابط الاستعادة. قد يكون الرابط منتهي الصلاحية. اطلب رسالة استعادة جديدة."
+      );
+      return;
+    }
+
+    showRecovery();
+    showRecoveryMessage("أدخل كلمة المرور الجديدة لحسابك.");
+    return;
+  }
+
   const { data, error } = await supabaseClient.auth.getSession();
 
   if (error) {
@@ -294,9 +343,7 @@ async function initializeApp() {
     return;
   }
 
-  if (!recoveryMode) {
-    await handleSession(data.session);
-  }
+  await handleSession(data.session);
 }
 
 initializeApp();
