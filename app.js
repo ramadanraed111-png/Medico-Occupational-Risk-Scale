@@ -15,6 +15,14 @@ const supabaseClient = window.supabase.createClient(
 
 const USER_MANAGEMENT_FUNCTION = "mors-user-management";
 
+// المدير الأعلى الوحيد لإدارة المستخدمين والصلاحيات.
+// نعتمد معرّف Auth الثابت، وليس البريد الإلكتروني أو بيانات قابلة للتعديل.
+const SUPER_ADMIN_USER_ID = "47253008-c899-43c9-93b3-b91ac27e1d31";
+
+function isSuperAdmin() {
+  return Boolean(currentUser && currentUser.id === SUPER_ADMIN_USER_ID);
+}
+
 // ==========================================
 // اكتشاف رابط استعادة كلمة المرور أو دعوة مستخدم
 // ==========================================
@@ -387,10 +395,14 @@ function renderManagedUsersTable() {
         : `<button type="button" class="user-action-button activate-button" data-action="activate-user" data-user-id="${escapeHtml(user.id)}">إعادة التفعيل</button>`;
     }
 
+    const displayedRole = isCurrentUser && isSuperAdmin()
+      ? "المدير الأعلى للنظام"
+      : translateUserRole(user.role);
+
     return `
       <tr>
         <td>${escapeHtml(user.email)}</td>
-        <td>${escapeHtml(translateUserRole(user.role))}</td>
+        <td>${escapeHtml(displayedRole)}</td>
         <td><span class="user-status ${statusClass}">${escapeHtml(translateUserStatus(user.status))}</span></td>
         <td>${escapeHtml(formatLastSignIn(user.last_sign_in_at))}</td>
         <td>${roleControl}</td>
@@ -403,7 +415,7 @@ function renderManagedUsersTable() {
 async function loadManagedUsers(options = {}) {
   const silent = options.silent === true;
 
-  if (currentRole !== "admin") return;
+  if (!isSuperAdmin()) return;
 
   if (!silent) {
     refreshUsersButton.disabled = true;
@@ -442,9 +454,9 @@ async function loadManagedUsers(options = {}) {
 inviteUserForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  if (currentRole !== "admin") {
+  if (!isSuperAdmin()) {
     showUserManagementMessage(
-      "هذه العملية متاحة لمسؤول النظام فقط.",
+      "إدارة المستخدمين متاحة للمدير الأعلى للنظام فقط.",
       "error"
     );
     return;
@@ -500,9 +512,9 @@ usersTableBody.addEventListener("click", async (event) => {
   const button = event.target.closest("button[data-action]");
   if (!button) return;
 
-  if (currentRole !== "admin") {
+  if (!isSuperAdmin()) {
     showUserManagementMessage(
-      "هذه العملية متاحة لمسؤول النظام فقط.",
+      "إدارة المستخدمين متاحة للمدير الأعلى للنظام فقط.",
       "error"
     );
     return;
@@ -693,15 +705,24 @@ async function handleSession(session) {
   dataEntryPanel.hidden = false;
 
   if (data.role === "admin") {
-    userRole.textContent =
-      "صلاحية المستخدم: مسؤول النظام";
+    userRole.textContent = isSuperAdmin()
+      ? "صلاحية المستخدم: المدير الأعلى للنظام"
+      : "صلاحية المستخدم: مسؤول النظام";
 
     adminPanel.hidden = false;
-    userManagementPanel.hidden = false;
 
-    // تحميل السجلات وقائمة المستخدمين للمسؤول فقط
+    // يستطيع جميع المسؤولين مراجعة السجلات، لكن إدارة المستخدمين
+    // محصورة في حساب المدير الأعلى المحدد في الخادم والواجهة.
+    userManagementPanel.hidden = !isSuperAdmin();
+
     await loadAdminAssessments();
-    await loadManagedUsers();
+
+    if (isSuperAdmin()) {
+      await loadManagedUsers();
+    } else {
+      managedUsers = [];
+      if (usersTableBody) usersTableBody.innerHTML = "";
+    }
 
   } else {
     userRole.textContent =
