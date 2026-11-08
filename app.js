@@ -13,6 +13,9 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_PUBLISHABLE_KEY
 );
 
+// إتاحة اتصال Supabase لإضافة مكتبات الوظائف والمخاطر الطبية.
+window.morsSupabaseClient = supabaseClient;
+
 const USER_MANAGEMENT_FUNCTION = "mors-user-management";
 
 // المدير الأعلى الوحيد لإدارة المستخدمين والصلاحيات.
