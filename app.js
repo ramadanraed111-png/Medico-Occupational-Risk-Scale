@@ -55,7 +55,7 @@ $("assessment-form").addEventListener("submit",async e=>{
  const {error}=await client.from("pofri_assessments").insert(payload);
  b.disabled=false;b.textContent="حفظ تقييم POFRI";
  if(error){msg("assessment-message","لم يُحفظ التقييم. قد يلزم تطبيق ملف SQL الخاص بجدول POFRI وسياسات الصلاحيات. التفاصيل: "+error.message,"error");return;}
- $("assessment-form").reset();today();$("decision-preview").hidden=true;msg("assessment-message","تم حفظ تقييم POFRI بنجاح.","success");if(role==="admin")loadRecords();
+ $("assessment-form").reset();window.POFRI_JEM?.clear?.();today();$("decision-preview").hidden=true;msg("assessment-message","تم حفظ تقييم POFRI بنجاح.","success");if(role==="admin")loadRecords();
 });
 async function loadRecords(){
  msg("admin-message","جارٍ تحميل تقييمات POFRI...");
