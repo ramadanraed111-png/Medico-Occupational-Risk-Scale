@@ -42,7 +42,7 @@ Record expected outcomes for deterministic checks of the draft A/B/C/D escalatio
 - All 22 assessment dropdowns must be required and begin with an empty prompt; a default selection must not silently imply a safe condition.
 - Job and task datalist markup must be valid.
 - Preview must be blocked until required inputs are completed.
-- Mission/shift duration must be entered because exposure duration is part of task-specific assessment.
+- Mission/shift duration must be entered because exposure duration is part of task-specific assessment; blank and whitespace-only values must be rejected.
 - Final restrictions/recommendations must be non-empty before saving any assessment; whitespace-only entries must be rejected.
 - The saved decision must include the category, label, reasons, and algorithm version.
 - Only `admin` and `data_entry` roles may insert records; only `admin` may read the full POFRI register.
@@ -61,4 +61,4 @@ The 18 logic-level cases above were run against the current draft rules during d
 
 ## Additional workflow safeguard
 
-The assessment form now requires mission/shift duration and final restrictions/recommendations. The save handler also trims the recommendations field and refuses to save a whitespace-only value. This is a workflow completeness check; it does not validate the clinical adequacy of the recommendation text.
+The assessment form now requires mission/shift duration and final restrictions/recommendations. The save handler also trims both fields and refuses to save blank or whitespace-only values. This is a workflow completeness check; it does not validate the clinical adequacy of the recommendation text.
