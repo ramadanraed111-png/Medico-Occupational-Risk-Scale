@@ -66,3 +66,8 @@ using (
     where u.user_id = (select auth.uid()) and u.role = 'admin'
   )
 );
+
+-- Explicit Data API grants are required for newly created public tables
+-- on projects where automatic API exposure is disabled.
+grant select, insert, update on table public.pofri_workers to authenticated;
+grant delete on table public.pofri_assessments to authenticated;
