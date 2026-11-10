@@ -71,3 +71,13 @@ using (
 -- on projects where automatic API exposure is disabled.
 grant select, insert, update on table public.pofri_workers to authenticated;
 grant delete on table public.pofri_assessments to authenticated;
+
+-- Preserve assessment history when an Auth account is permanently removed.
+-- The creator reference is cleared, but the assessment row and its content remain.
+alter table public.pofri_assessments
+  alter column created_by drop not null;
+alter table public.pofri_assessments
+  drop constraint if exists pofri_assessments_created_by_fkey;
+alter table public.pofri_assessments
+  add constraint pofri_assessments_created_by_fkey
+  foreign key (created_by) references auth.users(id) on delete set null;
