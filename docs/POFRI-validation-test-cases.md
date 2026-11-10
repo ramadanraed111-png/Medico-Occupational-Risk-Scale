@@ -42,6 +42,8 @@ Record expected outcomes for deterministic checks of the draft A/B/C/D escalatio
 - All 22 assessment dropdowns must be required and begin with an empty prompt; a default selection must not silently imply a safe condition.
 - Job and task datalist markup must be valid.
 - Preview must be blocked until required inputs are completed.
+- Mission/shift duration must be entered because exposure duration is part of task-specific assessment.
+- Final restrictions/recommendations must be non-empty before saving any assessment; whitespace-only entries must be rejected.
 - The saved decision must include the category, label, reasons, and algorithm version.
 - Only `admin` and `data_entry` roles may insert records; only `admin` may read the full POFRI register.
 - A data-entry user must not be able to read the full register through the API even if the interface hides the admin panel.
@@ -56,3 +58,7 @@ The 18 logic-level cases above were run against the current draft rules during d
 - A/B/C/D labels are provisional workflow prompts, not a medical diagnosis or final fitness decision.
 - The interface still needs end-to-end browser testing after deployment, including sign-in, save, admin read, data-entry denial of read, and CSV export.
 - Any real implementation requires approval by occupational medicine, HSE, operations, information security, and the organization's governance process.
+
+## Additional workflow safeguard
+
+The assessment form now requires mission/shift duration and final restrictions/recommendations. The save handler also trims the recommendations field and refuses to save a whitespace-only value. This is a workflow completeness check; it does not validate the clinical adequacy of the recommendation text.
