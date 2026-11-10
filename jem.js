@@ -20,7 +20,7 @@
  hazard.addEventListener("change",()=>{
    const h=selected();custom.hidden=hazard.value!=="__custom__";severity.disabled=false;severity.innerHTML='<option value="">اختر الشدة</option>';
    if(h){h.levels.forEach((desc,i)=>{const o=document.createElement("option");o.value=String(i+1);const lab=i===3?(h.criticalLabel||"شديد"):severityLabels[i];o.textContent=lab+" — "+desc;severity.append(o);});basis.textContent=h.basis?"أساس تقييم الشدة: "+h.basis:"";} 
-   else if(hazard.value==="__custom__"){severity.innerHTML="";severityLabels.forEach((lab,i)=>{const o=document.createElement("option");o.value=String(i+1);o.textContent=lab;severity.append(o);});basis.textContent="أدخل وصف الخطر وبيانات القياس أو ظروف التعرض وفق تقييم الموقع.";}
+   else if(hazard.value==="__custom__"){severity.innerHTML="";const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر الشدة";severity.append(placeholder);severityLabels.forEach((lab,i)=>{const o=document.createElement("option");o.value=String(i+1);o.textContent=lab;severity.append(o);});basis.textContent="أدخل وصف الخطر وبيانات القياس أو ظروف التعرض وفق تقييم الموقع.";}
    else resetSeverity();
  });
  function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
