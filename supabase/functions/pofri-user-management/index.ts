@@ -81,7 +81,6 @@ Deno.serve(async(req:Request)=>{
   }
   if(action==="delete_user"){
    if(target.role==="admin"&&await activeAdminCount()<=1)return reply({error:"لا يمكن حذف آخر مسؤول نشط."},409,origin);
-   await admin.auth.admin.signOut(id,"global");
    const {error}=await admin.auth.admin.deleteUser(id);if(error)throw error;
    return reply({ok:true,message:"تم حذف حساب المستخدم نهائياً. سجلات التقييم المرتبطة به لم تُحذف."},200,origin);
   }
