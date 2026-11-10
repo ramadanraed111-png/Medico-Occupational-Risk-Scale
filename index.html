@@ -39,11 +39,12 @@
 <p>اختر كل خطر مرتبط بالمهمة الفعلية. لكل خطر سجل شدة التعرض ومعدل التعرض بصورة مستقلة. الخيارات الأربعة لمعدل التعرض متاحة لجميع الفئات.</p>
 <div class="grid jem-controls">
 <label>فئة الخطر<select id="jem-category"><option value="">اختر فئة الخطر</option></select></label>
-<label>الخطر المحدد<select id="jem-hazard" disabled><option value="">اختر الخطر</option></select></label>
+<label>الخطر المحدد<select id="jem-hazard" disabled><option value="">اختر الخطر</option><option value="__custom__">خطر آخر / مخصص</option></select></label>
 <label>شدة التعرض<select id="jem-severity" disabled><option value="">اختر الشدة</option></select></label>
 <label>معدل التعرض<select id="jem-frequency" disabled><option value="">اختر معدل التعرض</option><option value="rare">نادر</option><option value="occasional">ظرفي</option><option value="repeated">متكرر</option><option value="continuous">مستمر</option></select></label>
 </div>
 <div id="jem-basis" class="muted jem-basis" aria-live="polite"></div>
+<div id="jem-custom-fields" class="grid" hidden><label>اسم الخطر غير المدرج<input id="jem-custom-name" maxlength="180" placeholder="اكتب اسم الخطر"></label><label>وصف مستوى الشدة / القياس<input id="jem-custom-description" maxlength="600" placeholder="اكتب وصفاً أو قراءة القياس"></label></div>
 <label>تفاصيل القياس أو ظروف التعرض (اختياري)<textarea id="jem-notes" rows="2" maxlength="1500" placeholder="مثال: قراءة جهاز القياس، مدة التعرض، مصدر الخطر، أو ظروف المهمة"></textarea></label>
 <button type="button" id="jem-add" class="secondary">إضافة الخطر إلى التقييم</button>
 <div class="table-wrap"><table class="jem-table"><thead><tr><th>فئة الخطر</th><th>الخطر</th><th>الشدة</th><th>معدل التعرض</th><th>تفاصيل</th><th>إجراء</th></tr></thead><tbody id="jem-items"><tr><td colspan="6">لم تتم إضافة أخطار بعد.</td></tr></tbody></table></div>
