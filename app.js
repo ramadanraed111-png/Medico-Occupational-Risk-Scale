@@ -1,5 +1,4 @@
-/* POFRI front-end | MORS legacy assessment logic intentionally retired.
-   Existing Supabase Auth and app_users roles are reused. Legacy MORS records/tables are untouched. */
+/* POFRI front-end. Existing Supabase Auth and app_users roles are reused. */
 const SUPABASE_URL="https://vvagucmjmjoxnyumxtcq.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_4jVHbUXOKy4TWG19LvQJJg_4f656sU2";
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
@@ -19,7 +18,7 @@ function analyze(d){
  const escalate=(c)=>{if(c==="D"|| (c==="C"&&cls!=="D") || (c==="B"&&cls==="A"))cls=c};
  if(d["medical-fit"]==="incompatible"||d.capacity==="insufficient"){escalate("D");reasons.push("عدم توافق طبي/وظيفي مع متطلبات المهمة الحالية وفق المدخلات");}
  if(d["medical-fit"]==="temporary"||d["medical-fit"]==="pending"||d.capacity==="unknown"){escalate("C");reasons.push("التقييم الطبي أو تحديد القدرة الوظيفية غير مكتمل أو يتطلب مراجعة");}
- if(d["medical-fit"]==="restricted"||d.capacity==="limited"||d.controls!=="effective"||["high","critical"].includes(d["residual-risk"])||d["care-access"]==="remote"||d.evacuation==="weak"||d.evacuation==="unknown"||d.communications==="poor"||d["site-support"]==="inadequate"){escalate("B");reasons.push("توجد قيود أو فجوات في التحكم بالمخاطر أو دعم الموقع تستلزم معالجة موثقة");}
+ if(d["medical-fit"]==="restricted"||d.capacity==="limited"||d.controls!=="effective"||["high","critical"].includes(d["residual-risk"])||["high"].some(k=>[d.chem,d.noise,d.heat,d.bio,d["physical-hazard"]].includes(k))||d.frequency==="frequent"||["high","very_high"].includes(d.physical)||["high","very_high"].includes(d.cognitive)||d.height==="yes"||d.confined==="yes"||d["care-access"]==="remote"||d["care-access"]==="limited"||d.evacuation==="weak"||d.evacuation==="unknown"||d.communications==="poor"||d.communications==="intermittent"||d["site-support"]==="inadequate"||d["site-support"]==="limited"){escalate("B");reasons.push("توجد قيود أو تعرضات/متطلبات مرتفعة أو فجوات في التحكم أو دعم الموقع تستلزم معالجة موثقة");}
  if(d["residual-risk"]==="critical"||d["inherent-risk"]==="critical"&&d.controls!=="effective"||d.evacuation==="weak"&&d["care-access"]==="remote"){escalate("C");reasons.push("مؤشر خطر حرج أو ترتيبات طوارئ غير كافية: أوقف إسناد المهمة حتى المراجعة والتحكم");}
  if(d["medical-fit"]==="pending"||d.capacity==="unknown"||d.controls==="unknown"||d.evacuation==="unknown"||d.communications==="unknown"||d["site-support"]==="unknown")reasons.push("هناك بيانات أساسية غير متحققة؛ لا يمكن اعتبار غياب المعلومة دليلاً على السلامة");
  if(cls==="D")label="D – غير ملائم لهذه المهمة المحددة حالياً";
