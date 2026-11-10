@@ -18,6 +18,7 @@ create table if not exists public.pofri_workers (
 
 create index if not exists pofri_workers_name_idx on public.pofri_workers (full_name);
 create index if not exists pofri_workers_registration_idx on public.pofri_workers (registration_number);
+create index if not exists pofri_workers_created_by_idx on public.pofri_workers (created_by);
 
 alter table public.pofri_workers enable row level security;
 
