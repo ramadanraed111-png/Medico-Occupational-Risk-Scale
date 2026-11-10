@@ -58,6 +58,6 @@
    $("jem-notes").value="";$("jem-custom-name").value="";$("jem-custom-description").value="";
    severity.value="";frequency.value="";render();
  });
- window.POFRI_JEM={getItems:()=>items.map(x=>({...x}))};
+ window.POFRI_JEM={getItems:()=>items.map(x=>({...x})),clear:()=>{items.splice(0,items.length);render();}};
  render();
 })();
