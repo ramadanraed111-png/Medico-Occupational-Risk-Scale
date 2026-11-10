@@ -51,7 +51,7 @@ function preview(){
 async function session(u){
  user=u;const {data,error}=await client.from("app_users").select("role,email").eq("user_id",u.id).maybeSingle();
  if(error||!data){await client.auth.signOut();user=null;show("auth");msg("login-message","تعذر التحقق من صلاحية الحساب. راجع مسؤول النظام.","error");return;}
- role=data.role;show("work");$("user-info").textContent=(data.email||u.email)+" — "+(role==="admin"?"مسؤول النظام":"مدخل بيانات");
+ role=data.role;show("work");document.dispatchEvent(new Event("pofri-session-ready"));$("user-info").textContent=(data.email||u.email)+" — "+(role==="admin"?"مسؤول النظام":"مدخل بيانات");
  $("admin-panel").hidden=role!=="admin";today();if(role==="admin")loadRecords();
 }
 $("login-form").addEventListener("submit",async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;const {data,error}=await client.auth.signInWithPassword({email:value("login-email"),password:value("login-password")});b.disabled=false;if(error){msg("login-message","تعذر تسجيل الدخول: "+error.message,"error");return;}await session(data.user);});
@@ -73,8 +73,8 @@ async function loadRecords(){
  msg("admin-message","جارٍ تحميل تقييمات POFRI...");
  const {data,error}=await client.from("pofri_assessments").select("id,assessment_date,employee_name,registration_number,job_title,task_name,site,evaluator_name,decision,medical").order("assessment_date",{ascending:false}).limit(500);
  if(error){msg("admin-message","تعذر تحميل السجلات: "+error.message,"error");return;}
- records=data||[];$("records-body").innerHTML=records.length?records.map(x=>'<tr><td>'+esc(x.assessment_date)+'</td><td>'+esc(x.employee_name)+'</td><td>'+esc(x.medical?.worker_profile?.age_years??'—')+'</td><td>'+esc(x.registration_number)+'</td><td>'+esc(x.job_title)+' / '+esc(x.task_name)+'</td><td>'+esc(x.site)+'</td><td>'+esc(x.decision?.label||"—")+'</td><td>'+esc(x.evaluator_name)+'</td></tr>').join(""):'<tr><td colspan="8">لا توجد تقييمات POFRI بعد.</td></tr>';
- msg("admin-message","عدد تقييمات POFRI: "+records.length,"success");
+ records=data||[];$("records-body").innerHTML=records.length?records.map(x=>'<tr><td>'+esc(x.assessment_date)+'</td><td>'+esc(x.employee_name)+'</td><td>'+esc(x.medical?.worker_profile?.age_years??'—')+'</td><td>'+esc(x.registration_number)+'</td><td>'+esc(x.job_title)+' / '+esc(x.task_name)+'</td><td>'+esc(x.site)+'</td><td>'+esc(x.decision?.label||"—")+'</td><td>'+esc(x.evaluator_name)+'</td><td><button type="button" class="danger" data-delete-assessment="'+esc(x.id)+'">مسح</button></td></tr>').join(""):'<tr><td colspan="8">لا توجد تقييمات POFRI بعد.</td></tr>';
+ msg("admin-message","عدد تقييمات POFRI: "+records.length,"success");document.dispatchEvent(new Event("pofri-records-loaded"));
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 $("refresh-button").addEventListener("click",loadRecords);
