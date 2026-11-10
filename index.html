@@ -35,13 +35,27 @@
 <label>العمل المنفرد / العزلة<select id="isolated" required><option value="">حدد العمل المنفرد</option><option value="no">لا</option><option value="yes">نعم</option></select></label>
 <label>قيادة / تشغيل معدات<select id="driving" required><option value="">حدد القيادة أو تشغيل المعدات</option><option value="no">لا</option><option value="yes">نعم</option></select></label>
 </div></div>
-<div class="axis"><h4>2. مصفوفة التعرضات – Job Exposure Matrix (JEM)</h4><p>سجل مستوى التعرض المتوقع لكل خطر في سياق المهمة.</p><div class="grid">
-<label>التعرض الكيميائي<select id="chem" required><option value="">اختر مستوى التعرض الكيميائي</option><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select></label>
-<label>الضوضاء / الاهتزاز<select id="noise" required><option value="">اختر مستوى الضوضاء والاهتزاز</option><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select></label>
-<label>الحرارة / الطقس<select id="heat" required><option value="">اختر مستوى الحرارة والطقس</option><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select></label>
-<label>المخاطر البيولوجية<select id="bio" required><option value="">اختر مستوى المخاطر البيولوجية</option><option value="none">غير موجودة</option><option value="low">منخفضة</option><option value="moderate">متوسطة</option><option value="high">مرتفعة</option></select></label>
-<label>المخاطر الفيزيائية / الميكانيكية<select id="physical-hazard" required><option value="">اختر مستوى المخاطر الفيزيائية والميكانيكية</option><option value="none">غير موجودة</option><option value="low">منخفضة</option><option value="moderate">متوسطة</option><option value="high">مرتفعة</option></select></label>
-<label>تواتر / مدة التعرض<select id="frequency" required><option value="">اختر تواتر التعرض</option><option value="occasional">متقطع</option><option value="regular">منتظم</option><option value="frequent">متكرر / مستمر</option></select></label>
+<div class="axis"><h4>2. مصفوفة التعرضات – Job Exposure Matrix (JEM)</h4>
+<p>اختر كل خطر مرتبط بالمهمة الفعلية. لكل خطر سجل شدة التعرض ومعدل التعرض بصورة مستقلة. الخيارات الأربعة لمعدل التعرض متاحة لجميع الفئات.</p>
+<div class="grid jem-controls">
+<label>فئة الخطر<select id="jem-category"><option value="">اختر فئة الخطر</option></select></label>
+<label>الخطر المحدد<select id="jem-hazard" disabled><option value="">اختر الخطر</option><option value="__custom__">خطر آخر / مخصص</option></select></label>
+<label>شدة التعرض<select id="jem-severity" disabled><option value="">اختر الشدة</option></select></label>
+<label>معدل التعرض<select id="jem-frequency" disabled><option value="">اختر معدل التعرض</option><option value="rare">نادر</option><option value="occasional">ظرفي</option><option value="repeated">متكرر</option><option value="continuous">مستمر</option></select></label>
+</div>
+<div id="jem-basis" class="muted jem-basis" aria-live="polite"></div>
+<div id="jem-custom-fields" class="grid" hidden><label>اسم الخطر غير المدرج<input id="jem-custom-name" maxlength="180" placeholder="اكتب اسم الخطر"></label><label>وصف مستوى الشدة / القياس<input id="jem-custom-description" maxlength="600" placeholder="اكتب وصفاً أو قراءة القياس"></label></div>
+<label>تفاصيل القياس أو ظروف التعرض (اختياري)<textarea id="jem-notes" rows="2" maxlength="1500" placeholder="مثال: قراءة جهاز القياس، مدة التعرض، مصدر الخطر، أو ظروف المهمة"></textarea></label>
+<button type="button" id="jem-add" class="secondary">إضافة الخطر إلى التقييم</button>
+<div class="table-wrap"><table class="jem-table"><thead><tr><th>فئة الخطر</th><th>الخطر</th><th>الشدة</th><th>معدل التعرض</th><th>تفاصيل</th><th>إجراء</th></tr></thead><tbody id="jem-items"><tr><td colspan="6">لم تتم إضافة أخطار بعد.</td></tr></tbody></table></div>
+<div class="muted">ملاحظة: لا تعني الشدة أو معدل التعرض منفرداً درجة الخطر المتبقي. سجّل الضوابط وقيّم الخطر المتبقي في محور TRA.</div>
+<div hidden aria-hidden="true">
+<select id="chem"><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select>
+<select id="noise"><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select>
+<select id="heat"><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select>
+<select id="bio"><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select>
+<select id="physical-hazard"><option value="none">غير موجود</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option></select>
+<select id="frequency"><option value="occasional">ظرفي</option><option value="regular">متكرر</option><option value="frequent">متكرر / مستمر</option></select>
 </div></div>
 <div class="axis"><h4>3. تقييم مخاطر المهمة – Task Risk Assessment (TRA)</h4><div class="grid">
 <label>مستوى الخطر قبل التحكم<select id="inherent-risk" required><option value="">اختر مستوى الخطر قبل التحكم</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option><option value="critical">حرج</option></select></label>
@@ -69,5 +83,5 @@
 </section>
 <footer>POFRI – نسخة تطويرية تجريبية. لا تستخدم لاتخاذ قرار نهائي بشأن اللياقة أو التوظيف قبل اعتماد النموذج، والتحقق من صلاحيته، ومراجعة قواعد الحماية والخصوصية.</footer>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="jem-library.js"></script><script src="app.js"></script><script src="jem.js"></script>
 </body></html>
