@@ -6,7 +6,7 @@ let user=null,role=null,records=[];
 const $=id=>document.getElementById(id);
 const auth=$("auth-panel"),workspace=$("workspace"),recovery=$("recovery-panel");
 function msg(id,t,type=""){const e=$(id);e.textContent=t;e.className="status "+type}
-function show(which){auth.hidden=which!=="auth";workspace.hidden=which!=="work";recovery.hidden=which!=="recovery"}
+function show(which){auth.hidden=which!=="auth";workspace.hidden=which!=="work";recovery.hidden=which!=="recovery";$("module-nav").hidden=which!=="work";$("top-user-info").hidden=which!=="work"}
 function value(id){return $(id).value}
 function today(){ $("assessment-date").value=new Date().toISOString().slice(0,10);calculateAge()}
 function calculateAge(){
@@ -51,7 +51,7 @@ function preview(){
 async function session(u){
  user=u;const {data,error}=await client.from("app_users").select("role,email").eq("user_id",u.id).maybeSingle();
  if(error||!data){await client.auth.signOut();user=null;show("auth");msg("login-message","تعذر التحقق من صلاحية الحساب. راجع مسؤول النظام.","error");return;}
- role=data.role;show("work");document.dispatchEvent(new Event("pofri-session-ready"));$("user-info").textContent=(data.email||u.email)+" — "+(role==="admin"?"مسؤول النظام":"مدخل بيانات");
+ role=data.role;show("work");document.dispatchEvent(new Event("pofri-session-ready"));$("top-user-info").textContent=(data.email||u.email)+"  |  "+(role==="admin"?"مسؤول النظام":"مدخل بيانات");
  $("admin-panel").hidden=role!=="admin";today();if(role==="admin")loadRecords();
 }
 $("login-form").addEventListener("submit",async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;const {data,error}=await client.auth.signInWithPassword({email:value("login-email"),password:value("login-password")});b.disabled=false;if(error){msg("login-message","تعذر تسجيل الدخول: "+error.message,"error");return;}await session(data.user);});
