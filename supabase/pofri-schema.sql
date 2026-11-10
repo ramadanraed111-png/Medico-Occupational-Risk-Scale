@@ -36,10 +36,11 @@ drop policy if exists "pofri_insert_own" on public.pofri_assessments;
 create policy "pofri_insert_own"
 on public.pofri_assessments for insert to authenticated
 with check (
-  created_by = auth.uid()
+  created_by = (select auth.uid())
   and exists (
     select 1 from public.app_users u
-    where u.user_id = auth.uid()
+    where u.user_id = (select auth.uid())
+      and u.role in ('admin', 'data_entry')
   )
 );
 
