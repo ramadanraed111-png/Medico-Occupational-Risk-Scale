@@ -80,9 +80,7 @@ Deno.serve(async(req:Request)=>{
    return reply({ok:true,message:body.active?"تمت إعادة تفعيل الحساب.":"تم تعطيل الحساب."},200,origin);
   }
   if(action==="delete_user"){
-   if(target.role==="admin"&&await activeAdminCount()<=1)return reply({error:"لا يمكن حذف آخر مسؤول نشط."},409,origin);
-   const {error}=await admin.auth.admin.deleteUser(id);if(error)throw error;
-   return reply({ok:true,message:"تم حذف حساب المستخدم نهائياً. سجلات التقييم المرتبطة به لم تُحذف."},200,origin);
+   return reply({error:"الحذف النهائي لحسابات Auth معطل لحماية أرشيف MORS القديم. استخدم تعطيل المستخدم؛ سيظل الحساب والسجل محفوظين ويمكن إعادة التفعيل."},409,origin);
   }
   return reply({error:"العملية المطلوبة غير معروفة."},400,origin);
  }catch(e){console.error("POFRI admin function error",e);return reply({error:e instanceof Error?e.message:"حدث خطأ غير متوقع."},500,origin);}
