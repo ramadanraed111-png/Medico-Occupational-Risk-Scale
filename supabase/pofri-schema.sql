@@ -29,6 +29,7 @@ create index if not exists pofri_assessments_created_by_idx
   on public.pofri_assessments (created_by);
 
 alter table public.pofri_assessments enable row level security;
+grant select, insert on public.pofri_assessments to authenticated;
 
 -- Authenticated app users may create records only for themselves.
 drop policy if exists "pofri_insert_own" on public.pofri_assessments;
