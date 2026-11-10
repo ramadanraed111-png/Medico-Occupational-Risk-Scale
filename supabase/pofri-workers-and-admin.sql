@@ -69,8 +69,11 @@ using (
 
 -- Explicit Data API grants are required for newly created public tables
 -- on projects where automatic API exposure is disabled.
+revoke all privileges on table public.pofri_workers from anon, authenticated;
+revoke all privileges on table public.pofri_assessments from anon, authenticated;
+
 grant select, insert, update on table public.pofri_workers to authenticated;
-grant delete on table public.pofri_assessments to authenticated;
+grant select, insert, delete on table public.pofri_assessments to authenticated;
 
 -- Preserve assessment history when an Auth account is permanently removed.
 -- The creator reference is cleared, but the assessment row and its content remain.
