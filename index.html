@@ -25,7 +25,7 @@
 <label>تاريخ التقييم *<input id="assessment-date" type="date" required></label>
 <label>الموقع *<select id="site" required><option value="">اختر الموقع</option><option>بدر-3</option><option>الأبيض</option><option>علم الشاويش</option><option>نياج-1</option><option>موقع آخر</option></select></label>
 <label>اسم الطبيب / المقيم *<input id="evaluator-name" required maxlength="200"></label>
-<label>مدة المهمة / الوردية<input id="duration" maxlength="100" placeholder="مثال: 12 ساعة / مهمة طارئة"></label>
+<label>مدة المهمة / الوردية *<input id="duration" required maxlength="100" placeholder="مثال: 12 ساعة / مهمة طارئة"></label>
 </div>
 <div class="axis"><h4>1. مكتبة الوظائف والمهام – Job &amp; Task Library</h4><p>حدد المتطلبات الفعلية للمهمة.</p><div class="grid">
 <label>المجهود البدني<select id="physical" required><option value="">اختر مستوى المجهود البدني</option><option value="low">منخفض</option><option value="moderate">متوسط</option><option value="high">مرتفع</option><option value="very_high">مرتفع جداً</option></select></label>
@@ -61,7 +61,7 @@
 <label>الاتصالات والطوارئ<select id="communications" required><option value="">اختر حالة الاتصالات والطوارئ</option><option value="reliable">موثوقة</option><option value="intermittent">متقطعة</option><option value="poor">ضعيفة</option><option value="unknown">غير متحقق منها</option></select></label>
 <label>ملاءمة الترتيبات للمخاطر الطبية<select id="site-support" required><option value="">اختر ملاءمة دعم الموقع</option><option value="adequate">كافية</option><option value="limited">محدودة</option><option value="inadequate">غير كافية</option><option value="unknown">غير محددة</option></select></label>
 </div></div>
-<div class="axis"><h4>6. محرك القرار – Fitness Decision Engine</h4><label>ملاحظات الطبيب وأسباب القرار<textarea id="decision-notes" rows="3" maxlength="4000"></textarea></label><label>القيود والتوصيات النهائية<textarea id="recommendations" rows="3" maxlength="4000"></textarea></label></div>
+<div class="axis"><h4>6. محرك القرار – Fitness Decision Engine</h4><label>ملاحظات الطبيب وأسباب القرار<textarea id="decision-notes" rows="3" maxlength="4000"></textarea></label><label>القيود والتوصيات النهائية *<textarea id="recommendations" required rows="3" maxlength="4000"></textarea></label></div>
 <div id="decision-preview" class="decision" hidden><h4>النتيجة الأولية المقترحة</h4><div id="decision-label" class="decision-label"></div><p id="decision-reasons"></p><p id="decision-caution" class="muted"></p></div>
 <button type="button" id="preview-button" class="secondary">تحليل أولي للمحاور الستة</button><button type="submit" id="save-button">حفظ تقييم POFRI</button><div id="assessment-message" class="status" hidden></div>
 </form></div>
