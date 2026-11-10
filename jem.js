@@ -8,6 +8,8 @@
  const categories=[...new Set(library.map(x=>x.category))];
  const category=$("jem-category"),hazard=$("jem-hazard"),severity=$("jem-severity"),frequency=$("jem-frequency");
  const custom=$("jem-custom-fields"),basis=$("jem-basis"),tbody=$("jem-items");
+ // Exposure frequency is independent of category, hazard and severity.
+ frequency.disabled=false;
  const fill=(el,opts,first)=>{el.innerHTML="";const p=document.createElement("option");p.value="";p.textContent=first;el.append(p);opts.forEach(o=>{const x=document.createElement("option");x.value=o.value;x.textContent=o.label;el.append(x);});};
  categories.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;category.append(o);});
  function selected(){return library.find(x=>x.name===hazard.value&&x.category===category.value);}
