@@ -1,0 +1,16 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const vm = require("node:vm");
+const sandbox = { window: {} };
+vm.runInNewContext(fs.readFileSync("jem-library.js", "utf8"), sandbox);
+const hazards = sandbox.window.POFRI_JEM_LIBRARY;
+const frequencies = sandbox.window.POFRI_EXPOSURE_FREQUENCIES;
+assert.ok(Array.isArray(hazards) && hazards.length > 0, "hazard library is populated");
+assert.equal(new Set(hazards.map(x => x.category)).size, 8, "all eight hazard categories exist");
+assert.ok(hazards.every(x => x.name && x.levels.length === 4), "each hazard has four severity descriptions");
+assert.equal(new Set(hazards.map(x => x.category + "|" + x.name)).size, hazards.length, "hazard names are unique within category");
+assert.deepEqual(frequencies.map(x => x.value), ["rare", "occasional", "repeated", "continuous"]);
+assert.ok(hazards.some(x => x.name.includes("Shift Work")), "psychosocial special hazards included");
+assert.ok(hazards.some(x => x.name.includes("Dust Storms")), "climatic hazards included");
+assert.ok(hazards.some(x => x.name.includes("Industrial Radiography")), "radiation hazards included");
+console.log(`PASS: ${hazards.length} hazards / 8 categories / 4 severity levels / 4 universal frequencies`);
