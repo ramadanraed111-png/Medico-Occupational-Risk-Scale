@@ -3,6 +3,7 @@ const SUPABASE_URL="https://vvagucmjmjoxnyumxtcq.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_4jVHbUXOKy4TWG19LvQJJg_4f656sU2";
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let user=null,role=null,records=[];
+let recoveryMode=(()=>{const h=new URLSearchParams(location.hash.replace(/^#/ ,""));const q=new URLSearchParams(location.search);return h.get("type")==="recovery"||q.get("type")==="recovery"||q.has("code");})();
 const $=id=>document.getElementById(id);
 const auth=$("auth-panel"),workspace=$("workspace"),recovery=$("recovery-panel");
 function msg(id,t,type=""){const e=$(id);e.textContent=t;e.className="status "+type}
@@ -84,7 +85,7 @@ async function session(u){
 }
 $("login-form").addEventListener("submit",async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;const {data,error}=await client.auth.signInWithPassword({email:value("login-email"),password:value("login-password")});b.disabled=false;if(error){msg("login-message","تعذر تسجيل الدخول: "+error.message,"error");return;}await session(data.user);});
 $("forgot-password").addEventListener("click",async()=>{const email=value("login-email").trim();if(!email){msg("login-message","أدخل البريد الإلكتروني أولاً.");return;}const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});msg("login-message",error?"تعذر إرسال الرابط: "+error.message:"إذا كان البريد مسجلاً فستصلك رسالة لاستعادة كلمة المرور.");});
-$("recovery-form").addEventListener("submit",async e=>{e.preventDefault();if(value("new-password")!==value("confirm-password")){msg("recovery-message","كلمتا المرور غير متطابقتين.","error");return;}const {error}=await client.auth.updateUser({password:value("new-password")});if(error){msg("recovery-message","تعذر تحديث كلمة المرور: "+error.message,"error");return;}msg("recovery-message","تم تحديث كلمة المرور. يمكنك تسجيل الدخول الآن.","success");await client.auth.signOut();show("auth");});
+$("recovery-form").addEventListener("submit",async e=>{e.preventDefault();if(value("new-password")!==value("confirm-password")){msg("recovery-message","كلمتا المرور غير متطابقتين.","error");return;}const {error}=await client.auth.updateUser({password:value("new-password")});if(error){msg("recovery-message","تعذر تحديث كلمة المرور: "+error.message,"error");return;}recoveryMode=false;$("new-password").value="";$("confirm-password").value="";await client.auth.signOut();show("auth");msg("login-message","تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.","success");});
 $("logout").addEventListener("click",async()=>{await client.auth.signOut();user=null;role=null;show("auth")});
 $("preview-button").addEventListener("click",()=>{if(!$("assessment-form").reportValidity())return;preview()});
 $("assessment-form").addEventListener("submit",async e=>{
@@ -107,5 +108,5 @@ async function loadRecords(){
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 $("refresh-button").addEventListener("click",loadRecords);
 $("export-button").addEventListener("click",()=>{const rows=[["تاريخ التقييم","العامل","تاريخ الميلاد","العمر","الرقم","الوظيفة","المهمة","الموقع","الحالات الطبية","التصنيف A/B/C/D","المؤشر الرقمي التجريبي /100","المقيم"],...records.map(x=>[x.assessment_date,x.employee_name,x.medical?.worker_profile?.date_of_birth,x.medical?.worker_profile?.age_years,x.registration_number,x.job_title,x.task_name,x.site,(x.medical?.conditions||x.medical?.diseases||[]).map(c=>(c.disease||c.name)+" (L"+c.level+(c.level===4?" — مراجعة طبية مطلوبة":"")+")").join("؛ "),x.decision?.label,x.decision?.experimental_score?.total,x.evaluator_name])];const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="POFRI-assessments.csv";a.click();URL.revokeObjectURL(a.href);});
-client.auth.onAuthStateChange((_event,s)=>{if(s?.user&&!user)session(s.user)});
-(async()=>{const {data}=await client.auth.getSession();const hash=new URLSearchParams(location.hash.replace(/^#/,""));if(hash.get("type")==="recovery"||location.search.includes("code=")){show("recovery");}else if(data.session?.user){await session(data.session.user);}else show("auth");})();
+client.auth.onAuthStateChange((event,s)=>{if(event==="PASSWORD_RECOVERY"){recoveryMode=true;user=s?.user||null;show("recovery");msg("recovery-message","أدخل كلمة المرور الجديدة ثم احفظها لإكمال الاستعادة.");return;}if(recoveryMode){show("recovery");return;}if(event==="SIGNED_OUT"){user=null;role=null;show("auth");return;}if(s?.user&&!user)session(s.user)});
+(async()=>{const {data}=await client.auth.getSession();if(recoveryMode){show("recovery");}else if(data.session?.user){await session(data.session.user);}else show("auth");})();
