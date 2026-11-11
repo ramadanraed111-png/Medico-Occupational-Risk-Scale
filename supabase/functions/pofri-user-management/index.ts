@@ -51,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   if(action==="invite_user"){
    const email=String(body.email||"").trim().toLowerCase(),role=body.role;
    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254)return reply({error:"أدخل بريداً إلكترونياً صحيحاً."},400,origin);
-   if(!["admin","data_entry"].includes(role))return reply({error:"نوع المستخدم غير صحيح."},400,origin);
+   if(!["hse_admin","medical_admin","data_entry"].includes(role))return reply({error:"اختر مسؤول السلامة أو طبيب الموقع أو مدخل بيانات."},400,origin);
    const {data:existing}=await admin.from("app_users").select("user_id").eq("email",email).maybeSingle();
    if(existing)return reply({error:"هذا البريد مسجل بالفعل في POFRI."},409,origin);
    const {data:all}=await admin.auth.admin.listUsers({page:1,perPage:1000});
@@ -68,7 +68,7 @@ Deno.serve(async(req:Request)=>{
   const {data:target,error:te}=await admin.from("app_users").select("user_id,email,role").eq("user_id",id).maybeSingle();
   if(te)throw te;if(!target)return reply({error:"المستخدم غير موجود."},404,origin);
   if(action==="update_role"){
-   const role=body.role;if(!["admin","data_entry"].includes(role))return reply({error:"نوع الصلاحية غير صحيح."},400,origin);
+   const role=body.role;if(!["hse_admin","medical_admin","data_entry"].includes(role))return reply({error:"نوع الصلاحية غير صحيح. لا يمكن منح صلاحية المدير الأعلى من هذه الشاشة."},400,origin);
    if(target.role==="admin"&&role!=="admin"&&await activeAdminCount()<=1)return reply({error:"لا يمكن تخفيض صلاحية آخر مسؤول نشط."},409,origin);
    const {error}=await admin.from("app_users").update({role}).eq("user_id",id);if(error)throw error;
    return reply({ok:true,message:"تم تحديث الصلاحية."},200,origin);
@@ -83,5 +83,5 @@ Deno.serve(async(req:Request)=>{
    return reply({error:"الحذف النهائي لحسابات Auth معطل لحماية أرشيف MORS القديم. استخدم تعطيل المستخدم؛ سيظل الحساب والسجل محفوظين ويمكن إعادة التفعيل."},409,origin);
   }
   return reply({error:"العملية المطلوبة غير معروفة."},400,origin);
- }catch(e){console.error("POFRI admin function error",e);return reply({error:e instanceof Error?e.message:"حدث خطأ غير متوقع."},500,origin);}
+ }catch(e){console.error("MOFASA admin function error",e);return reply({error:e instanceof Error?e.message:"حدث خطأ غير متوقع."},500,origin);}
 });
