@@ -309,3 +309,9 @@ body.is-admin .admin-only{display:inline-flex}
 .cri-warning{margin:9px 0;padding:10px 12px;border-right:4px solid #bd8b32;background:#fff8e9;border-radius:7px;font-size:12px}
 .cri-panel ul{margin:6px 0;padding-right:20px}
 @media(max-width:650px){.cri-components{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Super Admin detailed report controls */
+.top-actions,.record-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.record-actions{justify-content:flex-end;margin-bottom:10px}
+#mofasa-export-all,#mofasa-export-current{white-space:normal}
+@media(max-width:600px){.top-actions{width:100%}.top-actions button{flex:1}}
