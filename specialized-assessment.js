@@ -21,7 +21,7 @@
  const physical=["Lifting","Carrying","Climbing","Kneeling","Reaching","Long standing","Walking","Balance","Exercise"];
  const cognitive=["Concentration","Judgement","Decision-Making","Reaction time"];
  const psychological=["Emotional Stability","Stress Tolerance","Impulse Control"];
- let hazards=[], diseases=[], extraTests=[];
+ let hazards=[], diseases=[], extraTests=[], extraTasks=[];
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const opts=(arr,selected="")=>'<option value="">اختر</option>'+arr.map(x=>'<option value="'+esc(x.value??x)+'" '+((x.value??x)===selected?"selected":"")+'>'+esc(x.label??x)+'</option>').join("");
  const checkList=(items,name,checked=[])=>'<div class="specialist-checks">'+items.map((x,i)=>'<label class="specialist-check"><input type="checkbox" name="'+name+'" value="'+esc(x)+'" '+(checked.includes(x)?"checked":"")+'><span>'+esc(x)+'</span></label>').join("")+'</div>';
@@ -33,7 +33,7 @@
   root.innerHTML=
    section("بيانات","بيانات العامل والوظيفة","اختر الوظيفة أولاً لتحميل ملف متطلباتها. يمكن تحميل بيانات عامل مسجل.",'<div class="specialist-grid"><label>الوظيفة المحددة *<select id="sp-job">'+opts([{value:"Control Room Operator",label:"Control Room Operator"},{value:"__custom__",label:"وظيفة أخرى — إعداد يدوي"}])+'</select></label><label id="sp-custom-job-wrap" hidden>اسم الوظيفة المخصصة<input id="sp-custom-job" placeholder="اكتب المسمى الوظيفي"></label><label>تحميل عامل مسجل<select id="sp-worker">'+opts(workerOpts)+'</select></label><label>اسم العامل *<input id="sp-name" required></label><label>الرقم الوظيفي *<input id="sp-reg" required></label><label>تاريخ الميلاد<input id="sp-dob" type="date"></label><label>تاريخ التقييم *<input id="sp-date" type="date" required></label><label>الموقع *<input id="sp-site" required placeholder="مثال: بدر-3 / Offshore"></label><label>الطبيب / المقيم *<input id="sp-doctor" required></label><label>مسؤول السلامة<input id="sp-hse"></label><label>مدة الوردية / المهمة<input id="sp-duration" placeholder="مثال: 12 ساعة"></label></div>')+
    '<div id="sp-profile-note" class="notice">سيتم تحميل متطلبات الوظيفة المختارة تلقائياً. راجعها وعدّل ما ينطبق على الوظيفة الفعلية.</div>'+
-   section("1","Essential Job Tasks","تظهر من ملف الوظيفة. حدّد المهام التي تنطبق فعلياً على العامل.",'<div id="sp-tasks" class="specialist-checks"></div><label>مهام إضافية<textarea id="sp-extra-tasks" rows="2" placeholder="أضف مهاماً خاصة بالموقع أو الوظيفة"></textarea></label>')+
+   section("1","Essential Job Tasks","تظهر من ملف الوظيفة. حدّد المهام التي تنطبق فعلياً على العامل.",'<div id="sp-tasks" class="specialist-checks"></div><div class="specialist-grid"><label>مهمة إضافية<input id="sp-extra-task-input" placeholder="أضف مهمة أساسية خاصة بالموقع"></label><button type="button" class="secondary" id="sp-add-task">إضافة مهمة</button></div><div id="sp-extra-task-list"></div><label>ملاحظات حول المهام<textarea id="sp-extra-tasks" rows="2"></textarea></label>')+
    section("2","Occupational Hazards","تظهر الأخطار المقترحة من مكتبة JEM الحالية. يستكمل مسؤول السلامة الشدة والتعرض وفعالية الضوابط لكل خطر.",'<div class="specialist-grid"><label>إضافة خطر من مكتبة JEM<select id="sp-hazard-select">'+opts(hazardOptionList())+'</select></label><button type="button" class="secondary" id="sp-add-hazard">إضافة خطر</button><label>خطر مخصص<input id="sp-custom-hazard" placeholder="اسم الخطر غير الموجود"></label><button type="button" class="secondary" id="sp-add-custom-hazard">إضافة خطر مخصص</button></div><div id="sp-hazards"></div>')+
    section("3","Safety-Critical Duties","حدد الواجبات الحساسة للسلامة التي يؤديها العامل فعلياً.",checkList(duties,"sp-duty"))+
    section("4","Job Demands","تظهر المتطلبات الافتراضية للوظيفة ويمكن لمسؤول السلامة تعديلها وإضافة متطلبات أخرى.",checkList(demandList,"sp-demand",profiles["Control Room Operator"].demands)+'<label>متطلبات أخرى<input id="sp-extra-demand" placeholder="اكتب متطلباً ثم اضغط إضافة"></label><button type="button" class="secondary" id="sp-add-demand">إضافة متطلب</button><div id="sp-extra-demands"></div>')+
@@ -42,6 +42,7 @@
    section("7","Diseases Matrix","نفس مكتبة الأمراض الحالية ذات المستويات الأربعة؛ تسجيل المرض لا يصدر قراراً آلياً بمفرده.",'<div class="specialist-grid"><label>فئة المرض<select id="sp-disease-category">'+opts(med.map(c=>({value:c.category,label:c.label})))+'</select></label><label>المرض<select id="sp-disease" disabled>'+opts([])+'</select></label><label>مستوى الحالة<select id="sp-disease-level" disabled>'+opts([{value:"1",label:"Level 1"},{value:"2",label:"Level 2"},{value:"3",label:"Level 3"},{value:"4",label:"Level 4"}])+'</select></label></div><label>ملاحظات سريرية<input id="sp-disease-note"></label><button type="button" class="secondary" id="sp-add-disease">إضافة الحالة</button><div id="sp-diseases"></div>')+
    section("8","Functional Capacity Assessment","يحدد الطبيب حالة كل قدرة مقارنة بمتطلبات الوظيفة: Good أو Impaired أو Not assessed. أي قصور أو نقص بيانات يستلزم مراجعة قبل اعتماد الملاءمة.",'<div id="sp-capacities"></div>')+
    section("9","Fitness Essentials","تظهر المتطلبات الأساسية حسب الوظيفة. ضع علامة فقط على المتطلب الذي تم التحقق من استيفائه. أي متطلب غير محدد يمنع إصدار نتيجة «مستوفي» ويؤجل القرار.",'<div id="sp-essentials" class="specialist-checks"></div><label>متطلبات أساسية إضافية<input id="sp-extra-essential"></label><button type="button" class="secondary" id="sp-add-essential">إضافة متطلب أساسي</button><div id="sp-extra-essentials"></div><div class="specialist-grid"><label>الرأي الطبي النهائي *<select id="sp-medical-opinion">'+opts([{value:"",label:"اختر الرأي الطبي"},{value:"compatible",label:"متوافق مع متطلبات الوظيفة"},{value:"review",label:"يحتاج مراجعة / فحوصات إضافية"},{value:"incompatible",label:"غير متوافق مع متطلبات الوظيفة"}])+'</select></label><label>ملاحظات الطبيب<textarea id="sp-doctor-notes" rows="2"></textarea></label></div>');
+  $("sp-job").value="Control Room Operator";
   renderProfile("Control Room Operator");
   renderCapacities();renderHazards();renderDiseases();renderExtras();
  }
@@ -70,10 +71,12 @@
   const l=$("sp-disease-level");l.innerHTML=opts(["None","Controlled / Mild","Uncontrolled / Significant","Severe + Complications"].map((x,i)=>({value:String(i+1),label:"Level "+(i+1)+" — "+x})));l.disabled=!c;
  }
  function renderExtras(){
+  $("sp-extra-task-list").innerHTML=extraTasks.map((x,i)=>'<label class="specialist-check"><input type="checkbox" name="sp-task-extra" value="'+esc(x)+'" checked><span>'+esc(x)+'</span><button type="button" data-remove-task="'+i+'">حذف</button></label>').join("");
   $("sp-extra-demands").innerHTML=extraDemand.map((x,i)=>'<label class="specialist-check"><input type="checkbox" name="sp-demand-extra" value="'+esc(x)+'" checked><span>'+esc(x)+'</span><button type="button" data-remove-demand="'+i+'">حذف</button></label>').join("");
   $("sp-extra-essentials").innerHTML=extraEssential.map((x,i)=>'<label class="specialist-check"><input type="checkbox" name="sp-essential-extra" value="'+esc(x)+'"><span>'+esc(x)+'</span><button type="button" data-remove-essential="'+i+'">حذف</button></label>').join("");
   $("sp-required-list").innerHTML=extraTests.map((x,i)=>'<div class="specialist-grid"><label>'+esc(x.name)+'<input data-required-result="'+i+'" value="'+esc(x.result)+'" placeholder="النتيجة / الحالة"></label><button type="button" class="secondary" data-remove-test="'+i+'">حذف</button></div>').join("");
   $("sp-diseases").innerHTML=diseases.map((x,i)=>'<div class="specialist-check"><span>'+esc(x.category)+" — "+esc(x.name)+" — Level "+x.level+" ("+esc(x.description)+") "+esc(x.notes)+'</span><button type="button" class="secondary" data-remove-disease="'+i+'">حذف</button></div>').join("")||'<p class="specialist-help">لا توجد أمراض مسجلة.</p>';
+  document.querySelectorAll("[data-remove-task]").forEach(b=>b.onclick=()=>{extraTasks.splice(+b.dataset.removeTask,1);renderExtras()});
   document.querySelectorAll("[data-remove-demand]").forEach(b=>b.onclick=()=>{extraDemand.splice(+b.dataset.removeDemand,1);renderExtras()});
   document.querySelectorAll("[data-remove-essential]").forEach(b=>b.onclick=()=>{extraEssential.splice(+b.dataset.removeEssential,1);renderExtras()});
   document.querySelectorAll("[data-remove-test]").forEach(b=>b.onclick=()=>{extraTests.splice(+b.dataset.removeTest,1);renderExtras()});
@@ -92,13 +95,15 @@
   const additional=Object.fromEntries([...document.querySelectorAll("[data-additional]")].map(x=>[x.dataset.additional,x.value.trim()]));
   const capacities=[...document.querySelectorAll("[data-capacity]")].map(x=>({group:x.dataset.capacity,item:x.dataset.item,status:x.value||"pending"}));
   const siteCategories=checks("sp-site-category");
-  return {job:val("sp-job")==="__custom__"?(val("sp-custom-job").trim()||"وظيفة أخرى"):val("sp-job"),worker:{name:val("sp-name").trim(),registration:val("sp-reg").trim(),dob:val("sp-dob"),assessment_date:val("sp-date"),site:val("sp-site").trim(),doctor:val("sp-doctor").trim(),hse:val("sp-hse").trim(),duration:val("sp-duration").trim()},tasks:checks("sp-task"),extraTasks:val("sp-extra-tasks").trim(),hazards:hazards.map(x=>({...x})),safetyCriticalDuties:checks("sp-duty"),jobDemands:[...checks("sp-demand"),...checks("sp-demand-extra")],site:{categories:siteCategories,other:val("sp-other-site"),care:val("sp-care"),evacuation:val("sp-evac"),communications:val("sp-comms"),support:val("sp-support")},clinical:{basic:clinical,labs,additional,additionalOther:val("sp-additional-other"),requiredInvestigations:extraTests.map((x,i)=>({...x,result:document.querySelector('[data-required-result="'+i+'"]')?.value||""}))},diseases:diseases.map(x=>({...x})),capacities,extraCapacity:val("sp-capacity-other"),essentials:[...checks("sp-essential"),...checks("sp-essential-conditional"),...checks("sp-essential-extra")],allEssentials:[...document.querySelectorAll('input[name="sp-essential"],input[name="sp-essential-conditional"],input[name="sp-essential-extra"]')].map(x=>({name:x.value,required:!x.name.includes("conditional"),present:x.checked})),medicalOpinion:val("sp-medical-opinion"),doctorNotes:val("sp-doctor-notes"),extraDemands:extraDemand,extraEssentials};
+  return {job:val("sp-job")==="__custom__"?(val("sp-custom-job").trim()||"وظيفة أخرى"):val("sp-job"),worker:{name:val("sp-name").trim(),registration:val("sp-reg").trim(),dob:val("sp-dob"),assessment_date:val("sp-date"),site:val("sp-site").trim(),doctor:val("sp-doctor").trim(),hse:val("sp-hse").trim(),duration:val("sp-duration").trim()},tasks:[...checks("sp-task"),...checks("sp-task-extra")],extraTasks:val("sp-extra-tasks").trim(),hazards:hazards.map(x=>({...x})),safetyCriticalDuties:checks("sp-duty"),jobDemands:[...checks("sp-demand"),...checks("sp-demand-extra")],site:{categories:siteCategories,other:val("sp-other-site"),care:val("sp-care"),evacuation:val("sp-evac"),communications:val("sp-comms"),support:val("sp-support")},clinical:{basic:clinical,labs,additional,additionalOther:val("sp-additional-other"),requiredInvestigations:extraTests.map((x,i)=>({...x,result:document.querySelector('[data-required-result="'+i+'"]')?.value||""}))},diseases:diseases.map(x=>({...x})),capacities,extraCapacity:val("sp-capacity-other"),essentials:[...checks("sp-essential"),...checks("sp-essential-conditional"),...checks("sp-essential-extra")],allEssentials:[...document.querySelectorAll('input[name="sp-essential"],input[name="sp-essential-conditional"],input[name="sp-essential-extra"]')].map(x=>({name:x.value,required:!x.name.includes("conditional"),present:x.checked})),medicalOpinion:val("sp-medical-opinion"),doctorNotes:val("sp-doctor-notes"),extraDemands:extraDemand,extraEssentials};
  }
  function decide(d){
   const reasons=[];
   if(d.medicalOpinion==="incompatible")return {code:"not_fit",label:"غير مستوفٍ لمتطلبات الوظيفة",reasons:["الرأي الطبي النهائي المسجل: غير متوافق مع متطلبات الوظيفة.",d.doctorNotes].filter(Boolean)};
   if(!d.worker.name||!d.worker.registration||!d.worker.assessment_date||!d.worker.site||!d.worker.doctor)reasons.push("بيانات العامل أو الموقع أو الطبيب غير مكتملة.");
   if(!d.tasks.length)reasons.push("لم يتم تأكيد المهام الأساسية المنطبقة.");
+  if(!d.allEssentials.some(x=>x.required))reasons.push("لم يتم تحديد متطلبات اللياقة الأساسية الخاصة بهذه الوظيفة.");
+  if(Object.entries(d.clinical.basic).some(([k,v])=>k!=="Other"&&!v.trim()))reasons.push("الفحص السريري الأساسي غير مكتمل؛ استكمل نتائج الفحص أو وثّق سبب عدم إجرائه.");
   if(!d.hazards.length)reasons.push("لم يتم توثيق الأخطار المهنية للوظيفة.");
   d.hazards.forEach(h=>{if(!h.severity||!h.exposure||!h.control)reasons.push("تقييم الخطر غير مكتمل: "+h.name);});
   if(!d.site.categories.length)reasons.push("لم يتم تحديد فئة الموقع.");
@@ -107,6 +112,7 @@
   if(d.allEssentials.some(x=>x.required&&!x.present))reasons.push("يوجد متطلب أساسي للياقة لم يتم تأكيد استيفائه.");
   if(d.clinical.requiredInvestigations.some(x=>!x.result.trim()))reasons.push("توجد فحوصات إضافية مطلوبة لم تُستكمل أو لم تُسجل نتائجها.");
   if(!d.medicalOpinion||d.medicalOpinion==="review")reasons.push("الرأي الطبي يحتاج مراجعة أو لم يتم اعتماده.");
+  if(d.diseases.some(x=>x.level===4))reasons.push("توجد حالة مرضية بمستوى 4 تستلزم مراجعة طبية متخصصة قبل القرار.");
   if(d.hazards.some(x=>x.severity==="4"&&x.control!=="1"))reasons.push("يوجد خطر شديد المستوى 4 دون ضابط فعّال متحقق منه؛ يلزم تقييم متخصص وإجراءات تحكم.");
   if(d.site.evacuation==="weak"||d.site.communications==="poor"||d.site.support==="inadequate")reasons.push("توجد فجوة جوهرية في جاهزية الموقع للطوارئ أو دعم الحالة الطبية.");
   if(reasons.length)return {code:"review",label:"يحتاج عرضاً على متخصص – فحوصات إضافية / استكمال بيانات",reasons};
@@ -120,6 +126,7 @@
  }
  $("sp-job").addEventListener("change",()=>{const job=$("sp-job").value;renderProfile(job);});
  $("sp-worker").addEventListener("change",()=>{const w=((typeof workerRows!=="undefined"?workerRows:[])).find(x=>x.id===$("sp-worker").value);if(!w)return;$("sp-name").value=w.full_name;$("sp-reg").value=w.registration_number;$("sp-dob").value=w.date_of_birth;$("sp-site").value=w.site||"";if(w.job_title&&profiles[w.job_title])$("sp-job").value=w.job_title;});
+ $("sp-add-task").addEventListener("click",()=>{const x=$("sp-extra-task-input").value.trim();if(x&&!extraTasks.includes(x))extraTasks.push(x);$("sp-extra-task-input").value="";renderExtras();});
  $("sp-add-hazard").addEventListener("click",()=>addHazard($("sp-hazard-select").value));
  $("sp-add-custom-hazard").addEventListener("click",()=>{addHazard($("sp-custom-hazard").value.trim());$("sp-custom-hazard").value="";});
  $("sp-hazards").addEventListener("change",e=>{const i=e.target.dataset.hazard,k=e.target.dataset.key;if(i!==undefined&&k)hazards[+i][k]=e.target.value;});
@@ -145,7 +152,7 @@
   msg("specialist-message","تم حفظ التقييم المتخصص بنجاح. تم حفظ التفاصيل في سجل POFRI دون تعديل بيانات أرشيف MORS.","success");
  });
  $("sp-date").value=new Date().toISOString().slice(0,10);
- $("specialist-form").addEventListener("reset",()=>{hazards=[];diseases=[];extraTests=[];extraDemand=[];extraEssential=[];});
+ $("specialist-form").addEventListener("reset",()=>{hazards=[];diseases=[];extraTests=[];extraDemand=[];extraEssential=[];extraTasks=[];});
  function refreshWorkers(){const s=$("sp-worker"),old=s.value;s.innerHTML=opts(((typeof workerRows!=="undefined"?workerRows:[])).map(w=>({value:w.id,label:w.full_name+" — "+w.registration_number})));if(((typeof workerRows!=="undefined"?workerRows:[])).some(w=>w.id===old))s.value=old;}
  document.addEventListener("pofri-specialized-page-open",refreshWorkers);
  renderBase();
