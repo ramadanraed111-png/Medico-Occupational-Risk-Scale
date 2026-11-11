@@ -155,3 +155,69 @@ body.is-admin .admin-only{display:inline-flex}
  #mofasa-hse-form>.specialist-actions{display:grid;grid-template-columns:1fr}
  #mofasa-hse-form>.specialist-actions button{width:100%}
 }
+
+
+/* Extra-tight right-side HSE panels: hazards and emergency readiness */
+#mofasa-hse-form #mh-hazards-editor .specialist-section,
+#mofasa-hse-form #mh-emergency-editor .specialist-section{
+ padding:9px;
+}
+#mofasa-hse-form #mh-hazards-editor .specialist-grid,
+#mofasa-hse-form #mh-emergency-editor .specialist-grid{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:5px 7px;
+}
+#mofasa-hse-form #mh-hazards-editor label,
+#mofasa-hse-form #mh-emergency-editor label{
+ gap:3px;
+ margin-bottom:5px;
+ font-size:11px;
+ line-height:1.45;
+}
+#mofasa-hse-form #mh-hazards-editor select,
+#mofasa-hse-form #mh-hazards-editor input,
+#mofasa-hse-form #mh-emergency-editor select,
+#mofasa-hse-form #mh-emergency-editor input{
+ min-height:32px;
+ padding:4px 7px;
+ font-size:11px;
+ border-radius:7px;
+}
+#mofasa-hse-form #mh-hazards-editor textarea,
+#mofasa-hse-form #mh-emergency-editor textarea{
+ min-height:44px;
+ padding:5px 7px;
+ font-size:11px;
+}
+#mofasa-hse-form #mh-hazards-editor .specialist-section>p{
+ font-size:10px;
+ margin-bottom:6px;
+}
+#mofasa-hse-form #mh-hazards-editor button{
+ min-height:32px;
+ padding:5px 9px;
+ font-size:11px;
+}
+#mofasa-hse-form #mh-hazards-editor .table-wrap{
+ max-height:210px;
+ overflow:auto;
+}
+#mofasa-hse-form #mh-hazards-editor table{
+ font-size:10px;
+}
+#mofasa-hse-form #mh-hazards-editor th,
+#mofasa-hse-form #mh-hazards-editor td{
+ padding:4px 6px;
+}
+@media(max-width:760px){
+ #mofasa-hse-form #mh-hazards-editor .specialist-grid,
+ #mofasa-hse-form #mh-emergency-editor .specialist-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+@media(max-width:420px){
+ #mofasa-hse-form #mh-hazards-editor .specialist-grid,
+ #mofasa-hse-form #mh-emergency-editor .specialist-grid{
+  grid-template-columns:1fr;
+ }
+}
