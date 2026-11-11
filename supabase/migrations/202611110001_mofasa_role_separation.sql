@@ -143,6 +143,10 @@ drop trigger if exists mofasa_medical_audit on public.mofasa_medical_sections;
 create trigger mofasa_medical_audit before insert or update on public.mofasa_medical_sections
 for each row execute function private.mofasa_section_audit('medical');
 
+-- Expand the role allow-list while preserving existing admin/data_entry values.
+alter table public.app_users drop constraint if exists app_users_role_check;
+alter table public.app_users add constraint app_users_role_check check (role in ('admin','data_entry','hse_admin','medical_admin'));
+
 -- Existing accounts are retained; only the explicitly selected second admin role is narrowed.
 update public.app_users
 set role='medical_admin'
