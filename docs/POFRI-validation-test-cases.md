@@ -62,3 +62,7 @@ The 18 logic-level cases above were run against the current draft rules during d
 ## Additional workflow safeguard
 
 The assessment form now requires mission/shift duration and final restrictions/recommendations. The save handler also trims both fields and refuses to save blank or whitespace-only values. This is a workflow completeness check; it does not validate the clinical adequacy of the recommendation text.
+
+
+## Provisional weighted-score test coverage
+A separate Node.js test file, `tests/pofri-score.test.js`, checks the low-risk baseline, increasing scores for elevated scenarios, multi-hazard handling, and the very-high band for a critical scenario. Run with `node tests/pofri-score.test.js`. These are arithmetic/software checks only, not clinical or occupational validation.
