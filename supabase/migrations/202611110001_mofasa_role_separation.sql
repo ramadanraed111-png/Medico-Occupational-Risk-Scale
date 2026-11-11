@@ -61,7 +61,6 @@ grant select, insert on public.mofasa_assessments to authenticated;
 grant select, insert, update on public.mofasa_hse_sections to authenticated;
 grant select, insert, update on public.mofasa_medical_sections to authenticated;
 grant select on public.mofasa_audit_log to authenticated;
-grant usage, select on sequence public.mofasa_audit_log_id_seq to authenticated;
 
 drop policy if exists mofasa_assessments_read on public.mofasa_assessments;
 create policy mofasa_assessments_read on public.mofasa_assessments for select to authenticated
