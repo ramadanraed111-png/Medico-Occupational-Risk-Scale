@@ -99,3 +99,16 @@ body.is-admin .admin-only{display:inline-flex}
 .medical-register td button{white-space:nowrap;padding:5px 9px;font-size:11px}
 .medical-empty{padding:14px;text-align:center;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
 @media(max-width:650px){.medical-entry-grid{grid-template-columns:1fr}.medical-register{padding:10px}.medical-register .table-wrap{margin-inline:-2px}}
+
+/* MOFASA structured clinical examination */
+.clinical-exam{display:grid;gap:14px}
+.clinical-exam .notice{line-height:1.8}
+.clinical-fieldset{margin:0;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.clinical-fieldset legend{font-weight:800;color:var(--navy);padding:0 7px}
+.clinical-fieldset .specialist-grid{margin-top:8px}
+.clinical-custom{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.clinical-custom h5{margin:0 0 8px;color:var(--navy)}
+.clinical-custom-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(140px,1.4fr) auto;gap:8px;margin:7px 0;align-items:center}
+.clinical-custom-row input{min-width:0}
+.clinical-exam textarea{min-height:58px}
+@media(max-width:650px){.clinical-custom-row{grid-template-columns:1fr}.clinical-custom-row button{justify-self:start}}
