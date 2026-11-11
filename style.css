@@ -309,3 +309,11 @@ body.is-admin .admin-only{display:inline-flex}
 .cri-warning{margin:9px 0;padding:10px 12px;border-right:4px solid #bd8b32;background:#fff8e9;border-radius:7px;font-size:12px}
 .cri-panel ul{margin:6px 0;padding-right:20px}
 @media(max-width:650px){.cri-components{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* MOFASA archive and export controls */
+.mofasa-toolbar,.mofasa-card-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.mofasa-toolbar button,.mofasa-card-actions button{width:auto;margin:0;min-width:140px}
+.mofasa-card-actions>*{flex:1}
+.archived-card{border-style:dashed;background:#fbfcfc}
+.top-user-info{direction:ltr;unicode-bidi:plaintext}
+@media(max-width:600px){.mofasa-toolbar button,.mofasa-card-actions button{width:100%;min-width:0}}
