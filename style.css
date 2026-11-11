@@ -112,3 +112,46 @@ body.is-admin .admin-only{display:inline-flex}
 .clinical-custom-row input{min-width:0}
 .clinical-exam textarea{min-height:58px}
 @media(max-width:650px){.clinical-custom-row{grid-template-columns:1fr}.clinical-custom-row button{justify-self:start}}
+
+
+/* Compact HSE workspace: preserve every field while reducing vertical space */
+#mofasa-hse-form{display:grid;gap:10px}
+#mofasa-hse-form>h4{margin:0 0 2px;font-size:17px}
+#mofasa-hse-form>.specialist-help{margin:0 0 4px;padding:8px 11px;border-radius:8px;background:#f1f6f7;font-size:12px}
+#mofasa-hse-form>.specialist-grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:10px;
+ align-items:start;
+}
+#mofasa-hse-form>.specialist-grid>div{min-width:0}
+#mofasa-hse-form .specialist-section{
+ margin:0;
+ padding:12px;
+ border-radius:10px;
+ background:#fff;
+ box-shadow:none;
+}
+#mofasa-hse-form .specialist-section h4{font-size:14px;margin:0 0 5px}
+#mofasa-hse-form .specialist-section>p{font-size:11px;line-height:1.55;margin:0 0 8px}
+#mofasa-hse-form label{font-size:12px;gap:4px;margin:0 0 8px}
+#mofasa-hse-form input,
+#mofasa-hse-form select{min-height:36px;padding:6px 9px;font-size:12px}
+#mofasa-hse-form textarea{min-height:54px;padding:7px 9px;font-size:12px}
+#mofasa-hse-form .specialist-fieldset{padding:8px;margin:7px 0;border-radius:8px}
+#mofasa-hse-form .specialist-fieldset legend{font-size:12px}
+#mofasa-hse-form .specialist-checks,
+#mofasa-hse-form .specialist-grid{gap:7px}
+#mofasa-hse-form .specialist-check{padding:6px 8px;font-size:11px;line-height:1.5}
+#mofasa-hse-form .table-wrap{margin:8px 0}
+#mofasa-hse-form table{font-size:11px}
+#mofasa-hse-form th,#mofasa-hse-form td{padding:6px 8px}
+#mofasa-hse-form button{min-height:36px;padding:7px 12px;font-size:12px}
+#mofasa-hse-form .specialist-actions{margin:2px 0;gap:8px}
+#mofasa-hse-form>.specialist-actions button{width:auto;min-width:170px}
+#mofasa-hse-form #mh-notes{min-height:58px}
+@media(max-width:760px){
+ #mofasa-hse-form>.specialist-grid{grid-template-columns:1fr}
+ #mofasa-hse-form>.specialist-actions{display:grid;grid-template-columns:1fr}
+ #mofasa-hse-form>.specialist-actions button{width:100%}
+}
