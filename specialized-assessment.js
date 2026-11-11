@@ -102,6 +102,7 @@
   if(d.medicalOpinion==="incompatible")return {code:"not_fit",label:"غير مستوفٍ لمتطلبات الوظيفة",reasons:["الرأي الطبي النهائي المسجل: غير متوافق مع متطلبات الوظيفة.",d.doctorNotes].filter(Boolean)};
   if(!d.worker.name||!d.worker.registration||!d.worker.assessment_date||!d.worker.site||!d.worker.doctor)reasons.push("بيانات العامل أو الموقع أو الطبيب غير مكتملة.");
   if(!d.tasks.length)reasons.push("لم يتم تأكيد المهام الأساسية المنطبقة.");
+  if(!d.jobDemands.length)reasons.push("لم يتم تحديد متطلبات العمل الفعلية.");
   if(!d.allEssentials.some(x=>x.required))reasons.push("لم يتم تحديد متطلبات اللياقة الأساسية الخاصة بهذه الوظيفة.");
   if(Object.entries(d.clinical.basic).some(([k,v])=>k!=="Other"&&!v.trim()))reasons.push("الفحص السريري الأساسي غير مكتمل؛ استكمل نتائج الفحص أو وثّق سبب عدم إجرائه.");
   if(!d.hazards.length)reasons.push("لم يتم توثيق الأخطار المهنية للوظيفة.");
