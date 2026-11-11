@@ -264,8 +264,14 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   msg("تم تجهيز التقرير العام التفصيلي ويشمل "+parents.length+" سجلاً، مع تفاصيل السلامة والطب ومؤشر CRI والأرشيف.","success");
  }
  async function loadAudit(id){
-  const {data,error}=await client.from("mofasa_audit_log").select("section_name,action,actor_id,changed_at,old_status,new_status").eq("assessment_id",id).order("changed_at",{ascending:false});
-  $("mofasa-audit").innerHTML=error?"تعذر تحميل سجل التدقيق: "+esc(error.message):data?.length?'<table><thead><tr><th>القسم</th><th>العملية</th><th>المستخدم</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>'+data.map(x=>'<tr><td>'+ (x.section_name==="hse"?"السلامة":"الطب")+'</td><td>'+x.action+'</td><td>'+esc(x.actor_id)+'</td><td>'+esc(new Date(x.changed_at).toLocaleString("ar-EG"))+'</td><td>'+statusLabel(x.new_status)+'</td></tr>').join("")+'</tbody></table>':"لا توجد تغييرات مسجلة بعد.";
+  const [audit,archive]=await Promise.all([
+   client.from("mofasa_audit_log").select("section_name,action,actor_id,changed_at,old_status,new_status").eq("assessment_id",id).order("changed_at",{ascending:false}),
+   client.from("mofasa_archive_log").select("action,actor_id,changed_at,reason").eq("assessment_id",id).order("changed_at",{ascending:false})
+  ]);
+  if(audit.error||archive.error){$("mofasa-audit").textContent="تعذر تحميل سجل التدقيق أو الأرشفة: "+(audit.error||archive.error).message;return;}
+  const rowsAudit=(audit.data||[]).map(x=>'<tr><td>'+(x.section_name==="hse"?"السلامة":"الطب")+'</td><td>'+esc(x.action)+'</td><td>'+esc(x.actor_id)+'</td><td>'+esc(new Date(x.changed_at).toLocaleString("ar-EG"))+'</td><td>'+statusLabel(x.new_status)+'</td><td>'+esc(x.reason||"—")+'</td></tr>');
+  const rowsArchive=(archive.data||[]).map(x=>'<tr><td>الأرشفة</td><td>'+esc(x.action==="archive"?"أرشفة":"استعادة")+'</td><td>'+esc(x.actor_id)+'</td><td>'+esc(new Date(x.changed_at).toLocaleString("ar-EG"))+'</td><td>—</td><td>'+esc(x.reason||"—")+'</td></tr>');
+  $("mofasa-audit").innerHTML=rowsAudit.length||rowsArchive.length?'<table><thead><tr><th>القسم</th><th>العملية</th><th>المستخدم</th><th>التاريخ</th><th>الحالة</th><th>السبب</th></tr></thead><tbody>'+rowsAudit.concat(rowsArchive).join("")+'</tbody></table>':"لا توجد تغييرات مسجلة بعد.";
  }
  document.addEventListener("pofri-session-ready",()=>{if(!["admin","hse_admin","medical_admin"].includes(role))return;render();loadList();});
 })();
