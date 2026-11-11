@@ -82,7 +82,20 @@
 <label>القدرة الوظيفية<select id="capacity" required><option value="">اختر القدرة الوظيفية بعد التقييم</option><option value="adequate">كافية لمتطلبات المهمة</option><option value="limited">محدودة وتحتاج تكييفاً</option><option value="insufficient">غير كافية حالياً</option><option value="unknown">غير محددة</option></select></label>
 <label>قيود طبية / وظيفية<input id="medical-restrictions" maxlength="1000" placeholder="مثال: تجنب العمل على ارتفاعات"></label>
 <label>المراجعة / المتابعة المطلوبة<input id="medical-followup" maxlength="1000"></label>
-</div></div>
+</div>
+<div class="mcm-entry">
+<h5>الحالات الطبية المسجلة – Medical Conditions</h5>
+<p class="muted">يمكن إضافة أكثر من مرض. اختر الفئة والمرض ثم مستوى الحالة (1–4). يُحفظ كل مرض كسجل مستقل، مع إمكانية إضافة ملاحظات سريرية مختصرة.</p>
+<div class="grid">
+<label>فئة المرض<select id="mcm-category"><option value="">اختر فئة المرض</option></select></label>
+<label>المرض<select id="mcm-disease" disabled><option value="">اختر المرض</option></select></label>
+<label>مستوى الحالة<select id="mcm-level" disabled><option value="">اختر مستوى الحالة</option></select></label>
+<label>ملاحظات / تفاصيل الحالة<input id="mcm-note" maxlength="1000" placeholder="مثال: العلاج الحالي، آخر نوبة، نتائج المتابعة"></label>
+</div>
+<button type="button" id="mcm-add" class="secondary">إضافة المرض إلى التقييم</button>
+<div class="table-wrap"><table class="mcm-table"><thead><tr><th>الفئة</th><th>المرض</th><th>المستوى</th><th>وصف المستوى</th><th>ملاحظات</th><th>إجراء</th></tr></thead><tbody id="mcm-items"><tr><td colspan="6">لم تتم إضافة حالات طبية بعد.</td></tr></tbody></table></div>
+</div>
+</div>
 <div class="axis"><h4>5. الموقع والطوارئ – Location &amp; Emergency Matrix</h4><div class="grid">
 <label>زمن الوصول للرعاية الطبية<select id="care-access" required><option value="">اختر زمن الوصول للرعاية الطبية</option><option value="good">متاح سريعاً</option><option value="moderate">متوسط</option><option value="limited">محدود</option><option value="remote">بعيد / صعب الوصول</option></select></label>
 <label>توفر الإسعاف والإخلاء<select id="evacuation" required><option value="">اختر حالة الإسعاف والإخلاء</option><option value="ready">خطة وموارد جاهزة ومختبرة</option><option value="partial">متاحة جزئياً</option><option value="weak">غير كافية</option><option value="unknown">غير متحقق منها</option></select></label>
@@ -100,5 +113,5 @@
 </section>
 <footer>POFRI – نسخة تطويرية تجريبية. لا تستخدم لاتخاذ قرار نهائي بشأن اللياقة أو التوظيف قبل اعتماد النموذج، والتحقق من صلاحيته، ومراجعة قواعد الحماية والخصوصية.</footer>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="jem-library.js"></script><script src="app.js"></script><script src="jem.js"></script><script src="admin.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="jem-library.js"></script><script src="medical-library.js"></script><script src="app.js"></script><script src="jem.js"></script><script src="mcm.js"></script><script src="admin.js"></script>
 </body></html>
