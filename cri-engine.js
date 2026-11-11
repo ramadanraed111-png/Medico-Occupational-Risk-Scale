@@ -33,8 +33,9 @@
       return {name:x.name||"خطر مهني",score:Math.round(clamp(.4*exposure+.6*residual[x.residual])),severity:Number(x.severity),frequency:x.frequency,residual:x.residual};
     });
     const hazardValues=hazardScores.map(x=>x.score);
-    let T=hazardValues.length?clamp(.7*Math.max(...hazardValues)+.3*avg(hazardValues)):null;
-    if(T!==null && (tasks.safety_critical||[]).length) T=clamp(T*1.05);
+    const taskSignals=clamp((tasks.safety_critical||[]).length*20+(hse.demands?.selected||[]).length*5);
+    const hazardProfile=hazardValues.length?clamp(.7*Math.max(...hazardValues)+.3*avg(hazardValues)):null;
+    const T=hazardProfile===null?null:clamp(.85*hazardProfile+.15*taskSignals);
     const H=conditions.length?conditionScore(conditions):(String(medical.diseases?.notes||"").trim()?0:null);
     const fitValues=fitness.map(x=>fitMap[x.status]).filter(x=>x!==null);
     const F=fitness.length&&fitValues.length===fitness.length?clamp(avg(fitValues)):null;
