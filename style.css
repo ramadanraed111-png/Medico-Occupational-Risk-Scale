@@ -295,3 +295,17 @@ body.is-admin .admin-only{display:inline-flex}
  #mofasa-hse-form #mh-tasks-editor .specialist-fieldset,
  #mofasa-hse-form #mh-demands-editor .specialist-fieldset{grid-template-columns:1fr}
 }
+
+/* MOFASA experimental Composite Risk Index */
+.cri-panel{margin:14px 0;padding:15px;border:1px solid #cbdde1;border-radius:12px;background:#f7fbfc}
+.cri-panel h4{margin:0 0 7px}.cri-score{font-size:25px;font-weight:800;color:var(--navy);margin:5px 0}
+.cri-band{font-weight:800;padding:9px 12px;border-radius:8px;background:#edf4f5;color:var(--navy)}
+.cri-band.critical{background:#fff0f0;color:#8f2525;border:1px solid #e0b5b5}
+.cri-band.high{background:#fff5e9;color:#82500b;border:1px solid #e5c99c}
+.cri-band.moderate{background:#fff9e9;color:#735a16;border:1px solid #e8dcae}
+.cri-components{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.cri-component{padding:9px;border:1px solid var(--line);border-radius:8px;background:white}
+.cri-component span{display:block;font-size:11px;color:var(--muted)}.cri-component strong{font-size:18px;color:var(--navy)}
+.cri-warning{margin:9px 0;padding:10px 12px;border-right:4px solid #bd8b32;background:#fff8e9;border-radius:7px;font-size:12px}
+.cri-panel ul{margin:6px 0;padding-right:20px}
+@media(max-width:650px){.cri-components{grid-template-columns:repeat(2,minmax(0,1fr))}}
