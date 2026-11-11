@@ -55,10 +55,10 @@ function preview(){
    $("score-total").textContent=score.total+" / 100 — "+score.band;
    $("score-formula").textContent=score.formula;
    $("score-components").innerHTML=[
-     ["R","الخطر المهني المتبقي",score.components.R],
-     ["M","التوافق الطبي",score.components.M],
-     ["F","التوافق الوظيفي",score.components.F],
-     ["E","جاهزية الموقع للطوارئ",score.components.E]
+     ["R","الخطر المهني المتبقي (30%)",score.components.R],
+     ["M","التوافق الطبي (30%)",score.components.M],
+     ["F","التوافق الوظيفي (25%)",score.components.F],
+     ["E","جاهزية الموقع للطوارئ (15%)",score.components.E]
    ].map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+' / 100</td></tr>').join("");
    $("score-method-note").textContent="عدد الأخطار المسجلة: "+score.details.hazard_count+"؛ درجة الخطر المتبقي في TRA: "+score.details.tra_residual+". الدرجة الأعلى تعني قلقاً أكبر وتستلزم مراجعة المكونات والأسباب.";
  }
