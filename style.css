@@ -83,3 +83,19 @@ body.is-admin .admin-only{display:inline-flex}
 .summary-item span{font-size:11px;color:var(--muted)}.summary-item strong{font-size:13px;color:var(--navy);overflow-wrap:anywhere}
 .empty-state{padding:22px;text-align:center;border:1px dashed var(--line);border-radius:12px;background:#fff;color:var(--muted)}
 @media(max-width:700px){.medical-decision-summary,.record-hero{align-items:flex-start;flex-direction:column}.medical-step{padding:13px}.assessment-cards{grid-template-columns:1fr}}
+
+
+/* Interactive MOFASA medical registers */
+.medical-register{padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff;margin:8px 0}
+.medical-register h5{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 12px;color:var(--navy)}
+.medical-register h5 small{font-size:11px;font-weight:600;color:var(--muted);background:#edf4f5;border-radius:20px;padding:4px 9px}
+.medical-entry-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+.medical-entry-grid .entry-wide{grid-column:1/-1}
+.medical-register .table-wrap{margin:12px 0;overflow-x:auto}
+.medical-register table{width:100%;border-collapse:collapse;min-width:620px}
+.medical-register th,.medical-register td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);font-size:12px;vertical-align:middle}
+.medical-register th{background:#f1f6f7;color:var(--navy);font-weight:700;white-space:nowrap}
+.medical-register td{color:var(--ink);line-height:1.6}
+.medical-register td button{white-space:nowrap;padding:5px 9px;font-size:11px}
+.medical-empty{padding:14px;text-align:center;border:1px dashed var(--line);border-radius:9px;color:var(--muted);font-size:12px}
+@media(max-width:650px){.medical-entry-grid{grid-template-columns:1fr}.medical-register{padding:10px}.medical-register .table-wrap{margin-inline:-2px}}
