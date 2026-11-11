@@ -99,14 +99,23 @@ $("assessment-form").addEventListener("submit",async e=>{
  $("assessment-form").reset();window.POFRI_JEM?.clear?.();window.POFRI_MCM?.clear?.();today();$("decision-preview").hidden=true;msg("assessment-message","تم حفظ تقييم POFRI بنجاح.","success");if(role==="admin")loadRecords();
 });
 async function loadRecords(){
- msg("admin-message","جارٍ تحميل التقييمات الجديدة...");
- const {data,error}=await client.from("pofri_assessments").select("id,assessment_date,employee_name,registration_number,job_title,task_name,site,evaluator_name,decision,medical").order("assessment_date",{ascending:false}).limit(500);
- if(error){msg("admin-message","تعذر تحميل السجلات: "+error.message,"error");return;}
- records=data||[];$("records-body").innerHTML=records.length?records.map(x=>'<tr><td>'+esc(x.assessment_date)+'</td><td>'+esc(x.employee_name)+'</td><td>'+esc(x.medical?.worker_profile?.date_of_birth??'—')+'</td><td>'+esc(x.medical?.worker_profile?.age_years??'—')+'</td><td>'+esc(x.registration_number)+'</td><td>'+esc(x.job_title)+' / '+esc(x.task_name)+'</td><td>'+esc(x.site)+'</td><td>'+esc((x.medical?.conditions||x.medical?.diseases||[]).map(c=>(c.disease||c.name)+' (L'+c.level+(c.level===4?' — مراجعة طبية مطلوبة':'')+')').join('، ')||'—')+'</td><td>'+esc(x.decision?.label||"—")+'</td><td>'+esc(x.decision?.experimental_score?.total??"—")+'</td><td>'+esc(x.evaluator_name)+'</td><td>'+(user?.id==="47253008-c899-43c9-93b3-b91ac27e1d31"?'<button type="button" class="danger" data-delete-assessment="'+esc(x.id)+'">مسح</button>':"—")+'</td></tr>').join(""):'<tr><td colspan="12">لا توجد التقييمات الجديدة بعد.</td></tr>';
- msg("admin-message","عدد التقييمات الجديدة: "+records.length,"success");document.dispatchEvent(new Event("pofri-records-loaded"));
+ msg("admin-message","جارٍ تحميل ملفات تقييم MOFASA الجديدة...");
+ const {data,error}=await client.from("mofasa_assessments").select("id,worker_name,registration_number,job_title,task_name,assessment_date,site,hse_status,medical_status").order("assessment_date",{ascending:false}).limit(500);
+ if(error){records=[];$("records-body").innerHTML='<tr><td colspan="9">تعذر تحميل السجلات: '+esc(error.message)+'</td></tr>';msg("admin-message","تعذر تحميل سجلات MOFASA: "+error.message,"error");return;}
+ const list=data||[], ids=list.map(x=>x.id);let medicalById={};
+ if(ids.length){
+  const q=await client.from("mofasa_medical_sections").select("assessment_id,status,final_decision").in("assessment_id",ids);
+  if(q.error){records=[];$("records-body").innerHTML='<tr><td colspan="9">تعذر تحميل حالة القسم الطبي: '+esc(q.error.message)+'</td></tr>';msg("admin-message","تعذر تحميل بيانات الحالة الطبية: "+q.error.message,"error");return;}
+  (q.data||[]).forEach(x=>{medicalById[x.assessment_id]=x;});
+ }
+ records=list.map(x=>({...x,medical_record:medicalById[x.id]||null}));
+ const statusLabel=s=>({pending:"لم يبدأ",draft:"مسودة",submitted:"مكتمل ومُرسل"}[s]||"غير محدد");
+ $("records-body").innerHTML=records.length?records.map(x=>'<tr><td>'+esc(x.assessment_date)+'</td><td>'+esc(x.worker_name)+'</td><td>'+esc(x.registration_number)+'</td><td>'+esc(x.job_title)+'</td><td>'+esc(x.task_name)+'</td><td>'+esc(x.site)+'</td><td>'+esc(statusLabel(x.hse_status))+'</td><td>'+esc(statusLabel(x.medical_status))+'</td><td>'+esc(x.medical_record?.final_decision||"لم يعتمد بعد")+'</td></tr>').join(""):'<tr><td colspan="9">لا توجد تقييمات MOFASA جديدة حتى الآن.</td></tr>';
+ msg("admin-message","عدد ملفات تقييم MOFASA الجديدة: "+records.length,"success");
+ document.dispatchEvent(new Event("mofasa-records-loaded"));
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 $("refresh-button").addEventListener("click",loadRecords);
-$("export-button").addEventListener("click",()=>{const rows=[["تاريخ التقييم","العامل","تاريخ الميلاد","العمر","الرقم","الوظيفة","المهمة","الموقع","الحالات الطبية","التصنيف A/B/C/D","المؤشر الرقمي التجريبي /100","المقيم"],...records.map(x=>[x.assessment_date,x.employee_name,x.medical?.worker_profile?.date_of_birth,x.medical?.worker_profile?.age_years,x.registration_number,x.job_title,x.task_name,x.site,(x.medical?.conditions||x.medical?.diseases||[]).map(c=>(c.disease||c.name)+" (L"+c.level+(c.level===4?" — مراجعة طبية مطلوبة":"")+")").join("؛ "),x.decision?.label,x.decision?.experimental_score?.total,x.evaluator_name])];const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="MOFASA-new-assessments.csv";a.click();URL.revokeObjectURL(a.href);});
+$("export-button").addEventListener("click",()=>{const rows=[["تاريخ التقييم","العامل","الرقم الوظيفي","الوظيفة","المهمة","الموقع","حالة قسم السلامة","حالة القسم الطبي","الرأي الطبي النهائي"],...records.map(x=>[x.assessment_date,x.worker_name,x.registration_number,x.job_title,x.task_name,x.site,x.hse_status,x.medical_status,x.medical_record?.final_decision||"لم يعتمد بعد"])];const csv="\\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\\r\\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="MOFASA-new-assessments.csv";a.click();URL.revokeObjectURL(a.href);});
 client.auth.onAuthStateChange((event,s)=>{if(event==="PASSWORD_RECOVERY"){recoveryMode=true;user=s?.user||null;show("recovery");msg("recovery-message","أدخل كلمة المرور الجديدة ثم احفظها لإكمال الاستعادة.");return;}if(recoveryMode){show("recovery");return;}if(event==="SIGNED_OUT"){user=null;role=null;show("auth");return;}if(s?.user&&!user)session(s.user)});
 (async()=>{const {data}=await client.auth.getSession();if(recoveryMode){show("recovery");}else if(data.session?.user){await session(data.session.user);}else show("auth");})();
