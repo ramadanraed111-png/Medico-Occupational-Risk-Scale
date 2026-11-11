@@ -44,10 +44,25 @@ function analyze(d){
  return {code:cls,label,reasons,tone:cls==="C"||cls==="D"?"critical":cls==="B"?"conditional":""};
 }
 function preview(){
- const d=readForm();const r=analyze(d),box=$("decision-preview");box.hidden=false;box.className="decision "+r.tone;
+ const d=readForm();const r=analyze(d);
+ const score=window.POFRI_EXPERIMENTAL_SCORE?.calculate(d)||null;
+ const box=$("decision-preview");box.hidden=false;box.className="decision "+r.tone;
  $("decision-label").textContent=r.label;$("decision-reasons").textContent=r.reasons.join(" • ");
- $("decision-caution").textContent="نتيجة فرز أولية قائمة على قواعد تشغيلية غير معايرة. لا توجد درجة رقمية كلية في هذه النسخة، ولا تتجاوز القواعد بوابات السلامة أو الحكم الطبي.";
- return {d,r};
+ $("decision-caution").textContent="تصنيف A/B/C/D ناتج عن قواعد الفرز الحالية. المؤشر الرقمي أدناه تجريبي للعرض والمناقشة فقط، ولا يغيّر التصنيف أو يتجاوز بوابات السلامة أو الحكم الطبي.";
+ const scoreBox=$("score-preview");
+ if(scoreBox&&score){
+   scoreBox.hidden=false;
+   $("score-total").textContent=score.total+" / 100 — "+score.band;
+   $("score-formula").textContent=score.formula;
+   $("score-components").innerHTML=[
+     ["R","الخطر المهني المتبقي",score.components.R],
+     ["M","التوافق الطبي",score.components.M],
+     ["F","التوافق الوظيفي",score.components.F],
+     ["E","جاهزية الموقع للطوارئ",score.components.E]
+   ].map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+' / 100</td></tr>').join("");
+   $("score-method-note").textContent="عدد الأخطار المسجلة: "+score.details.hazard_count+"؛ درجة الخطر المتبقي في TRA: "+score.details.tra_residual+". الدرجة الأعلى تعني قلقاً أكبر وتستلزم مراجعة المكونات والأسباب.";
+ }
+ return {d,r,score};
 }
 async function session(u){
  user=u;const {data,error}=await client.from("app_users").select("role,email").eq("user_id",u.id).maybeSingle();
@@ -63,7 +78,7 @@ $("preview-button").addEventListener("click",()=>{if(!$("assessment-form").repor
 $("assessment-form").addEventListener("submit",async e=>{
  e.preventDefault();if(!user||!role){msg("assessment-message","انتهت الجلسة؛ سجل الدخول مجدداً.","error");return;}
  if(!$("assessment-form").reportValidity())return;
- const {d,r}=preview();if(d.age_years===null){msg("assessment-message","تحقق من تاريخ الميلاد؛ يجب أن يكون صحيحاً وألا يتجاوز تاريخ التقييم.","error");$("date-of-birth").focus();return;}if(!d.duration.trim()||!d.recommendations.trim()){msg("assessment-message","يجب إدخال مدة المهمة/الوردية والقيود والتوصيات النهائية قبل حفظ التقييم. لا تقبل الحقول الفارغة أو المسافات فقط.","error");$( !d.duration.trim() ? "duration" : "recommendations").focus();return;}const payload={employee_name:d["employee-name"],registration_number:d["registration-number"],job_title:d["job-title"],task_name:d["task-name"],assessment_date:d["assessment-date"],site:d.site,evaluator_name:d["evaluator-name"],duration:d.duration,job_task:{physical:d.physical,cognitive:d.cognitive,height:d.height,confined_space:d.confined,isolated_work:d.isolated,driving:d.driving},exposures:{items:d.jem_items,chemical:d.chem,noise_vibration:d.noise,heat_weather:d.heat,biological:d.bio,physical_mechanical:d["physical-hazard"],frequency:d.frequency},task_risk:{inherent:d["inherent-risk"],controls:d.controls,residual:d["residual-risk"],permit:d.permit,notes:d["tra-notes"]},medical:{fit:d["medical-fit"],capacity:d.capacity,conditions:d.mcm_items,medical_review_required:d.mcm_items.some(c=>c.level===4),restrictions:d["medical-restrictions"],followup:d["medical-followup"],worker_profile:{date_of_birth:d["date-of-birth"],age_years:d.age_years}},location_emergency:{care_access:d["care-access"],evacuation:d.evacuation,communications:d.communications,site_support:d["site-support"]},decision:{code:r.code,label:r.label,reasons:r.reasons,notes:d["decision-notes"],recommendations:d.recommendations},algorithm_version:"POFRI-0.1-DRAFT",created_by:user.id};
+ const {d,r,score}=preview();if(d.age_years===null){msg("assessment-message","تحقق من تاريخ الميلاد؛ يجب أن يكون صحيحاً وألا يتجاوز تاريخ التقييم.","error");$("date-of-birth").focus();return;}if(!d.duration.trim()||!d.recommendations.trim()){msg("assessment-message","يجب إدخال مدة المهمة/الوردية والقيود والتوصيات النهائية قبل حفظ التقييم. لا تقبل الحقول الفارغة أو المسافات فقط.","error");$( !d.duration.trim() ? "duration" : "recommendations").focus();return;}const payload={employee_name:d["employee-name"],registration_number:d["registration-number"],job_title:d["job-title"],task_name:d["task-name"],assessment_date:d["assessment-date"],site:d.site,evaluator_name:d["evaluator-name"],duration:d.duration,job_task:{physical:d.physical,cognitive:d.cognitive,height:d.height,confined_space:d.confined,isolated_work:d.isolated,driving:d.driving},exposures:{items:d.jem_items,chemical:d.chem,noise_vibration:d.noise,heat_weather:d.heat,biological:d.bio,physical_mechanical:d["physical-hazard"],frequency:d.frequency},task_risk:{inherent:d["inherent-risk"],controls:d.controls,residual:d["residual-risk"],permit:d.permit,notes:d["tra-notes"]},medical:{fit:d["medical-fit"],capacity:d.capacity,conditions:d.mcm_items,medical_review_required:d.mcm_items.some(c=>c.level===4),restrictions:d["medical-restrictions"],followup:d["medical-followup"],worker_profile:{date_of_birth:d["date-of-birth"],age_years:d.age_years}},location_emergency:{care_access:d["care-access"],evacuation:d.evacuation,communications:d.communications,site_support:d["site-support"]},decision:{code:r.code,label:r.label,reasons:r.reasons,notes:d["decision-notes"],recommendations:d.recommendations,experimental_score:score},algorithm_version:"POFRI-0.2-WEIGHTED-DRAFT",score_model_version:"POFRI-WEIGHTED-DRAFT-1.0",created_by:user.id};
  const b=$("save-button");b.disabled=true;b.textContent="جارٍ الحفظ...";
  const {error}=await client.from("pofri_assessments").insert(payload);
  b.disabled=false;b.textContent="حفظ تقييم POFRI";
