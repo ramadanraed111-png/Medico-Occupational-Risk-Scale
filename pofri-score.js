@@ -10,7 +10,7 @@
     residual: {low:0, moderate:33.3, high:66.7, critical:100},
     medicalFit: {compatible:0, restricted:50, temporary:80, incompatible:100, pending:75},
     capacity: {adequate:0, limited:60, insufficient:100, unknown:75},
-    demand: {low:25, moderate:50, high:75, very_high:100},
+    demand: {low:0, moderate:33, high:67, very_high:100},
     care: {good:0, moderate:35, limited:70, remote:100},
     evacuation: {ready:0, partial:60, weak:100, unknown:75},
     communications: {reliable:0, intermittent:60, poor:100, unknown:75},
