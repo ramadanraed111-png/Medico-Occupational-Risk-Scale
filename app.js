@@ -29,13 +29,23 @@ function readForm(){
  return data;
 }
 function analyze(d){
- const reasons=[];if(d.jem_items?.length){reasons.push("تم توثيق "+d.jem_items.length+" من عناصر التعرض في مكتبة JEM؛ راجع أوصاف القياس والضوابط لكل خطر.");}
+ const reasons=[];
+ if(d.jem_items?.length)reasons.push("تم توثيق "+d.jem_items.length+" من عناصر التعرض في مكتبة JEM؛ راجع أوصاف القياس والضوابط لكل خطر.");
  let cls="A",label="A – ملائم مبدئياً للمهمة المحددة",tone="";
- const escalate=(c)=>{if(c==="D"|| (c==="C"&&cls!=="D") || (c==="B"&&cls==="A"))cls=c};
+ const escalate=c=>{if(c==="D"||(c==="C"&&cls!=="D")||(c==="B"&&cls==="A"))cls=c};
  if(d["medical-fit"]==="incompatible"||d.capacity==="insufficient"){escalate("D");reasons.push("عدم توافق طبي/وظيفي مع متطلبات المهمة الحالية وفق المدخلات");}
  if(d["medical-fit"]==="temporary"||d["medical-fit"]==="pending"||d.capacity==="unknown"){escalate("C");reasons.push("التقييم الطبي أو تحديد القدرة الوظيفية غير مكتمل أو يتطلب مراجعة");}
- if(d["medical-fit"]==="restricted"||d.capacity==="limited"||d.controls!=="effective"||["high","critical"].includes(d["residual-risk"])||["high"].some(k=>[d.chem,d.noise,d.heat,d.bio,d["physical-hazard"]].includes(k))||["high","very_high"].includes(d.physical)||["high","very_high"].includes(d.cognitive)||d.height==="yes"||d.confined==="yes"||d.isolated==="yes"||d.driving==="yes"||["high","critical"].includes(d["inherent-risk"])||d["care-access"]==="remote"||d["care-access"]==="limited"||d["care-access"]==="moderate"||d.evacuation==="partial"||d.evacuation==="weak"||d.evacuation==="unknown"||d.communications==="poor"||d.communications==="intermittent"||d.communications==="unknown"||d["site-support"]==="inadequate"||d["site-support"]==="limited"||d["site-support"]==="unknown"){escalate("B");reasons.push("توجد قيود أو تعرضات/متطلبات مرتفعة أو فجوات في التحكم أو دعم الموقع تستلزم معالجة موثقة");}
- if(d["residual-risk"]==="critical"||d["inherent-risk"]==="critical"&&d.controls!=="effective"||d.evacuation==="weak"&&d["care-access"]==="remote"){escalate("C");reasons.push("مؤشر خطر حرج أو ترتيبات طوارئ غير كافية: أوقف إسناد المهمة حتى المراجعة والتحكم");}
+ if(d["medical-fit"]==="restricted"||d.capacity==="limited"||d.controls!=="effective"||["high","critical"].includes(d["residual-risk"])||["high"].some(k=>[d.chem,d.noise,d.heat,d.bio,d["physical-hazard"]].includes(k))||["high","very_high"].includes(d.physical)||["high","very_high"].includes(d.cognitive)||d.height==="yes"||d.confined==="yes"||d.isolated==="yes"||d.driving==="yes"||["high","critical"].includes(d["inherent-risk"])||["remote","limited","moderate"].includes(d["care-access"])||["partial","weak","unknown"].includes(d.evacuation)||["poor","intermittent","unknown"].includes(d.communications)||["inadequate","limited","unknown"].includes(d["site-support"])){escalate("B");reasons.push("توجد قيود أو تعرضات/متطلبات مرتفعة أو فجوات في التحكم أو دعم الموقع تستلزم معالجة موثقة");}
+ if(d["residual-risk"]==="critical"||(d["inherent-risk"]==="critical"&&d.controls!=="effective")||(d.evacuation==="weak"&&d["care-access"]==="remote")){escalate("C");reasons.push("مؤشر خطر حرج أو ترتيبات طوارئ غير كافية: أوقف إسناد المهمة حتى المراجعة والتحكم");}
+ const siteNames={
+  "care-access":{good:"الرعاية الطبية متاحة سريعاً",moderate:"زمن الوصول للرعاية الطبية متوسط",limited:"الوصول للرعاية الطبية محدود",remote:"الرعاية الطبية بعيدة أو صعبة الوصول"},
+  evacuation:{ready:"خطة الإسعاف والإخلاء جاهزة ومختبرة",partial:"الإسعاف والإخلاء متاحان جزئياً",weak:"ترتيبات الإسعاف والإخلاء غير كافية",unknown:"جاهزية الإسعاف والإخلاء غير متحققة"},
+  communications:{reliable:"الاتصالات موثوقة",intermittent:"الاتصالات متقطعة",poor:"الاتصالات ضعيفة",unknown:"حالة الاتصالات غير متحققة"},
+  "site-support":{adequate:"دعم الموقع للمخاطر الطبية كافٍ",limited:"دعم الموقع للمخاطر الطبية محدود",inadequate:"دعم الموقع للمخاطر الطبية غير كافٍ",unknown:"ملاءمة دعم الموقع غير محددة"}
+ };
+ const siteFindings=Object.entries(siteNames).filter(([id])=>d[id]).map(([id,labels])=>labels[d[id]]||"قيمة موقع غير معروفة");
+ if(siteFindings.length)reasons.push("محور الموقع والطوارئ (مُدخل في التقييم): "+siteFindings.join("؛ ")+".");
+ if(d["care-access"]==="good"&&d.evacuation==="ready"&&d.communications==="reliable"&&d["site-support"]==="adequate")reasons.push("مدخلات الموقع الأربعة تشير إلى جاهزية مناسبة؛ لذلك تكون مساهمة E منخفضة (صفر عند اختيار أفضل مستوى في جميع الحقول)، وهذا يعني قلة الفجوات المرصودة وليس تجاهل المحور.");
  if(d["medical-fit"]==="pending"||d.capacity==="unknown"||d.controls==="unknown"||d.evacuation==="unknown"||d.communications==="unknown"||d["site-support"]==="unknown")reasons.push("هناك بيانات أساسية غير متحققة؛ لا يمكن اعتبار غياب المعلومة دليلاً على السلامة");
  if(cls==="D")label="D – غير ملائم لهذه المهمة المحددة حالياً";
  if(cls==="C")label="C – غير ملائم مؤقتاً / يلزم إيقاف الإسناد والمراجعة";
@@ -52,15 +62,17 @@ function preview(){
  const scoreBox=$("score-preview");
  if(scoreBox&&score){
    scoreBox.hidden=false;
-   $("score-total").textContent=score.total+" / 100 — "+score.band;
+   $("score-total").textContent=score.total===null?"غير مكتمل — استكمل مدخلات المحاور المطلوبة":score.total+" / 100 — مستوى القلق: "+score.band;
    $("score-formula").textContent=score.formula;
+   $("score-meaning").textContent=score.meaning+" "+score.band_note;
    $("score-components").innerHTML=[
      ["R","الخطر المهني المتبقي (30%)",score.components.R],
      ["M","التوافق الطبي (30%)",score.components.M],
      ["F","التوافق الوظيفي (25%)",score.components.F],
      ["E","جاهزية الموقع للطوارئ (15%)",score.components.E]
-   ].map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+x[2]+' / 100</td></tr>').join("");
-   $("score-method-note").textContent="عدد الأخطار المسجلة: "+score.details.hazard_count+"؛ درجة الخطر المتبقي في TRA: "+score.details.tra_residual+". الدرجة الأعلى تعني قلقاً أكبر وتستلزم مراجعة المكونات والأسباب.";
+   ].map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td><td>'+(x[2]===null?"غير مكتمل":x[2]+" / 100")+'</td></tr>').join("");
+   $("site-score-breakdown").innerHTML=score.details.site_breakdown.map(x=>'<tr><td>'+x.label+'</td><td>'+x.choice+'</td><td>'+(x.score===null?"غير مكتمل":x.score+" / 100")+'</td></tr>').join("");
+   $("score-method-note").textContent="عدد الأخطار المسجلة: "+score.details.hazard_count+"؛ درجة الخطر المتبقي في TRA: "+score.details.tra_residual+". الصفر يعني أقل قلق/فجوة مرصودة، و100 يعني أعلى قلق/فجوة؛ ولا تمثل الدرجة احتمالاً طبياً أو نسبة لياقة.";
  }
  return {d,r,score};
 }
