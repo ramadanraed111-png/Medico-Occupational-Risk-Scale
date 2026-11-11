@@ -21,7 +21,11 @@
 - قبل تشغيل الحفظ، راجع ونفذ يدوياً وبموافقة مسؤول قاعدة البيانات ملف `supabase/pofri-schema.sql` في SQL Editor.
 
 ## القرار
-تصنيفات A/B/C/D في هذه النسخة ناتجة عن قواعد فرز تشغيلية أولية وليست معياراً طبياً معتمداً. لا توجد درجة رقمية كلية مقصودة حالياً؛ لا يجوز استخدام درجة موزونة لتجاوز بوابة طبية أو خطر حرج. يجب استكمال التحقق، والمعايرة، والاعتماد الطبي/المهني، واختبارات الأمن والخصوصية قبل التشغيل الفعلي.
+تصنيفات A/B/C/D في هذه النسخة ناتجة عن قواعد فرز تشغيلية أولية وليست معياراً طبياً معتمداً. أُضيف مؤشر رقمي موزون تجريبي مؤقت لغرض العرض على اللجنة المختصة فقط؛ ويظل منفصلاً عن التصنيف ولا يجوز استخدامه لتجاوز بوابة طبية أو خطر حرج. لا تُستخدم النتيجة لاتخاذ قرار لياقة أو توظيف فعلي قبل التحقق، والمعايرة، والاعتماد الطبي/المهني، واختبارات الأمن والخصوصية.
 
 ## التشغيل
 يُنشر الموقع الثابت من GitHub Pages عند ضبط النشر على الفرع المطلوب. لا تغيّر فرع Pages الرئيسي حتى اكتمال اختبار نسخة POFRI وقبولها.
+
+
+## Provisional weighted index for committee demonstration
+A separate, explicitly provisional numeric model is included in `pofri-score.js`. It calculates R/M/F/E using the draft weights 30%/30%/25%/15%, displays the result beside (not instead of) the existing A/B/C/D rule classification, and stores it inside the existing `decision` JSON object. The score does not override medical or safety gates. Its mappings, weights, and display bands are not validated. See [POFRI weighted model draft](docs/POFRI-weighted-model-draft.md). This is for expert-committee demonstration and discussion only, not real fitness decisions.
