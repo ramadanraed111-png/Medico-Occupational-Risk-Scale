@@ -1,4 +1,4 @@
-/* POFRI front-end. Existing Supabase Auth and app_users roles are reused. */
+/* MOFASA front-end. Existing Auth accounts are retained; roles are enforced in Supabase RLS. */
 const SUPABASE_URL="https://vvagucmjmjoxnyumxtcq.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_4jVHbUXOKy4TWG19LvQJJg_4f656sU2";
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
@@ -79,7 +79,7 @@ function preview(){
 async function session(u){
  user=u;const {data,error}=await client.from("app_users").select("role,email").eq("user_id",u.id).maybeSingle();
  if(error||!data){await client.auth.signOut();user=null;show("auth");msg("login-message","تعذر التحقق من صلاحية الحساب. راجع مسؤول النظام.","error");return;}
- role=data.role;show("work");document.dispatchEvent(new Event("pofri-session-ready"));$("top-user-info").textContent=(data.email||u.email)+"  |  "+(role==="admin"?"مسؤول النظام":"مدخل بيانات");
+ role=data.role;show("work");document.dispatchEvent(new Event("pofri-session-ready"));const roleNames={admin:"المدير الأعلى",hse_admin:"مسؤول النظام – مسؤول السلامة",medical_admin:"مسؤول النظام – طبيب الموقع",data_entry:"مدخل بيانات"};$("top-user-info").textContent=(data.email||u.email)+"  |  "+(roleNames[role]||"صلاحية غير معروفة");
  $("admin-panel").hidden=role!=="admin";today();if(role==="admin")loadRecords();
 }
 $("login-form").addEventListener("submit",async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;const {data,error}=await client.auth.signInWithPassword({email:value("login-email"),password:value("login-password")});b.disabled=false;if(error){msg("login-message","تعذر تسجيل الدخول: "+error.message,"error");return;}await session(data.user);});
