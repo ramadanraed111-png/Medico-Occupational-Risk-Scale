@@ -36,3 +36,20 @@ body.is-admin .admin-only{display:inline-flex}
 .score-card table{min-width:0}.score-warning{padding:10px 12px;border-right:4px solid #bd8b32;border-radius:7px;background:#fff8e9;color:#674d20;font-size:13px}
 
 .score-meaning{padding:11px 13px;margin:8px 0 12px;border-right:4px solid var(--teal);border-radius:8px;background:#edf6f7;color:#254b54;font-size:13px}.score-card h5{margin:16px 0 6px;color:var(--navy);font-size:14px}.score-card table{white-space:normal}.score-card td,.score-card th{white-space:normal;min-width:120px}
+
+/* Job-specific specialist fitness assessment */
+.specialist-section{margin:16px 0;padding:16px;border:1px solid #d7e3e7;border-radius:12px;background:#fbfdfe}
+.specialist-section h4{margin:0 0 8px;color:#17495a}
+.specialist-section>p{margin:4px 0 12px;color:#627985;font-size:13px}
+.specialist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.specialist-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.specialist-check{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1px solid #e1e9ec;border-radius:8px;background:#fff;font-size:13px}
+.specialist-check input{margin-top:3px;accent-color:#176b78}
+.specialist-row{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr auto;gap:8px;align-items:end;padding:10px 0;border-bottom:1px solid #e5ecef}
+.specialist-result{padding:14px;border-radius:10px;background:#f3f7f8}
+.specialist-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.specialist-help{font-size:12px;color:#647985}
+.specialist-fieldset{border:1px solid #dce7ea;border-radius:9px;padding:12px;margin:10px 0}
+.specialist-fieldset legend{font-weight:700;color:#17495a;padding:0 6px}
+.specialist-pending{border-right:4px solid #bd8b32;background:#fff8e9}
+@media(max-width:700px){.specialist-row{grid-template-columns:1fr}.specialist-actions button{width:100%}}
