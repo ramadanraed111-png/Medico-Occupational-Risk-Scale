@@ -130,7 +130,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   host.innerHTML='<div class="cri-panel"><h4>مؤشر الخطورة المركب – Composite Risk Index (CRI)</h4><p class="specialist-help">محرك مستقل تجريبي يربط المهمة والتعرضات والحالة الصحية والقدرة الوظيفية وظروف الموقع. لا يعتمد اللياقة ولا يستبدل قرار الطبيب.</p>'+
     (result.total===null?'<div class="cri-band">النتيجة: غير مكتمل – لا تصدر توصية</div>':'<div class="cri-band '+result.band+'">'+esc(result.label)+'</div><div class="cri-score">'+result.total+' / 100</div>')+
     '<div class="cri-components">'+values+'</div><p><strong>المعادلة:</strong> '+result.formula+'</p>'+gaps+hazards+
-    '<div class="cri-warning">'+esc(result.note)+'<br>النطاقات المقترحة: 0–24 منخفض، 25–49 متوسط، 50–74 مرتفع، 75–100 حرج. تُطبق أولوية الخطر الحرج عند وجود خطر متبقٍ مصنف حرجاً أو تعرض شديد مستمر مع خطر متبقٍ مرتفع/حرج.</div></div>';
+    '<div class="cri-warning">'+esc(result.note)+'<br>النطاقات المقترحة: 0–24 منخفض، 25–49 متوسط، 50–74 مرتفع، 75–100 حرج. قد ترفع قاعدة أولوية السلامة تصنيف الحالة إلى «حرج» حتى إذا كانت الدرجة الموزونة أقل من 75؛ ويُعرض ذلك كاستثناء سلامة لا كاعتماد للياقة.</div></div>';
  }
  function render(){
   root.innerHTML='<div class="workspace-head"><div><h3>MOFASA – التقييم المشترك</h3><p class="muted">ملف واحد للعامل والمهمة، مع قسم سلامة وقسم طبي مستقلين.</p></div><button type="button" class="secondary" id="mofasa-refresh">تحديث السجلات</button></div>'+
