@@ -34,3 +34,5 @@ body.is-admin .admin-only{display:inline-flex}
 .score-card{margin-top:16px;padding:16px;border:1px solid #c8dadd;border-radius:12px;background:#f7fbfc}
 .score-card h4{margin-bottom:8px}.score-total{font-size:22px;font-weight:800;color:var(--navy);margin:4px 0 10px}
 .score-card table{min-width:0}.score-warning{padding:10px 12px;border-right:4px solid #bd8b32;border-radius:7px;background:#fff8e9;color:#674d20;font-size:13px}
+
+.score-meaning{padding:11px 13px;margin:8px 0 12px;border-right:4px solid var(--teal);border-radius:8px;background:#edf6f7;color:#254b54;font-size:13px}.score-card h5{margin:16px 0 6px;color:var(--navy);font-size:14px}.score-card table{white-space:normal}.score-card td,.score-card th{white-space:normal;min-width:120px}
