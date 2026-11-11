@@ -53,3 +53,33 @@ body.is-admin .admin-only{display:inline-flex}
 .specialist-fieldset legend{font-weight:700;color:#17495a;padding:0 6px}
 .specialist-pending{border-right:4px solid #bd8b32;background:#fff8e9}
 @media(max-width:700px){.specialist-row{grid-template-columns:1fr}.specialist-actions button{width:100%}}
+
+
+/* MOFASA clinical workflow and record-review UI */
+.medical-step{margin:15px 0;padding:17px;border:1px solid #d9e5e8;border-radius:13px;background:#fff;box-shadow:0 4px 14px #123b4a08}
+.medical-step-title{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.medical-step-title>span{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:11px;background:#e8f2f3;color:#145466;font-weight:800}
+.medical-step-title h4{margin:0 0 2px}.medical-step-title p{margin:0;font-size:12px}
+.medical-step>label{margin-bottom:4px}
+.medical-review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.medical-review-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:#fff;min-width:0}
+.medical-review-card h5{margin:0 0 8px;color:var(--navy);font-size:14px}
+.medical-review-card p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font-size:13px;line-height:1.8}
+.medical-decision-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:15px;border-radius:11px;background:#edf5f6;color:var(--navy)}
+.medical-decision-summary span{padding:4px 10px;border-radius:20px;background:#fff;border:1px solid var(--line);font-size:12px}
+.assessment-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.assessment-card{padding:16px;border:1px solid var(--line);border-radius:13px;background:#fff;box-shadow:0 4px 14px #123b4a08}
+.assessment-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.assessment-card-head h5{margin:0;color:var(--navy);font-size:16px}.assessment-card-head p{margin:3px 0 10px;font-size:12px}
+.record-date{white-space:nowrap;padding:4px 8px;border-radius:7px;background:#f0f5f6;color:var(--muted);font-size:11px}
+.record-meta,.record-status{display:flex;flex-wrap:wrap;gap:8px 16px;padding:9px 0;border-top:1px solid #edf1f2;font-size:12px;color:var(--muted)}
+.record-meta strong,.record-status strong{color:var(--navy)}
+.assessment-card button{width:100%;margin-top:8px}
+.record-hero{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:18px;border-radius:13px;background:linear-gradient(115deg,#edf5f6,#f8fbfb);border:1px solid #dce8ea}
+.record-hero h3{margin:3px 0;font-size:21px}.record-hero p{margin:0;font-size:13px}
+.record-hero-id{padding:8px 12px;border:1px solid #d2e0e3;border-radius:9px;background:#fff;color:var(--navy);font-weight:800}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:13px 0}
+.summary-item{display:flex;flex-direction:column;gap:4px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;min-width:0}
+.summary-item span{font-size:11px;color:var(--muted)}.summary-item strong{font-size:13px;color:var(--navy);overflow-wrap:anywhere}
+.empty-state{padding:22px;text-align:center;border:1px dashed var(--line);border-radius:12px;background:#fff;color:var(--muted)}
+@media(max-width:700px){.medical-decision-summary,.record-hero{align-items:flex-start;flex-direction:column}.medical-step{padding:13px}.assessment-cards{grid-template-columns:1fr}}
