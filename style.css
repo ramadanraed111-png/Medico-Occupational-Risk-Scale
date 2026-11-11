@@ -221,3 +221,77 @@ body.is-admin .admin-only{display:inline-flex}
   grid-template-columns:1fr;
  }
 }
+
+/* Compact left-side HSE panels: core tasks and job demands */
+#mofasa-hse-form #mh-tasks-editor .specialist-section,
+#mofasa-hse-form #mh-demands-editor .specialist-section{
+ padding:8px;
+ margin:0;
+}
+#mofasa-hse-form #mh-tasks-editor .specialist-section>p{
+ margin:0 0 5px;
+ font-size:10px;
+ line-height:1.4;
+}
+#mofasa-hse-form #mh-tasks-editor h4,
+#mofasa-hse-form #mh-demands-editor h4{
+ margin:0 0 4px;
+ font-size:13px;
+}
+#mofasa-hse-form #mh-tasks-editor label,
+#mofasa-hse-form #mh-demands-editor label{
+ margin:0 0 5px;
+ gap:2px;
+ font-size:10px;
+ line-height:1.35;
+}
+#mofasa-hse-form #mh-tasks-editor textarea,
+#mofasa-hse-form #mh-demands-editor textarea{
+ min-height:34px;
+ padding:4px 6px;
+ font-size:11px;
+ line-height:1.4;
+}
+#mofasa-hse-form #mh-tasks-editor #mh-task-items{min-height:58px}
+#mofasa-hse-form #mh-tasks-editor #mh-task-notes{min-height:34px}
+#mofasa-hse-form #mh-tasks-editor .specialist-fieldset,
+#mofasa-hse-form #mh-demands-editor .specialist-fieldset{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:3px 5px;
+ padding:6px;
+ margin:5px 0;
+}
+#mofasa-hse-form #mh-tasks-editor .specialist-fieldset legend,
+#mofasa-hse-form #mh-demands-editor .specialist-fieldset legend{
+ grid-column:1/-1;
+ padding:0 4px;
+ font-size:10px;
+ line-height:1.3;
+}
+#mofasa-hse-form #mh-tasks-editor .specialist-check,
+#mofasa-hse-form #mh-demands-editor .specialist-check{
+ display:flex;
+ align-items:flex-start;
+ gap:5px;
+ padding:3px 5px;
+ margin:0;
+ min-height:0;
+ font-size:10px;
+ line-height:1.35;
+}
+#mofasa-hse-form #mh-tasks-editor .specialist-check input,
+#mofasa-hse-form #mh-demands-editor .specialist-check input{
+ width:13px;
+ min-height:13px;
+ height:13px;
+ margin:1px 0 0;
+ flex:0 0 13px;
+}
+#mofasa-hse-form #mh-demands-editor .specialist-fieldset{
+ grid-template-columns:repeat(2,minmax(0,1fr));
+}
+@media(max-width:420px){
+ #mofasa-hse-form #mh-tasks-editor .specialist-fieldset,
+ #mofasa-hse-form #mh-demands-editor .specialist-fieldset{grid-template-columns:1fr}
+}
