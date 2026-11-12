@@ -326,6 +326,11 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const table=isH?"mofasa_hse_sections":"mofasa_medical_sections";
   const {error}=await client.from(table).update(payload).eq("id",row.id).eq("status","submitted");
   if(error){msg("تعذرت إعادة القسم للاستكمال: "+error.message,"error");return;}
+  if(isH&&medicalRow?.status==="submitted"){
+   const medMeta={...(medicalRow.section_data?._meta||{}),admin_returned_at:new Date().toISOString(),admin_returned_by:user.id,admin_returned_by_email:user.email||"",admin_return_reason:"أعيد قسم السلامة للمراجعة؛ يلزم إعادة مراجعة واعتماد الرأي الطبي بعد استكماله.",return_target:"medical_admin"};
+   const medUpdate=await client.from("mofasa_medical_sections").update({section_data:{...(medicalRow.section_data||{}),_meta:medMeta},status:"draft",submitted_at:null,final_decision:null,updated_by:user.id}).eq("id",medicalRow.id).eq("status","submitted");
+   if(medUpdate.error){msg("أُعيد قسم السلامة، لكن تعذر إلغاء الاعتماد الطبي السابق: "+medUpdate.error.message+"؛ يرجى مراجعة الطبيب يدوياً.","error");return;}
+  }
   msg("أُعيد القسم إلى "+target+" وأصبح متاحاً للاستكمال. سبب الإعادة: "+meta.admin_return_reason,"success");
   await loadList();await openAssessment(selected);
  }
