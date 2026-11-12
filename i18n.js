@@ -548,7 +548,33 @@
  "الطبيب المعتمد":"Approving Physician",
  "توقيع الطبيب":"Physician Signature",
  "توقيع مسؤول السلامة":"HSE Officer Signature",
- "تاريخ التوقيع":"Signature Date"
+ "تاريخ التوقيع":"Signature Date",
+ "نظام التقييم الطبي والمهني المتكامل للياقة للعمل":"Integrated Medical and Occupational Fitness Assessment System",
+ "المدير الأعلى":"Super Admin",
+ "مسؤول النظام – مسؤول السلامة":"HSE Administrator",
+ "مسؤول النظام – طبيب الموقع":"Site Physician",
+ "مدخل بيانات":"Data Entry",
+ "أكمل فئة الخطر والخطر والشدة ومعدل التعرض والخطر المتبقي.":"Complete the hazard category, hazard, severity, exposure frequency and residual risk.",
+ "لم يتم إدخال بيانات":"No data entered",
+ "لا توجد بيانات":"No data available",
+ "غير متاح للتعديلات السابقة":"Not available for edits made before this update",
+ "سجل الأخطار المهنية":"Occupational Hazard Register",
+ "التعرضات المهنية":"Occupational Exposures",
+ "الواجبات الحساسة للسلامة":"Safety-Critical Duties",
+ "العمل على ارتفاعات":"Working at Heights",
+ "دخول الأماكن المغلقة":"Confined-Space Entry",
+ "تشغيل معدات حرجة":"Operating Critical Equipment",
+ "العزل والتحكم في الطاقة":"Isolation and Energy Control",
+ "الاستجابة للحريق والطوارئ":"Fire and Emergency Response",
+ "الإسعافات الأولية والإنقاذ":"First Aid and Rescue",
+ "تشغيل الرافعات وعمليات الرفع":"Crane and Lifting Operations",
+ "بيانات العامل والمهمة":"Worker and Task Details",
+ "الوظيفة المحددة":"Selected Job",
+ "الرقم الوظيفي / التسجيل":"Employee / Registration Number",
+ "مدة الوردية / المهمة":"Shift / Task Duration",
+ "تاريخ التقييم":"Assessment Date",
+ "الموقع":"Site",
+ "اسم الطبيب / المقيم":"Physician / Assessor Name"
  };
  const originalText=new WeakMap(), originalAttrs=new WeakMap();
  const attrNames=["placeholder","title","aria-label"];
@@ -560,8 +586,6 @@
    let n;while((n=walker.nextNode())){if(!originalText.has(n))originalText.set(n,n.nodeValue);const base=originalText.get(n);const next=lang==="en"?translateText(base):base;if(n.nodeValue!==next)n.nodeValue=next;}
    const els=root.nodeType===1?[root,...root.querySelectorAll("*")]:root.querySelectorAll("*");
    for(const el of els){for(const a of attrNames){if(!el.hasAttribute?.(a))continue;let map=originalAttrs.get(el);if(!map){map={};originalAttrs.set(el,map);}if(!(a in map))map[a]=el.getAttribute(a);el.setAttribute(a,lang==="en"?translateText(map[a]):map[a]);}
-     if(el.tagName==="OPTION"&&!el.dataset.i18nOriginal){el.dataset.i18nOriginal=el.textContent;}
-     if(el.tagName==="OPTION"){const base=el.dataset.i18nOriginal;const next=lang==="en"?translateText(base):base;if(el.textContent!==next)el.textContent=next;}
    }
  }
  function apply(next){lang=next==="en"?"en":"ar";document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.body.dataset.language=lang;visit(document.body);const b=document.getElementById("language-toggle");if(b){b.textContent=lang==="ar"?"English":"العربية";b.setAttribute("aria-label",lang==="ar"?"Switch interface to English":"تغيير لغة الواجهة إلى العربية");}try{localStorage.setItem("mofasa-language",lang);}catch(_){} }
