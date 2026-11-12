@@ -34,7 +34,7 @@
  function translateText(source){let out=source;for(const k of keys){if(out===k)return translations[k];}return out;}
  function visit(root){
    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-   let n;while((n=walker.nextNode())){if(!originalText.has(n))originalText.set(n,n.nodeValue);const base=originalText.get(n);n.nodeValue=lang==="en"?translateText(base):base;}
+   let n;while((n=walker.nextNode())){if(!originalText.has(n))originalText.set(n,n.nodeValue);const base=originalText.get(n);const next=lang==="en"?translateText(base):base;if(n.nodeValue!==next)n.nodeValue=next;}
    const els=root.nodeType===1?[root,...root.querySelectorAll("*")]:root.querySelectorAll("*");
    for(const el of els){for(const a of attrNames){if(!el.hasAttribute?.(a))continue;let map=originalAttrs.get(el);if(!map){map={};originalAttrs.set(el,map);}if(!(a in map))map[a]=el.getAttribute(a);el.setAttribute(a,lang==="en"?translateText(map[a]):map[a]);}
      if(el.tagName==="OPTION"&&!el.dataset.i18nOriginal){el.dataset.i18nOriginal=el.textContent;}
@@ -42,7 +42,7 @@
    }
  }
  function apply(next){lang=next==="en"?"en":"ar";document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.body.dataset.language=lang;visit(document.body);const b=document.getElementById("language-toggle");if(b){b.textContent=lang==="ar"?"English":"العربية";b.setAttribute("aria-label",lang==="ar"?"Switch interface to English":"تغيير لغة الواجهة إلى العربية");}try{localStorage.setItem("mofasa-language",lang);}catch(_){} }
- function init(){const b=document.getElementById("language-toggle");if(!b)return;let saved="ar";try{saved=localStorage.getItem("mofasa-language")||"ar";}catch(_){}b.addEventListener("click",()=>apply(lang==="ar"?"en":"ar"));apply(saved);const observer=new MutationObserver(records=>{for(const r of records){if(r.type==="childList")r.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3){if(n.nodeType===3){if(!originalText.has(n))originalText.set(n,n.nodeValue);if(lang==="en")n.nodeValue=translateText(originalText.get(n));}else visit(n);}});else if(r.type==="characterData"&&r.target.nodeType===3){if(!originalText.has(r.target))originalText.set(r.target,r.target.nodeValue);if(lang==="en")r.target.nodeValue=translateText(originalText.get(r.target));}}});observer.observe(document.body,{childList:true,subtree:true,characterData:true});}
+ function init(){const b=document.getElementById("language-toggle");if(!b)return;let saved="ar";try{saved=localStorage.getItem("mofasa-language")||"ar";}catch(_){}b.addEventListener("click",()=>apply(lang==="ar"?"en":"ar"));apply(saved);const observer=new MutationObserver(records=>{for(const r of records){if(r.type==="childList")r.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3){if(n.nodeType===3){if(!originalText.has(n))originalText.set(n,n.nodeValue);if(lang==="en"){const next=translateText(originalText.get(n));if(n.nodeValue!==next)n.nodeValue=next;}}else visit(n);}});else if(r.type==="characterData"&&r.target.nodeType===3){if(!originalText.has(r.target))originalText.set(r.target,r.target.nodeValue);if(lang==="en"){const next=translateText(originalText.get(r.target));if(r.target.nodeValue!==next)r.target.nodeValue=next;}}}});observer.observe(document.body,{childList:true,subtree:true,characterData:true});}
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
  window.MOFASA_I18N={setLanguage:apply,getLanguage:()=>lang};
 })();
