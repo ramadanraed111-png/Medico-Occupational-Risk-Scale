@@ -351,3 +351,15 @@ body.is-admin .admin-only{display:inline-flex}
 .ftw-subsection .specialist-checks{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:4px}
 .ftw-subsection .specialist-check{padding:5px 7px;border-radius:6px;font-size:12px;line-height:1.35}
 .ftw-subsection .specialist-check input{margin-top:2px}
+
+
+/* Match Supervisor Observations panel to the adjacent HSE checklist styling */
+.ftw-subsection{margin:8px 0;padding:10px;border:1px solid #d7e3e7;border-radius:12px;background:#fbfdfe}
+.ftw-subsection>h4{margin:0 0 8px;font-size:13px;line-height:1.4}
+.ftw-subsection .specialist-fieldset{margin:8px 0;padding:8px 10px;border:1px solid #dce7ea;border-radius:9px}
+.ftw-subsection .specialist-fieldset legend{font-size:12px}
+.ftw-observation-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.ftw-observation-check{display:flex;flex-direction:row-reverse;align-items:center;justify-content:flex-start;gap:7px;min-height:34px;padding:6px 9px;border:1px solid #e1e9ec;border-radius:8px;background:#fff;font-size:12px;line-height:1.4;text-align:right}
+.ftw-observation-check input{flex:0 0 auto;width:13px;height:13px;margin:0;accent-color:#176b78}
+.ftw-observation-check span{flex:1}
+@media(max-width:700px){.ftw-observation-checks{grid-template-columns:1fr}}
