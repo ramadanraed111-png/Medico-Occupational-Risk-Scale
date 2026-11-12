@@ -341,3 +341,13 @@ body.is-admin .admin-only{display:inline-flex}
 .completed-review .completed-review-row{display:grid;grid-template-columns:minmax(115px,.8fr) minmax(0,2fr);gap:8px;padding:6px 0;border-bottom:1px solid #edf1f2;font-size:12px}
 .completed-review .completed-review-row>strong{color:var(--navy)}
 @media(max-width:650px){.completed-review .completed-review-row{grid-template-columns:1fr;gap:2px}}
+
+
+/* Compact Fitness-to-Work supervisor/HSE block to match the safety-critical duties group */
+.ftw-subsection{margin:8px 0;padding:8px 10px;border-radius:9px}
+.ftw-subsection>h4{margin:0 0 5px;font-size:13px;line-height:1.35}
+.ftw-subsection .specialist-fieldset{margin:5px 0;padding:6px 9px;border-radius:8px}
+.ftw-subsection .specialist-fieldset legend{font-size:12px}
+.ftw-subsection .specialist-checks{grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:4px}
+.ftw-subsection .specialist-check{padding:5px 7px;border-radius:6px;font-size:12px;line-height:1.35}
+.ftw-subsection .specialist-check input{margin-top:2px}
