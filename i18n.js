@@ -38,7 +38,7 @@
    const els=root.nodeType===1?[root,...root.querySelectorAll("*")]:root.querySelectorAll("*");
    for(const el of els){for(const a of attrNames){if(!el.hasAttribute?.(a))continue;let map=originalAttrs.get(el);if(!map){map={};originalAttrs.set(el,map);}if(!(a in map))map[a]=el.getAttribute(a);el.setAttribute(a,lang==="en"?translateText(map[a]):map[a]);}
      if(el.tagName==="OPTION"&&!el.dataset.i18nOriginal){el.dataset.i18nOriginal=el.textContent;}
-     if(el.tagName==="OPTION"){const base=el.dataset.i18nOriginal;el.textContent=lang==="en"?translateText(base):base;}
+     if(el.tagName==="OPTION"){const base=el.dataset.i18nOriginal;const next=lang==="en"?translateText(base):base;if(el.textContent!==next)el.textContent=next;}
    }
  }
  function apply(next){lang=next==="en"?"en":"ar";document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.body.dataset.language=lang;visit(document.body);const b=document.getElementById("language-toggle");if(b){b.textContent=lang==="ar"?"English":"العربية";b.setAttribute("aria-label",lang==="ar"?"Switch interface to English":"تغيير لغة الواجهة إلى العربية");}try{localStorage.setItem("mofasa-language",lang);}catch(_){} }
