@@ -317,3 +317,27 @@ body.is-admin .admin-only{display:inline-flex}
 .archived-card{border-style:dashed;background:#fbfcfc}
 .top-user-info{direction:ltr;unicode-bidi:plaintext}
 @media(max-width:600px){.mofasa-toolbar button,.mofasa-card-actions button{width:100%;min-width:0}}
+
+
+/* MOFASA compact medical inputs and completed-only review */
+#mofasa-med-form .medical-step{padding:12px;margin:10px 0}
+#mofasa-med-form .medical-step-title{margin-bottom:8px;gap:9px}
+#mofasa-med-form .medical-step-title>span{flex-basis:32px;height:32px;border-radius:9px;font-size:12px}
+#mofasa-med-form label{font-size:11px;gap:3px;margin-bottom:7px}
+#mofasa-med-form input,#mofasa-med-form select{min-height:34px;padding:5px 8px;font-size:12px;border-radius:7px}
+#mofasa-med-form textarea{min-height:46px;padding:6px 8px;font-size:12px;border-radius:7px}
+#mofasa-med-form .specialist-fieldset{padding:9px;margin:7px 0}
+#mofasa-med-form .specialist-grid{gap:7px}
+#mofasa-med-form .medical-register{padding:10px;margin:6px 0}
+#mofasa-med-form .medical-entry-grid{gap:7px;margin:7px 0}
+#mofasa-med-form .medical-register th,#mofasa-med-form .medical-register td{padding:6px 7px;font-size:11px}
+#mofasa-med-form button{min-height:34px;padding:6px 11px;font-size:12px}
+#mofasa-med-form [data-ftw-vital="bmi"]{background:#edf5f6;color:#17495a;font-weight:800}
+.clinical-exam .clinical-fieldset{padding:10px}
+.clinical-exam .specialist-grid{gap:7px}
+.clinical-exam label{font-size:11px;margin-bottom:6px}
+.clinical-exam input,.clinical-exam select{min-height:34px;padding:5px 8px;font-size:12px}
+.clinical-exam textarea{min-height:44px;padding:6px 8px;font-size:12px}
+.completed-review .completed-review-row{display:grid;grid-template-columns:minmax(115px,.8fr) minmax(0,2fr);gap:8px;padding:6px 0;border-bottom:1px solid #edf1f2;font-size:12px}
+.completed-review .completed-review-row>strong{color:var(--navy)}
+@media(max-width:650px){.completed-review .completed-review-row{grid-template-columns:1fr;gap:2px}}
