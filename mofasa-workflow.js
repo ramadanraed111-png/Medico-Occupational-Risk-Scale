@@ -336,6 +336,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  }
  async function saveSection(section,status){
   if(parent?.archived_at){msg("هذا السجل مؤرشف ولا يمكن تعديله قبل استعادته بواسطة المدير الأعلى.","error");return;}
+  if(section==="medical"&&isAdmin()&&status==="submitted"){msg("اعتماد الرأي الطبي النهائي من صلاحية طبيب الموقع حصراً.","error");return;}
   const isH=section==="hse", table=isH?"mofasa_hse_sections":"mofasa_medical_sections", old=isH?hseRow:medicalRow;
   let section_data,final_decision=null;
   if(isH){section_data=collectHseData();section_data._meta={...(old?.section_data?._meta||{}),last_edited_by_email:user?.email||"",last_edited_by:user?.id||null,last_edited_at:new Date().toISOString()};const t=section_data.tasks.items.length,h=section_data.hazards.items.length,e=section_data.emergency;if(status==="submitted"&&(!t||!h||!e.site_category||!e.care_access||!e.evacuation||!e.communications)){msg("لا يمكن إرسال قسم السلامة قبل تسجيل مهمة واحدة وخطر واحد على الأقل واستكمال فئة الموقع والرعاية الطبية والإخلاء والاتصالات.","error");return;}}
