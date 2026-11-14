@@ -72,7 +72,7 @@ function preview(){
    $("score-total").textContent=score.total===null?"غير مكتمل — ينتظر استكمال الطبيب":score.total+" / 100 — مستوى القلق: "+score.band;
    $("score-formula").textContent=score.formula;
    $("score-meaning").textContent=score.meaning+" "+score.band_note;
-   $("score-components").innerHTML=[
+   $("score-components").innerHTML=score.total===null?'<tr><td colspan="3">تنتظر استكمال MCM والقدرة الوظيفية والرأي الطبي بواسطة الطبيب.</td></tr>':[
      ["R","الخطر المهني المتبقي (30%)",score.components.R],
      ["M","التوافق الطبي (30%)",score.components.M],
      ["F","التوافق الوظيفي (25%)",score.components.F],
