@@ -400,3 +400,13 @@ html[dir="ltr"] label{text-align:left}
 html[dir="ltr"] input,html[dir="ltr"] textarea,html[dir="ltr"] select{text-align:left}
 html[dir="ltr"] .module-nav{direction:ltr}
 @media(max-width:600px){.language-toggle{padding:7px 10px;font-size:13px}}
+
+
+/* Compact, grouped medical completed-review panel */
+.completed-review .medical-review-section{min-width:0}
+.completed-review .medical-review-subgroup{margin:5px 0;border:1px solid #e3ebed;border-radius:8px;background:#fbfdfd;overflow:hidden}
+.completed-review .medical-review-subgroup>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;cursor:pointer;color:var(--navy);font-size:12px;list-style-position:inside}
+.completed-review .medical-review-subgroup>summary span{flex:0 0 auto;padding:2px 7px;border-radius:12px;background:#edf4f5;color:#58717a;font-size:10px;font-weight:600}
+.completed-review .medical-review-subgroup>.review-disclosure-body{padding:5px 10px 8px}
+.completed-review .medical-review-section>.review-disclosure-body{padding:8px}
+.completed-review .medical-review-section>.review-disclosure-body>.medical-review-subgroup:first-child{margin-top:0}
