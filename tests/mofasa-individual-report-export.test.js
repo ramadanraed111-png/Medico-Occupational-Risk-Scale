@@ -27,7 +27,7 @@ assert.match(workflow, /0\.30R \+ 0\.30M \+ 0\.25F \+ 0\.15E/,
   "The report must show the weighted POFRI formula.");
 assert.match(workflow, /renderCompletedReview\\(hseRow,medicalRow,\\{includeScore:false,expanded:true\\}\\)[\s\S]*renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
   "The PDF must show complete specialist review and the detailed saved POFRI result.");
-assert.match(workflow, /const body=reviewRows\(x\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
+assert.match(workflow, /const body=reviewRows\(x,options\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
   "Medical history entries and physician notes must be fully rendered.");
 
 
