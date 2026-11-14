@@ -45,7 +45,7 @@
  }
  function renderHseHazardList(){
   const el=$("mh-hazard-list");if(!el)return;
-  el.innerHTML=hseHazards.length?'<table><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>الضوابط</th><th>الخطر المتبقي</th><th></th></tr></thead><tbody>'+hseHazards.map((x,i)=>'<tr><td>'+hseEsc(x.category)+' / '+hseEsc(x.name)+'</td><td>'+(x.severity_label||["","منخفض","متوسط","مرتفع","شديد"][Number(x.severity)])+(x.severity_description?" — "+hseEsc(x.severity_description):"")+'</td><td>'+exposureLabels[x.frequency]+'</td><td>'+hseEsc(x.controls||"—")+'</td><td>'+hseEsc(x.residual||"—")+'</td><td><button type="button" class="secondary" data-hse-remove="'+i+'">حذف</button></td></tr>').join("")+'</tbody></table>':'لم تتم إضافة أخطار بعد.';
+  el.innerHTML=hseHazards.length?'<table><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>التكرار (1–5)</th><th>المدة (1–5)</th><th>الاحتمالية (1–5)</th><th>فعالية التحكم</th><th>الضوابط</th><th>الخطر المتبقي</th><th></th></tr></thead><tbody>'+hseHazards.map((x,i)=>'<tr><td>'+hseEsc(x.category)+' / '+hseEsc(x.name)+'</td><td>'+(x.severity_label||["","منخفض","متوسط","مرتفع","شديد"][Number(x.severity)])+(x.severity_description?" — "+hseEsc(x.severity_description):"")+'</td><td>'+exposureLabels[x.frequency]+'</td><td>'+(x.frequency_scale??"—")+'</td><td>'+(x.duration_scale??"—")+'</td><td>'+(x.probability_scale??"—")+'</td><td>'+(x.control_effectiveness??"—")+'</td><td>'+hseEsc(x.controls||"—")+'</td><td>'+hseEsc(x.residual||"—")+'</td><td><button type="button" class="secondary" data-hse-remove="'+i+'">حذف</button></td></tr>').join("")+'</tbody></table>':'لم تتم إضافة أخطار بعد.';
   el.querySelectorAll("[data-hse-remove]").forEach(b=>b.onclick=()=>{hseHazards.splice(Number(b.dataset.hseRemove),1);renderHseHazardList();});
  }
  function collectHseData(){
@@ -467,7 +467,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   addSheet(wb,en?"Archive Log":"سجل الأرشيف",[en?["Assessment ID","Action","User","Date","Reason"]:["رقم التقييم","العملية","المستخدم","التاريخ","السبب"],...(ar.data||[]).map(x=>[x.assessment_id,x.action,x.actor_id,x.changed_at,x.reason])]);
   addSheet(wb,en?"Audit Log":"سجل التدقيق",[en?["Assessment ID","Section","Action","User","Date","Previous Status","New Status"]:["رقم التقييم","القسم","العملية","المستخدم","التاريخ","الحالة السابقة","الحالة الجديدة"],...(au.data||[]).map(x=>[x.assessment_id,x.section_name,x.action,x.actor_id,x.changed_at,x.old_status,x.new_status])]);
   saveBook(wb,"MOFASA-comprehensive-register");
-  msg(en?"The detailed report is ready and includes "+parents.length+" records, HSE and medical details, CRI indicators and archive data.":"تم تجهيز التقرير العام التفصيلي ويشمل "+parents.length+" سجلاً، مع تفاصيل السلامة والطب ومؤشر CRI والأرشيف.","success");
+  msg(en?"The detailed report is ready and includes "+parents.length+" records, HSE and medical details, IOFI indicators and archive data.":"تم تجهيز التقرير العام التفصيلي ويشمل "+parents.length+" سجلاً، مع تفاصيل السلامة والطب ومؤشرات IOFI والأرشيف.","success");
  }
  async function loadAudit(id){
   const [audit,archive]=await Promise.all([
