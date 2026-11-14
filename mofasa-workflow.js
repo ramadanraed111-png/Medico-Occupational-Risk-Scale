@@ -247,14 +247,8 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   ]);
   const clin=ftwPrintSection("Clinical Examination Findings",clinical);
   const func=ftwPrintSection("Functional Capacity Assessment",[
-   ["Physical / Functional Capacity",mf.functional_capacity],
    ["Cognitive Capacity",mf.cognitive_capacity],
-   ["Fitness Essentials",fitness.map(x=>{
-    const bilingual=String(x.item||"").split("/");
-    const item=(bilingual.length>1?bilingual.slice(1).join("/").trim():({"Normal Consciousness":"Normal consciousness","No Uncontrolled Epilepsy":"No uncontrolled epilepsy","Adequate Mobility":"Adequate mobility","Safe Ladder Climbing":"Safe ladder climbing","Normal Balance":"Normal balance","Adequate Hearing":"Adequate hearing","Adequate Vision":"Adequate vision","Ability to Wear Respirator":"Ability to wear respirator","Cardiovascular Fitness":"Cardiovascular fitness"}[String(x.item||"").trim()]||x.item));
-    const status=({met:"Met",restricted:"Met with Restrictions",not_met:"Not Met",not_assessed:"Not Assessed"})[x.status]||"Not Assessed";
-    return (bilingual.length>1?bilingual[0].trim():item)+" — "+status+(x.evidence?" — "+x.evidence:"");
-   })],["Functional Capacity Notes",m.capacity?.notes]
+   ["Functional Capacity Notes",m.capacity?.notes]
   ]);
   const investigations=ftwPrintSection("Labs & Imaging Findings",labs.map(x=>[x.test,[x.result,x.unit,x.status,x.date].filter(Boolean).join(" — ")]));
   const additional=ftwPrintSection("Additional Investigations",[
