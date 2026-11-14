@@ -43,8 +43,16 @@ assert.match(workflow, /renderPofriReport\(medicalRow\?\.section_data\?\.prelimi
   "The PDF may append only the compact overall indicator result.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwReportDocument(id)"), workflow.indexOf("function printFtwReport(id)")), /mofasa_audit_log|mofasa_archive_log|سجل التدقيق|سجل الأرشيف|auditHtml/,
   "The individual report must not load or render audit or archive logs.");
-assert.match(workflow, /@page\{size:A4;margin:7mm 8mm\}/,
-  "The individual report must use compact A4 margins.");
+assert.match(workflow, /@page\{size:A4 portrait;margin:5mm 6mm\}/,
+  "The individual report must use compact A4 portrait margins.");
+assert.match(workflow, /medical-review-section>\.review-disclosure-body\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
+  "Medical subsections must use a compact two-column print layout.");
+assert.match(workflow, /font:7\.1pt Tahoma,Arial,sans-serif[\s\S]*line-height:1\.14/,
+  "The individual report must use compact, readable typography and spacing.");
+assert.match(workflow, /review-section,\.review-entry,\.report-section,\.report-audit\{[^}]*break-inside:auto/,
+  "Sections must remain flowable rather than being clipped to force a page break.");
+assert.match(workflow, /\.medical-review-section>\.review-disclosure-body>\.review-group\{grid-column:1\/-1\}/,
+  "Long medical-history groups must retain full width in the compact layout.");
 assert.match(workflow, /section\{break-inside:auto\}table,tr,.worker-card,.completed-review-row\{break-inside:avoid\}/,
   "Long sections must flow across pages while keeping table rows intact.");
 assert.match(workflow, /reviewRows\(value,options=\{\},path=\[\]\)[\s\S]*options\.expanded\?' open'/,
@@ -61,8 +69,8 @@ assert.match(workflow, /effective:"فعالة ومتحقق منها"[\s\S]*remot
   "HSE and site-readiness enum values must be translated into Arabic.");
 assert.match(workflow, /bp:"ضغط الدم",hr:"معدل النبض"/,
   "Vital signs must have clear Arabic labels.");
-assert.match(workflow, /grid-template-columns:1fr;gap:7px;align-items:start/,
-  "Individual report sections must print in a clear single-column sequence.");
+assert.match(workflow, /medical-review-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
+  "The individual report must use a compact two-column page layout.");
 assert.match(workflow, /border-right:3px solid #17495a/,
   "The worker header and report sections must use a refined visual hierarchy.");
 assert.match(workflow, /const body=reviewRows\(x,options,\["diseases"\]\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
