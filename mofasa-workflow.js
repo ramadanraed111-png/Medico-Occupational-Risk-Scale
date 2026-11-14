@@ -361,7 +361,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(typeof v==="number")return Number.isFinite(v);
   if(typeof v==="boolean")return true;
   if(Array.isArray(v))return v.some(hasCompletedReviewValue);
-  if(typeof v==="object")return Object.entries(v).some(([k,x])=>k!=="_meta"&&!(k==="status"&&typeof x==="string"&&x.toLowerCase().startsWith("matrix_level_"))&&hasCompletedReviewValue(x));
+  if(typeof v==="object")return Object.entries(v).some(([k,x])=>k!=="_meta"&&k!=="status"&&hasCompletedReviewValue(x));
   return false;
  }
  function reviewCount(value){
@@ -399,13 +399,14 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   return '<details class="review-disclosure review-group"><summary><strong>التاريخ المرضي والحالات الطبية</strong><span>'+cards.length+' حالة</span></summary><div class="review-disclosure-body">'+cards.join("")+'</div></details>';
  }
  function renderJemReview(h){
-  const items=Array.isArray(h?.section_data?.hazards?.items)?h.section_data.hazards.items:[];
+  const source=Array.isArray(h?.section_data?.hazards?.items)?h.section_data.hazards.items:[];
+  const items=source.filter(x=>x&&typeof x==="object"&&["category","name","severity_label","severity_description","severity","frequency","frequency_scale","duration_scale","probability_scale","control_effectiveness","controls","residual"].some(k=>hasCompletedReviewValue(x[k])));
   if(!items.length)return "";
   const residualLabels={low:"منخفض",moderate:"متوسط",high:"مرتفع",critical:"حرج",not_assessed:"لم يقيّم"};
   const rows=items.map(x=>{
    const severity=(x.severity_label||(["","منخفض","متوسط","مرتفع","شديد / حرج","كارثي"][Number(x.severity)]||""))+(x.severity_description?" — "+x.severity_description:"");
-   const effectiveness=x.control_effectiveness===undefined||x.control_effectiveness===null?"—":Number(x.control_effectiveness).toFixed(2);
-   return "<tr><td>"+esc((x.category||"")+" / "+(x.name||""))+"</td><td>"+esc(severity||"—")+"</td><td>"+esc(exposureLabels[x.frequency]||reviewValue(x.frequency||"—"))+"</td><td>"+esc(x.frequency_scale??"—")+"</td><td>"+esc(x.duration_scale??"—")+"</td><td>"+esc(x.probability_scale??"—")+"</td><td>"+esc(effectiveness)+"</td><td>"+esc(x.controls||"—")+"</td><td>"+esc(residualLabels[x.residual]||x.residual||"—")+"</td></tr>";
+   const effectiveness=x.control_effectiveness===undefined||x.control_effectiveness===null||x.control_effectiveness===""?"":Number(x.control_effectiveness).toFixed(2);
+   return "<tr><td>"+esc([x.category,x.name].filter(Boolean).join(" / "))+"</td><td>"+esc(severity)+"</td><td>"+esc(x.frequency?(exposureLabels[x.frequency]||reviewValue(x.frequency)):"")+"</td><td>"+esc(x.frequency_scale??"")+"</td><td>"+esc(x.duration_scale??"")+"</td><td>"+esc(x.probability_scale??"")+"</td><td>"+esc(effectiveness)+"</td><td>"+esc(x.controls||"")+"</td><td>"+esc(x.residual?(residualLabels[x.residual]||x.residual):"")+"</td></tr>";
   }).join("");
   const notes=h.section_data.hazards?.notes;
   return '<section class="specialist-section jem-review"><h4>سجل الأخطار المهنية JEM</h4><div class="table-wrap"><table class="jem-table"><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>التكرار (1–5)</th><th>المدة (1–5)</th><th>الاحتمالية (1–5)</th><th>فعالية التحكم</th><th>الضوابط</th><th>الخطر المتبقي</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(notes?'<div class="completed-review-row"><strong>ملاحظات عامة على تقييم الأخطار</strong><div>'+esc(notes)+'</div></div>':"")+'</section>';
@@ -421,6 +422,23 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const extras=(other?'<div class="completed-review-row"><strong>متطلبات أخرى</strong><div>'+esc(other)+'</div></div>':"")+(notes?'<div class="completed-review-row"><strong>مستوى المجهود / طبيعة العمل</strong><div>'+esc(notes)+'</div></div>':"");
   if(!groups&&!extras)return "";
   return '<section class="specialist-section demand-review"><h4>متطلبات أداء الوظيفة</h4>'+groups+extras+'</section>';
+ }
+ function renderIndicatorReview(h,m){
+  if(!window.MOFASA_IOFI||(!canHseRead()&&!canMedicalRead()))return "";
+  const medical=canMedicalRead()?(m?.section_data||{}):{};
+  const result=window.MOFASA_IOFI.calculate({hse:h?.section_data||{},medical,finalDecision:canMedicalRead()?(m?.final_decision||null):null});
+  const names={OERI:"مؤشر مخاطر التعرضات المهنية",IHVI:"مؤشر القابلية الصحية الفردية",JTCI:"مؤشر التوافق الوظيفي والمهماتي"};
+  const components=["OERI",...(canMedicalRead()?["IHVI","JTCI"]:[])].filter(k=>result.components[k]!==null&&result.components[k]!==undefined);
+  const componentRows=components.map(k=>'<div class="completed-review-row"><strong>'+names[k]+'</strong><div>'+esc(result.components[k])+' / 100</div></div>').join("");
+  const total=canMedicalRead()&&result.total!==null?'<div class="completed-review-row"><strong>المؤشر المركب IOFI (تجريبي)</strong><div>'+esc(result.total)+' / 100</div></div>':"";
+  const wormRows=Object.entries(result.components.WORM.context||{}).filter(([,v])=>v&&v!=="غير محدد").map(([k,v])=>'<div class="completed-review-row"><strong>'+esc(k)+'</strong><div>'+esc(v)+'</div></div>').join("");
+  const subdomains=canMedicalRead()?["IHVI","JTCI"].map(key=>{
+   const vals=(result.subdomains[key]||[]).filter(x=>x.value!==null&&x.value!==undefined);
+   return vals.length?'<details class="review-disclosure review-entry"><summary><strong>تفاصيل '+key+'</strong><span>'+vals.length+' محاور مستكملة</span></summary><div class="review-disclosure-body">'+vals.map(x=>'<div class="completed-review-row"><strong>'+esc(x.label)+'</strong><div>'+esc(x.value)+' / 100</div></div>').join("")+'</div></details>':"";
+  }).join(""):"";
+  const alerts=(result.alerts||[]).length?'<div class="completed-review-row"><strong>تنبيهات تستلزم المراجعة</strong><ul>'+result.alerts.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>':"";
+  if(!componentRows&&!total&&!wormRows&&!subdomains&&!alerts)return "";
+  return '<details class="review-disclosure review-section"><summary><strong>المؤشرات والنتائج الحسابية</strong><span>'+components.length+' مؤشرات مستكملة</span></summary><div class="review-disclosure-body">'+componentRows+total+(wormRows?'<details class="review-disclosure review-entry"><summary><strong>ظروف الموقع والتشغيل (WORM)</strong></summary><div class="review-disclosure-body">'+wormRows+'</div></details>':"")+subdomains+alerts+'<p class="specialist-help">المؤشرات المعروضة تجريبية وإرشادية، ولا تمثل تشخيصاً أو قرار لياقة مستقلًا.</p></div></details>';
  }
  function renderCompletedReview(h,m){
   const sections=[],hd=h?.section_data||{},md=m?.section_data||{};
@@ -441,6 +459,8 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   }
   const jemReview=renderJemReview(h);
   if(jemReview)sections.unshift(jemReview);
+  const indicatorReview=renderIndicatorReview(h,m);
+  if(indicatorReview)sections.push(indicatorReview);
   return sections.length?'<section class="specialist-section completed-review"><h4>استعراض النقاط المستكملة فقط</h4><p class="specialist-help">تظهر هنا البيانات التي تم إدخالها أو تقييمها فقط. افتح كل قائمة لعرض تفاصيلها؛ وتظل صلاحيات الاطلاع الخاصة بكل دور كما هي.</p><div class="medical-review-grid">'+sections.join("")+'</div></section>':"";
  }
  async function openAssessment(id){
