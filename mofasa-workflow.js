@@ -318,6 +318,8 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    if(medicalRow?.status!=="submitted")return null;
    const groups=renderMedicalReviewGroups(md)+renderMedicalHistory(md.diseases);
    if(groups)rows.push('<section class="report-section"><h2>البيانات الطبية المستكملة</h2>'+groups+'</section>');
+   const score=md.preliminary_analysis||{};
+   if(score.total!==null&&score.total!==undefined)rows.push('<section class="report-section"><h2>المؤشر الرقمي التجريبي للمحاور الستة</h2><div class="completed-review-row"><strong>النتيجة</strong><div>'+esc(score.total+' / 100 — '+(score.band||""))+'</div></div><div class="completed-review-row"><strong>المعادلة</strong><div>'+esc(score.formula||"")+'</div></div><p>مؤشر تجريبي غير معاير؛ لا يمثل تشخيصاً أو قرار لياقة ولا يحل محل الحكم الطبي.</p></section>');
    if(medicalRow?.final_decision)rows.push('<section class="report-section"><h2>الرأي الطبي النهائي</h2><div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(medicalRow.final_decision))+'</div></div></section>');
   }
   if(!rows.length){msg("لا توجد بيانات مكتملة للطباعة في هذا القسم.","error");return null;}
