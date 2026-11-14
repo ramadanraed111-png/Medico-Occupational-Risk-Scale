@@ -371,7 +371,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  }
  function reviewRows(value){
   if(Array.isArray(value)){
-   const items=value.filter(hasCompletedReviewValue);if(!items.length)return "";
+   const items=value.filter(x=>hasCompletedReviewValue(x)&&!(x&&typeof x==="object"&&String(x.status||"").toLowerCase()==="not_assessed"));if(!items.length)return "";
    if(items.every(x=>typeof x!=="object"))return '<ul>'+items.map(x=>'<li>'+esc(reviewValue(x))+'</li>').join("")+'</ul>';
    return '<div class="completed-review-list">'+items.map(x=>{
     const title=x.disease||x.name||x.test||x.item||x.task||x.hazard||x.category_label||"تفاصيل مسجلة";
@@ -386,7 +386,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const items=Array.isArray(diseases?.items)?diseases.items:Array.isArray(diseases)?diseases:[];
   const categoryNames={ENT:"أمراض الأنف والأذن والحنجرة والسمع والاتزان",Psychiatric:"الاضطرابات النفسية"};
   const levelNames={1:"المستوى 1",2:"المستوى 2",3:"المستوى 3",4:"المستوى 4"};
-  const cards=items.filter(hasCompletedReviewValue).map(x=>{
+  const cards=items.filter(x=>hasCompletedReviewValue(x)&&String(x.status||"").toLowerCase()!=="not_assessed").map(x=>{
    const disease=x.disease||x.name||"حالة طبية مسجلة";
    const category=x.category_label||categoryNames[x.category]||x.category||"";
    const level=x.level!==undefined&&x.level!==null&&x.level!==""?(levelNames[Number(x.level)]||("المستوى "+x.level)):"";
