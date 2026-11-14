@@ -1,24 +1,14 @@
 -- Allow HSE and physician sections to be completed and submitted independently.
--- Final record completion still requires both sections; medical approval remains physician-only.
+-- Preserve the live role restrictions and physician-only final approval.
 drop policy if exists mofasa_medical_insert on public.mofasa_medical_sections;
 create policy mofasa_medical_insert on public.mofasa_medical_sections
 for insert to authenticated
 with check (
   created_by = (select auth.uid())
   and updated_by = (select auth.uid())
-  and (
-    exists (
-      select 1 from public.app_users u
-      where u.user_id = (select auth.uid()) and u.role = 'medical_admin'
-    )
-    or (
-      status = 'draft'
-      and final_decision is null
-      and exists (
-        select 1 from public.app_users u
-        where u.user_id = (select auth.uid()) and u.role = 'admin'
-      )
-    )
+  and exists (
+    select 1 from public.app_users u
+    where u.user_id = (select auth.uid()) and u.role = 'medical_admin'
   )
   and (
     status = 'draft'
@@ -33,25 +23,15 @@ using (
   status = 'draft'
   and exists (
     select 1 from public.app_users u
-    where u.user_id = (select auth.uid()) and u.role in ('admin','medical_admin')
+    where u.user_id = (select auth.uid()) and u.role = 'medical_admin'
   )
 )
 with check (
   status in ('draft','submitted')
   and updated_by = (select auth.uid())
-  and (
-    exists (
-      select 1 from public.app_users u
-      where u.user_id = (select auth.uid()) and u.role = 'medical_admin'
-    )
-    or (
-      status = 'draft'
-      and final_decision is null
-      and exists (
-        select 1 from public.app_users u
-        where u.user_id = (select auth.uid()) and u.role = 'admin'
-      )
-    )
+  and exists (
+    select 1 from public.app_users u
+    where u.user_id = (select auth.uid()) and u.role = 'medical_admin'
   )
   and (
     status = 'draft'
