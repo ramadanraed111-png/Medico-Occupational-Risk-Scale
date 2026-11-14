@@ -268,23 +268,6 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name+base+".doc";document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);msg("تم تجهيز التقرير المنفصل بنجاح.","success");
  }
- function printFtwReport(id){
-  if(!canMedicalRead())return;
-  const html=buildFtwReportDocument(id);if(!html)return;
-  const pop=window.open("","_blank","width=1000,height=800");if(!pop){msg("يرجى السماح بالنوافذ المنبثقة لطباعة التقرير.","error");return;}
-  pop.document.open();pop.document.write(html.replace("</body>","<script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script></body>"));pop.document.close();
- }
- function exportFtwWord(id){
-  if(!canMedicalRead())return;
-  const html=buildFtwReportDocument(id);if(!html)return;
-  const blob=new Blob(["\ufeff",html],{type:"application/msword;charset=utf-8"});
-  const url=URL.createObjectURL(blob),a=document.createElement("a");
-  const base=String(parent?.registration_number||parent?.worker_name||id).replace(/[^a-zA-Z0-9_-]+/g,"-");
-  a.href=url;a.download="MOFASA-Individual-FTW-"+base+".doc";document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1500);
-  msg("تم تجهيز تقرير Word الفردي.","success");
- }
-
  function render(){
   root.innerHTML='<div class="workspace-head"><div><h3>MOFASA – التقييم المشترك</h3><p class="muted">ملف واحد للعامل والمهمة، مع قسم سلامة وقسم طبي مستقلين.</p></div><div class="mofasa-toolbar"><button type="button" class="secondary" id="mofasa-refresh">تحديث السجلات</button>'+(isAdmin()?'<button type="button" class="secondary" id="mofasa-archive-toggle">عرض الأرشيف</button><button type="button" id="mofasa-export-all">تصدير التقرير العام التفصيلي (Excel)</button>':'')+'</div></div>'+
    '<div class="notice"><strong>حوكمة الصلاحيات:</strong> يعمل قسم السلامة والقسم الطبي بصورة مستقلة ومتوازية؛ يمكن لكل مختص حفظ وإرسال قسمه فور الانتهاء دون انتظار القسم الآخر. تظل البيانات الطبية محمية، ولا يصدر القرار النهائي إلا بعد اكتمال القسمين واعتماد الرأي الطبي بواسطة الطبيب.</div>'+
