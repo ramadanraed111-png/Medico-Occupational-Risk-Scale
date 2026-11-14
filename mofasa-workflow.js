@@ -448,6 +448,26 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(!componentRows&&!total&&!wormRows&&!subdomains&&!alerts)return "";
   return '<details class="review-disclosure review-section"><summary><strong>المؤشرات والنتائج الحسابية</strong><span>'+components.length+' مؤشرات مستكملة</span></summary><div class="review-disclosure-body">'+componentRows+total+(wormRows?'<details class="review-disclosure review-entry"><summary><strong>ظروف الموقع والتشغيل (WORM)</strong></summary><div class="review-disclosure-body">'+wormRows+'</div></details>':"")+subdomains+alerts+'<p class="specialist-help">المؤشرات المعروضة تجريبية وإرشادية، ولا تمثل تشخيصاً أو قرار لياقة مستقلًا.</p></div></details>';
  }
+ function renderMedicalReviewGroups(md){
+  const groups=[
+   {title:"الفحص السريري والعلامات الحيوية",keys:["ftw","exam","vitals"]},
+   {title:"التحاليل والفحوصات",keys:["labs"]},
+   {title:"القدرة الوظيفية والمتطلبات الأساسية",keys:["capacity","functional_capacity"]},
+   {title:"التقييم الطبي المتخصص والمؤشرات",keys:["iofi"]},
+   {title:"القيود الطبية وخطة المتابعة",keys:["restrictions","notes"]}
+  ];
+  const used=new Set(["diseases"]);
+  const blocks=groups.map(group=>{
+   const data={};group.keys.forEach(k=>{if(Object.prototype.hasOwnProperty.call(md,k)){data[k]=md[k];used.add(k);}});
+   if(!hasCompletedReviewValue(data))return "";
+   const count=reviewCount(data),body=reviewRows(data);
+   return body?'<details class="review-disclosure review-entry medical-review-subgroup"><summary><strong>'+group.title+'</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
+  }).join("");
+  const other={};Object.entries(md||{}).forEach(([k,v])=>{if(!used.has(k)&&k!=="_meta"&&hasCompletedReviewValue(v))other[k]=v;});
+  const otherBody=reviewRows(other);
+  const extras=otherBody?'<details class="review-disclosure review-entry medical-review-subgroup"><summary><strong>بيانات طبية إضافية</strong><span>'+reviewCount(other)+' عناصر</span></summary><div class="review-disclosure-body">'+otherBody+'</div></details>':"";
+  return blocks+extras;
+ }
  function renderCompletedReview(h,m){
   const sections=[],hd=h?.section_data||{},md=m?.section_data||{};
   if(canHseRead()&&hasCompletedReviewValue(hd)){
@@ -458,11 +478,10 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    if(demandsReview)sections.push(demandsReview);
   }
   if(canMedicalRead()&&(hasCompletedReviewValue(md)||m?.final_decision)){
-   const medicalData={...md};delete medicalData.diseases;
-   const medicalContent=reviewRows(medicalData)+renderMedicalHistory(md.diseases)+(m?.final_decision?'<div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(m.final_decision))+'</div></div>':"");
+   const medicalContent=renderMedicalReviewGroups(md)+renderMedicalHistory(md.diseases)+(m?.final_decision?'<div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(m.final_decision))+'</div></div>':"");
    if(medicalContent){
-    const count=reviewCount(medicalData)+reviewCount(md.diseases)+(m?.final_decision?1:0);
-    sections.push('<details class="review-disclosure review-section"><summary><strong>البيانات المكتملة – القسم الطبي</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+medicalContent+'</div></details>');
+    const count=reviewCount(md)+reviewCount(md.diseases)+(m?.final_decision?1:0);
+    sections.push('<details class="review-disclosure review-section medical-review-section"><summary><strong>البيانات المكتملة – القسم الطبي</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+medicalContent+'</div></details>');
    }
   }
   const jemReview=renderJemReview(h);
