@@ -61,7 +61,7 @@ assert.match(workflow, /grid-template-columns:1fr;gap:7px;align-items:start/,
   "Individual report sections must print in a clear single-column sequence.");
 assert.match(workflow, /border-right:3px solid #17495a/,
   "The worker header and report sections must use a refined visual hierarchy.");
-assert.match(workflow, /const body=reviewRows\(x,options\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
-  "Medical history entries and physician notes must be fully rendered.");
+assert.match(workflow, /const body=reviewRows\(x,options,\["diseases"\]\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
+  "Medical history entries and physician notes must be fully rendered in the disease-specific report context.");
 
 console.log("MOFASA individual PDF/Word export regression tests passed.");
