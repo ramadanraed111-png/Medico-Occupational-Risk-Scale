@@ -502,8 +502,6 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   }
   const jemReview=renderJemReview(h);
   if(jemReview)sections.unshift(jemReview);
-  const indicatorReview=renderIndicatorReview(h,m);
-  if(indicatorReview)sections.push(indicatorReview);
   return sections.length?'<section class="specialist-section completed-review"><h4>استعراض النقاط المستكملة فقط</h4><p class="specialist-help">تظهر هنا البيانات التي تم إدخالها أو تقييمها فقط. افتح كل قائمة لعرض تفاصيلها؛ وتظل صلاحيات الاطلاع الخاصة بكل دور كما هي.</p><div class="medical-review-grid">'+sections.join("")+'</div></section>':"";
  }
  async function openAssessment(id){
