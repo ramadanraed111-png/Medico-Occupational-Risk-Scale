@@ -29,3 +29,7 @@
 
 ## Provisional weighted index for committee demonstration
 A separate, explicitly provisional numeric model is included in `pofri-score.js`. It calculates R/M/F/E using the draft weights 30%/30%/25%/15%, displays the result beside (not instead of) the existing A/B/C/D rule classification, and stores it inside the existing `decision` JSON object. The score does not override medical or safety gates. Its mappings, weights, and display bands are not validated. See [POFRI weighted model draft](docs/POFRI-weighted-model-draft.md). This is for expert-committee demonstration and discussion only, not real fitness decisions.
+
+
+## IOFI development track (not yet production)
+The approved IOFI foundation is being developed on the separate branch `feature/iofi-foundation` and tracked in [Draft PR #45](https://github.com/ramadanraed111-png/Medico-Occupational-Risk-Scale/pull/45). It adds an evidence-completeness engine, four independent index structures and a non-compensatory critical safety gate. It does not change the production interface or database and is not yet connected to live assessments. See the IOFI architecture, proposed logical data model, validation plan and repository audit under `docs/IOFI-*.md`. Do not use the IOFI foundation for operational fitness decisions.
