@@ -7,7 +7,7 @@ assert.equal(empty.overall.numeric_score,null);
 const base={
  exposure:{reviewed:true,hazards:[]},
  health:{physician_review:{completed:true,review_date:"2026-11-14",reviewer_id:"physician-test"},exposure_relevance:[]},
- compatibility:{reviewed:true,tasks:[]},
+ compatibility:{reviewed:true,tasks:[{task_id:"task-1",criticality:"essential",requirement:"Sustained monitoring",capacity_status:"met",evidence:"Reviewed functional assessment"}]},
  site:{reviewed:true,work_mode:"onshore",medical_care_access:"available",evacuation:"tested",communications:"reliable",transport:"available",emergency_support:"adequate",shift_pattern:"day"},
  critical_safety_gate:{reviewed:true,status:"clear"}
 };
