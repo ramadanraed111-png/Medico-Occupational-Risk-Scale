@@ -646,6 +646,9 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const rowsArchive=(archive.data||[]).map(x=>'<tr><td>الأرشفة</td><td>'+esc(x.action==="archive"?"أرشفة":"استعادة")+'</td><td>'+esc(x.actor_id)+'</td><td>'+esc(new Date(x.changed_at).toLocaleString("ar-EG"))+'</td><td>—</td><td>'+esc(x.reason||"—")+'</td></tr>');
   $("mofasa-audit").innerHTML=rowsAudit.length||rowsArchive.length?'<table><thead><tr><th>القسم</th><th>العملية</th><th>المستخدم</th><th>التاريخ</th><th>الحالة</th><th>السبب</th></tr></thead><tbody>'+rowsAudit.concat(rowsArchive).join("")+'</tbody></table>':"لا توجد تغييرات مسجلة بعد.";
  }
- document.addEventListener("pofri-session-ready",()=>{if(!["admin","hse_admin","medical_admin"].includes(role))return;render();loadList();});
+ let workspaceRendered=false;
+ function ensureWorkspace(){if(!["admin","hse_admin","medical_admin"].includes(role))return;if(!workspaceRendered){workspaceRendered=true;render();}loadList();}
+ document.addEventListener("pofri-session-ready",ensureWorkspace);
+ document.addEventListener("mofasa-page-open",()=>{if(!workspaceRendered)ensureWorkspace();});
  document.addEventListener("mofasa-assessment-created",async event=>{const id=event.detail?.id;if(!id||role!=="hse_admin")return;await loadList();await openAssessment(id);if(typeof window.setPage==="function")window.setPage("mofasa");});
 })();
