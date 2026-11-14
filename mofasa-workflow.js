@@ -3,7 +3,7 @@
  const root=document.getElementById("mofasa-panel"); if(!root)return;
  const $=id=>document.getElementById(id), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  let selected=null, parent=null, hseRow=null, medicalRow=null, rows=[], showingArchive=false;
- const isAdmin=()=>role==="admin", canHse=()=>isAdmin()||role==="hse_admin", canHseRead=()=>isAdmin()||role==="hse_admin"||role==="medical_admin", canMedical=()=>role==="medical_admin"||isAdmin(), canMedicalRead=()=>isAdmin()||role==="medical_admin";
+ const isAdmin=()=>role==="admin", canHse=()=>role==="hse_admin", canHseRead=()=>isAdmin()||role==="hse_admin"||role==="medical_admin", canMedical=()=>role==="medical_admin", canMedicalRead=()=>isAdmin()||role==="medical_admin";
  const statusLabel=s=>({pending:"لم يبدأ",draft:"مسودة",submitted:"مكتمل ومُرسل"}[s]||"غير معروف");
  const msg=(t,kind="")=>{const n=$("mofasa-message");if(n){n.textContent=t;n.className="status "+kind;}};
  function field(id,label,placeholder="",type="text"){return '<label>'+label+'<input id="'+id+'" type="'+type+'" placeholder="'+placeholder+'" required></label>';}
@@ -364,6 +364,14 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   $("mofasa-list").querySelectorAll("[data-open-mofasa]").forEach(b=>b.onclick=()=>openAssessment(b.dataset.openMofasa));
   $("mofasa-list").querySelectorAll("[data-restore-mofasa]").forEach(b=>b.onclick=()=>restoreAssessment(b.dataset.restoreMofasa));
  }
+ async function deleteAssessment(id){
+  if(!isAdmin()||!confirm("تحذير: سيتم حذف ملف التقييم بالكامل نهائياً، بما في ذلك بيانات السلامة والبيانات الطبية وسجل التدقيق. لا يمكن التراجع عن هذا الإجراء. هل تريد المتابعة؟"))return;
+  const {error}=await client.rpc("mofasa_delete_assessment",{p_assessment_id:id});
+  if(error){msg("تعذر حذف الملف بالكامل: "+error.message,"error");return;}
+  if(selected===id){selected=null;parent=null;hseRow=null;medicalRow=null;$("mofasa-selected").hidden=true;}
+  msg("تم حذف ملف التقييم وجميع أقسامه وسجل تدقيقه نهائياً.","success");
+  showingArchive?await loadArchiveList():await loadList();
+ }
  async function archiveAssessment(id){
   if(!isAdmin()||!confirm("سيتم إخفاء السجل من القائمة النشطة مع الاحتفاظ بكامل بياناته وإمكانية استعادته. هل تريد المتابعة؟"))return;
   const reason=prompt("سبب الأرشفة (اختياري):")||null;
@@ -511,7 +519,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(canHseRead()||canMedicalRead()){const q=await client.from("mofasa_hse_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)hseRow=q.data;}
   if(canMedicalRead()){const q=await client.from("mofasa_medical_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)medicalRow=q.data;}
   $("mofasa-selected").hidden=false;
-  $("mofasa-record-header").innerHTML='<div class="record-hero"><div><span class="eyebrow">ملف تقييم MOFASA</span><h3>'+esc(p.worker_name)+'</h3><p>'+esc(p.job_title)+' · '+esc(p.task_name)+'</p></div><div class="record-hero-id">'+esc(p.registration_number)+'</div></div><div class="summary-grid"><div class="summary-item"><span>الموقع</span><strong>'+esc(p.site)+'</strong></div><div class="summary-item"><span>تاريخ التقييم</span><strong>'+esc(p.assessment_date)+'</strong></div><div class="summary-item"><span>قسم السلامة</span><strong>'+statusLabel(p.hse_status)+'</strong></div><div class="summary-item"><span>القسم الطبي</span><strong>'+statusLabel(p.medical_status)+'</strong></div></div><div class="mofasa-toolbar">'+(isAdmin()?'<button type="button" id="mofasa-print-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (PDF)":"استخراج التقرير الفردي PDF")+'</button><button type="button" class="secondary" id="mofasa-word-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (Word)":"استخراج التقرير الفردي Word")+'</button>':role==="hse_admin"&&hseRow?.status==="submitted"?'<button type="button" id="mofasa-print-hse-section">طباعة تقرير السلامة PDF</button><button type="button" class="secondary" id="mofasa-word-hse-section">استخراج تقرير السلامة Word</button>':role==="medical_admin"&&medicalRow?.status==="submitted"?'<button type="button" id="mofasa-print-med-section">طباعة التقرير الطبي PDF</button><button type="button" class="secondary" id="mofasa-word-med-section">استخراج التقرير الطبي Word</button>':'')+(isAdmin()?'<button type="button" id="mofasa-export-one">تصدير ملف العامل التفصيلي (Excel)</button>': '')+(isAdmin()&&hseRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-hse">إعادة إلى مسؤول السلامة للاستكمال</button>':'')+(isAdmin()&&medicalRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-medical">إعادة إلى الطبيب للاستكمال</button>':'')+(isAdmin()&&p.archived_at?'<button type="button" class="secondary" id="mofasa-restore-current">استعادة السجل</button>':isAdmin()?'<button type="button" class="secondary" id="mofasa-archive-current">أرشفة السجل</button>':'')+'</div>';
+  $("mofasa-record-header").innerHTML='<div class="record-hero"><div><span class="eyebrow">ملف تقييم MOFASA</span><h3>'+esc(p.worker_name)+'</h3><p>'+esc(p.job_title)+' · '+esc(p.task_name)+'</p></div><div class="record-hero-id">'+esc(p.registration_number)+'</div></div><div class="summary-grid"><div class="summary-item"><span>الموقع</span><strong>'+esc(p.site)+'</strong></div><div class="summary-item"><span>تاريخ التقييم</span><strong>'+esc(p.assessment_date)+'</strong></div><div class="summary-item"><span>قسم السلامة</span><strong>'+statusLabel(p.hse_status)+'</strong></div><div class="summary-item"><span>القسم الطبي</span><strong>'+statusLabel(p.medical_status)+'</strong></div></div><div class="mofasa-toolbar">'+(isAdmin()?'<button type="button" id="mofasa-print-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (PDF)":"استخراج التقرير الفردي PDF")+'</button><button type="button" class="secondary" id="mofasa-word-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (Word)":"استخراج التقرير الفردي Word")+'</button>':role==="hse_admin"&&hseRow?.status==="submitted"?'<button type="button" id="mofasa-print-hse-section">طباعة تقرير السلامة PDF</button><button type="button" class="secondary" id="mofasa-word-hse-section">استخراج تقرير السلامة Word</button>':role==="medical_admin"&&medicalRow?.status==="submitted"?'<button type="button" id="mofasa-print-med-section">طباعة التقرير الطبي PDF</button><button type="button" class="secondary" id="mofasa-word-med-section">استخراج التقرير الطبي Word</button>':'')+(isAdmin()?'<button type="button" id="mofasa-export-one">تصدير ملف العامل التفصيلي (Excel)</button>': '')+(isAdmin()&&hseRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-hse">إعادة إلى مسؤول السلامة للاستكمال</button>':'')+(isAdmin()&&medicalRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-medical">إعادة إلى الطبيب للاستكمال</button>':'')+(isAdmin()&&p.archived_at?'<button type="button" class="secondary" id="mofasa-restore-current">استعادة السجل</button>':isAdmin()?'<button type="button" class="secondary" id="mofasa-archive-current">أرشفة السجل</button>':'')+(isAdmin()?'<button type="button" class="danger" id="mofasa-delete-current">حذف الملف بالكامل</button>':'')+'</div>';
   $("mofasa-record-header").insertAdjacentHTML("beforeend",renderCompletedReview(hseRow,medicalRow));
   if(canHse()){const d=hseRow?.section_data||{};renderHseEditors(d);const locked=hseRow?.status==="submitted"||!!p.archived_at;["mofasa-hse-draft","mofasa-hse-submit"].forEach(id=>$(id).disabled=locked);const hseReturn=hseRow?.section_data?._meta?.admin_return_reason;$("mofasa-hse-lock").textContent=p.archived_at?"هذا السجل مؤرشف؛ العرض فقط دون تعديل.":locked?"تم إرسال قسم السلامة وأصبح مقفلاً.":hseReturn?"أُعيد القسم من المدير الأعلى للاستكمال: "+hseReturn:"يمكنك حفظ مسودة أو إرسال القسم بعد استكماله."; if(locked)document.querySelectorAll("#mofasa-hse-form input,#mofasa-hse-form select,#mofasa-hse-form textarea").forEach(x=>x.disabled=true);}
     
@@ -519,7 +527,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
 
   if(canHse()){$("mofasa-hse-draft").onclick=()=>saveSection("hse","draft");$("mofasa-hse-submit").onclick=()=>saveSection("hse","submitted");}
   if(canMedical()){const md=$("mofasa-med-draft"),ms=$("mofasa-med-submit");if(md)md.onclick=()=>saveSection("medical","draft");if(ms&&!isAdmin())ms.onclick=()=>saveSection("medical","submitted");}
-  const fp=$("mofasa-print-ftw"),fw=$("mofasa-word-ftw");if(fp)fp.onclick=()=>printFtwReport(id);if(fw)fw.onclick=()=>exportFtwWord(id);const hp=$("mofasa-print-hse-section"),hw=$("mofasa-word-hse-section"),mp=$("mofasa-print-med-section"),mw=$("mofasa-word-med-section");if(hp)hp.onclick=()=>printRoleSectionReport("hse",id);if(hw)hw.onclick=()=>exportRoleSectionWord("hse",id);if(mp)mp.onclick=()=>printRoleSectionReport("medical",id);if(mw)mw.onclick=()=>exportRoleSectionWord("medical",id);if(isAdmin()){loadAudit(id);const ex=$("mofasa-export-one"),ar=$("mofasa-archive-current"),rs=$("mofasa-restore-current");if(ex)ex.onclick=()=>exportOneAssessment(id);if(ar)ar.onclick=()=>archiveAssessment(id);if(rs)rs.onclick=()=>restoreAssessment(id);}
+  const fp=$("mofasa-print-ftw"),fw=$("mofasa-word-ftw");if(fp)fp.onclick=()=>printFtwReport(id);if(fw)fw.onclick=()=>exportFtwWord(id);const hp=$("mofasa-print-hse-section"),hw=$("mofasa-word-hse-section"),mp=$("mofasa-print-med-section"),mw=$("mofasa-word-med-section");if(hp)hp.onclick=()=>printRoleSectionReport("hse",id);if(hw)hw.onclick=()=>exportRoleSectionWord("hse",id);if(mp)mp.onclick=()=>printRoleSectionReport("medical",id);if(mw)mw.onclick=()=>exportRoleSectionWord("medical",id);if(isAdmin()){loadAudit(id);const ex=$("mofasa-export-one"),ar=$("mofasa-archive-current"),rs=$("mofasa-restore-current"),del=$("mofasa-delete-current");if(ex)ex.onclick=()=>exportOneAssessment(id);if(ar)ar.onclick=()=>archiveAssessment(id);if(rs)rs.onclick=()=>restoreAssessment(id);if(del)del.onclick=()=>deleteAssessment(id);}
   if(isAdmin()){const rh=$("mofasa-return-hse"),rm=$("mofasa-return-medical");if(rh)rh.onclick=()=>returnSectionToRole("hse");if(rm)rm.onclick=()=>returnSectionToRole("medical");}
   $("mofasa-selected").scrollIntoView({behavior:"smooth",block:"start"});
  }
@@ -530,23 +538,20 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const target=isH?"مسؤول السلامة":"طبيب الموقع";
   const reason=prompt("اكتب سبب إعادة الملف إلى "+target+" لاستكماله:");
   if(reason===null)return;
-  const meta={...(row.section_data?._meta||{}),admin_returned_at:new Date().toISOString(),admin_returned_by:user.id,admin_returned_by_email:user.email||"",admin_return_reason:reason.trim()||"يرجى مراجعة البيانات واستكمال النواقص",return_target:isH?"hse_admin":"medical_admin"};
-  const payload={section_data:{...(row.section_data||{}),_meta:meta},status:"draft",submitted_at:null,updated_by:user.id};
-  if(!isH)payload.final_decision=null;
-  const table=isH?"mofasa_hse_sections":"mofasa_medical_sections";
-  const {error}=await client.from(table).update(payload).eq("id",row.id).eq("status","submitted");
+  const {error}=await client.rpc("mofasa_return_section",{
+    p_assessment_id:selected,
+    p_section:section,
+    p_reason:reason.trim()
+  });
   if(error){msg("تعذرت إعادة القسم للاستكمال: "+error.message,"error");return;}
-  if(isH&&medicalRow?.status==="submitted"){
-   const medMeta={...(medicalRow.section_data?._meta||{}),admin_returned_at:new Date().toISOString(),admin_returned_by:user.id,admin_returned_by_email:user.email||"",admin_return_reason:"أعيد قسم السلامة للمراجعة؛ يلزم إعادة مراجعة واعتماد الرأي الطبي بعد استكماله.",return_target:"medical_admin"};
-   const medUpdate=await client.from("mofasa_medical_sections").update({section_data:{...(medicalRow.section_data||{}),_meta:medMeta},status:"draft",submitted_at:null,final_decision:null,updated_by:user.id}).eq("id",medicalRow.id).eq("status","submitted");
-   if(medUpdate.error){msg("أُعيد قسم السلامة، لكن تعذر إلغاء الاعتماد الطبي السابق: "+medUpdate.error.message+"؛ يرجى مراجعة الطبيب يدوياً.","error");return;}
-  }
-  msg("أُعيد القسم إلى "+target+" وأصبح متاحاً للاستكمال. سبب الإعادة: "+meta.admin_return_reason,"success");
+  msg(isH?"تمت إعادة قسم السلامة، وأُعيدت المراجعة الطبية للطبيب عند الحاجة.":"تمت إعادة القسم الطبي إلى طبيب الموقع للاستكمال.","success");
   await loadList();await openAssessment(selected);
  }
  async function saveSection(section,status){
   if(parent?.archived_at){msg("هذا السجل مؤرشف ولا يمكن تعديله قبل استعادته بواسطة المدير الأعلى.","error");return;}
-  if(section==="medical"&&isAdmin()&&status==="submitted"){msg("اعتماد الرأي الطبي النهائي من صلاحية طبيب الموقع حصراً.","error");return;}
+  if(section==="hse"&&role!=="hse_admin"){msg("تعديل قسم السلامة متاح لمسؤول السلامة فقط.","error");return;}
+  if(section==="medical"&&role!=="medical_admin"){msg("تعديل القسم الطبي متاح لطبيب الموقع فقط.","error");return;}
+  if(section==="medical"&&status==="submitted"&&parent.hse_status!=="submitted"){msg("لا يمكن اعتماد الرأي الطبي قبل إرسال قسم السلامة.","error");return;}
   const isH=section==="hse", table=isH?"mofasa_hse_sections":"mofasa_medical_sections", old=isH?hseRow:medicalRow;
   let section_data,final_decision=null;
   if(isH){section_data=collectHseData();section_data._meta={...(old?.section_data?._meta||{}),last_edited_by_email:user?.email||"",last_edited_by:user?.id||null,last_edited_at:new Date().toISOString()};if(section_data.emergency){delete section_data.emergency.shift_pattern;delete section_data.emergency.isolation;delete section_data.emergency.task_criticality;delete section_data.emergency.environmental_conditions;}const t=section_data.tasks.items.length,h=section_data.hazards.items.length,e=section_data.emergency;if(status==="submitted"&&(!t||!h||!e.site_category||!e.care_access||!e.evacuation||!e.communications)){msg("لا يمكن إرسال قسم السلامة قبل تسجيل مهمة واحدة وخطر واحد على الأقل واستكمال فئة الموقع والرعاية الطبية والإخلاء والاتصالات.","error");return;}}
