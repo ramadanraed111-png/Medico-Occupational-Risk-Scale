@@ -196,9 +196,6 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    return item?[item.result,item.unit,item.status].filter(Boolean).join(" — "):"";
   };
   const clinical=[
-   ["General Examination",clinicalValue("basic","general")],
-   ["Blood Pressure",v.bp||clinicalValue("basic","blood_pressure")],
-   ["Heart Rate",v.hr],["SpO2",v.spo2],["BMI",v.bmi],
    ["Cardiovascular System",clinicalValue("basic","cardiovascular")],
    ["Respiratory System",clinicalValue("basic","respiratory")],
    ["Musculoskeletal System",clinicalValue("basic","musculoskeletal")],
@@ -206,8 +203,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    ["Vision",clinicalValue("basic","vision")],["Hearing",clinicalValue("basic","hearing")],
    ["Balance & Coordination",clinicalValue("basic","balance")],
    ["ALT",labValue(["alt"])],["AST",labValue(["ast"])],["Creatinine",labValue(["creatinine","creat"])],
-   ["Blood Glucose",labValue(["fbs","fastingbloodglucose","glucose"])||v.glucose],
-   ["HbA1c",labValue(["hba1c"])||v.hba1c],["CBC",labValue(["cbc","completebloodcount"])],
+["CBC",labValue(["cbc","completebloodcount"])],
    ["Lipid Profile",labValue(["lipid","lipidprofile"])],["Chest X-Ray",labValue(["chestxray","xray"])],
    ["Ultrasound",labValue(["ultrasound","us"])],["ECG",labValue(["ecg","electrocardiogram"])||clinicalValue("additional","ecg")],
    ["Spirometry",labValue(["spirometry","pulmonaryfunction"])||clinicalValue("additional","spirometry")],
@@ -237,9 +233,6 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    ["Evacuation Time",h.emergency?.evacuation_time],["Transport",h.emergency?.transport],
    ["Last Emergency Drill",h.emergency?.last_drill_date],["Site / Emergency Notes",h.emergency?.notes],
    ["HSE Notes",h.notes]
-  ])+ftwPrintSection("HSE Review & Sign-off",[
-   ["HSE Representative",hf.hse_name],["HSE Ref. Number",hf.hse_pr],
-   ["HSE Account",h._meta?.last_edited_by_email],["HSE Section Status",hseRow?.status]
   ]);
   const diseases=(m.diseases?.items||[]).map(x=>[x.disease||x.name,x.level?"Level "+x.level:"",x.status,x.impact,x.treatment].filter(Boolean).join(" — "));
   const med=ftwPrintSection("Medical Department Output — History Findings",[
@@ -270,13 +263,10 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   ]);
   const final=ftwPrintSection("Fitness to Work Decision",[
    ["Fitness to Work Decision",decision],["Restrictions / Justification",m.restrictions],
-   ["Medical Rationale",m.notes],["Review Date",mf.review_date],
-   ["Physician Name",mf.physician_name],["Physician Ref. Number",mf.physician_pr]
+   ["Medical Rationale",m.notes],["Review Date",mf.review_date]
   ]);
   const signatures='<section class="signatures"><div><strong>Physician</strong><p>Name: '+esc(ftwPrintValue(mf.physician_name)||"")+'</p><p>Ref. Number: '+esc(ftwPrintValue(mf.physician_pr)||"")+'</p><p>Signature: __________________________</p></div><div><strong>HSE</strong><p>Name: '+esc(ftwPrintValue(hf.hse_name)||"")+'</p><p>Ref. Number: '+esc(ftwPrintValue(hf.hse_pr)||"")+'</p><p>Signature: __________________________</p></div></section>';
-  const iofiResult=window.MOFASA_IOFI?.calculate({hse:h,medical:m,finalDecision:medicalRow?.final_decision||null})||{total:null,components:{OERI:null,IHVI:null,JTCI:null,WORM:{complete:false,context:{}}},formula:"غير متاح",gaps:["محرك IOFI غير متاح"],alerts:[],note:"تعذر الحساب."};
-  const iofiSection=ftwPrintSection("IOFI — Integrated Occupational Fitness Index",[["IOFI experimental score",iofiResult.total===null?"Not calculated — incomplete":iofiResult.total+" / 100"],["OERI — Occupational Exposure Risk Index",iofiResult.components.OERI===null?"Incomplete":iofiResult.components.OERI+" / 100"],["IHVI — Individual Health Vulnerability Index",iofiResult.components.IHVI===null?"Incomplete":iofiResult.components.IHVI+" / 100"],["JTCI — Job & Task Compatibility Index",iofiResult.components.JTCI===null?"Incomplete":iofiResult.components.JTCI+" / 100"],["IHVI subdomains",iofiResult.subdomains?.IHVI?.map(x=>x.label+": "+(x.value===null?"Incomplete":x.value)).join("; ")||""],["JTCI subdomains",iofiResult.subdomains?.JTCI?.map(x=>x.label+": "+(x.value===null?"Incomplete":x.value)).join("; ")||""],["OERI hazard details",iofiResult.hazards?.map(x=>x.name+": "+(x.residual===null?"Incomplete":x.residual)).join("; ")||""],["WORM — Worksite & Operational Risk Modifier",iofiResult.components.WORM.complete?"Context recorded":"Incomplete"],["WORM context",Object.entries(iofiResult.components.WORM.context).map(([k,v])=>k+": "+v).join("; ")],["Critical alerts",iofiResult.alerts.join("; ")||"None recorded"],["Missing inputs",iofiResult.gaps.join("; ")||"None"],["Formula",iofiResult.formula],["Model version",iofiResult.model||"IOFI-MULTI-INDEX-DRAFT-1.0"],["Method note",iofiResult.note]]);
-  const report='<header class="report-header"><h1>Individual FTW Examination Report</h1><p>MOFASA — Medico-Occupational Fitness Assessment Scale Advance</p><p>Confidential Occupational Health Record</p></header>'+info+hse+med+vitals+clin+func+investigations+additional+iofiSection+final+signatures+'<footer>Preliminary and recorded assessment information only. The final fitness determination is the responsibility of the authorized physician. Experimental indicators, if any, are not a substitute for clinical judgment.</footer>';
+  const report='<header class="report-header"><h1>Individual FTW Examination Report</h1><p>MOFASA — Medico-Occupational Fitness Assessment Scale Advance</p><p>Confidential Occupational Health Record</p></header>'+info+hse+med+vitals+clin+func+investigations+additional+final+signatures+'<footer>Preliminary and recorded assessment information only. The final fitness determination is the responsibility of the authorized physician. Experimental indicators, if any, are not a substitute for clinical judgment.</footer>';
   return '<!doctype html><html><head><meta charset="utf-8"><title>Individual FTW Report — '+esc(p.registration_number||p.worker_name||id)+'</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font:10pt Arial,Tahoma,sans-serif;color:#182b33;direction:ltr;line-height:1.4;margin:0}.report-header{text-align:center;border-bottom:2px solid #17495a;padding:0 0 10px;margin-bottom:12px}.report-header h1{font-size:18pt;margin:0;color:#123b4a}.report-header p{margin:3px 0;font-size:8.5pt;color:#526a72}.report-section{break-inside:avoid;margin:0 0 10px}.report-section h2{font-size:11.5pt;color:#17495a;border-bottom:1px solid #b9cbd0;padding:4px 0;margin:10px 0 5px}.ftw-table{width:100%;border-collapse:collapse;margin:4px 0 7px;font-size:8.7pt;table-layout:fixed}.ftw-table th,.ftw-table td{border:1px solid #cbd8dc;padding:5px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere;white-space:normal}.ftw-table th{background:#eef4f5;width:29%}.ftw-table thead th{background:#dfecee}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:18px 0 10px;break-inside:avoid}.signatures>div{border:1px solid #cbd8dc;padding:9px}.signatures p{margin:8px 0}.signatures strong{color:#17495a}.report-section:last-of-type{margin-bottom:8px}footer{border-top:1px solid #cbd8dc;margin-top:15px;padding-top:7px;font-size:8pt;color:#526a72}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>'+report+'</body></html>';
  }
  function printFtwReport(id){
