@@ -2,7 +2,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const workflow = fs.readFileSync(require.resolve("../mofasa-workflow.js"), "utf8");
-const migration = fs.readFileSync(require.resolve("../supabase/migrations/20261114210000_mofasa_parallel_section_submission.sql"), "utf8");
+const migration = fs.readFileSync(require.resolve("../supabase/migrations/20261114212427_mofasa_parallel_section_submission.sql"), "utf8");
 
 // Neither role's submission may be gated by the other section's status.
 assert.doesNotMatch(workflow, /parent\.hse_status\s*!==\s*["']submitted["']/);
