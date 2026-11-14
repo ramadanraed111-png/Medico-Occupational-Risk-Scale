@@ -16,7 +16,8 @@
   const hm=[]; if(h.physician_review?.completed!==true)hm.push("health.physician_review.completed");
   ["review_date","reviewer_id"].forEach(k=>{if(!hasText(h.physician_review?.[k]))hm.push("health.physician_review."+k);});
   list(h.exposure_relevance).forEach((x,i)=>["exposure_id","health_effect_assessed","stability","functional_impact","accommodation"].forEach(k=>{if(!hasText(x[k]))hm.push("health.exposure_relevance["+i+"]."+k);}));
-  const cm=[]; if(c.reviewed!==true)cm.push("compatibility.reviewed");\n  if(!list(c.tasks).length)cm.push("compatibility.tasks");
+  const cm=[]; if(c.reviewed!==true)cm.push("compatibility.reviewed");
+  if(!list(c.tasks).length)cm.push("compatibility.tasks");
   list(c.tasks).forEach((x,i)=>{
    ["task_id","criticality","requirement","capacity_status","evidence"].forEach(k=>{if(!hasText(x[k]))cm.push("compatibility.tasks["+i+"]."+k);});
    if(x.capacity_status&&!["met","met_with_accommodation","not_met","not_assessed"].includes(x.capacity_status))cm.push("compatibility.tasks["+i+"].capacity_status_invalid");
