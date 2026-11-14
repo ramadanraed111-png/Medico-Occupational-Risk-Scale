@@ -369,17 +369,25 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(value&&typeof value==="object")return Object.entries(value).filter(([k,v])=>k!=="_meta"&&hasCompletedReviewValue(v)).length;
   return hasCompletedReviewValue(value)?1:0;
  }
+ function reviewDisplayValue(key,value){
+  if(key==="item"&&typeof value==="string"&&value.includes("/")){
+   const parts=value.split("/");
+   const arabic=parts.slice(1).join("/").trim();
+   if(/[\u0600-\u06FF]/.test(arabic))return arabic;
+  }
+  return value;
+ }
  function reviewRows(value){
   if(Array.isArray(value)){
    const items=value.filter(x=>hasCompletedReviewValue(x)&&!(x&&typeof x==="object"&&String(x.status||"").toLowerCase()==="not_assessed"));if(!items.length)return "";
    if(items.every(x=>typeof x!=="object"))return '<ul>'+items.map(x=>'<li>'+esc(reviewValue(x))+'</li>').join("")+'</ul>';
    return '<div class="completed-review-list">'+items.map(x=>{
-    const title=x.disease||x.name||x.test||x.item||x.task||x.hazard||x.category_label||"تفاصيل مسجلة";
+    const title=x.disease||x.name||x.test||(x.item?reviewDisplayValue("item",x.item):"")||x.task||x.hazard||x.category_label||"تفاصيل مسجلة";
     const body=reviewRows(x);
     return body?'<details class="review-disclosure review-entry"><summary><strong>'+esc(title)+'</strong></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
    }).join("")+'</div>';
   }
-  if(value&&typeof value==="object")return Object.entries(value).filter(([k,v])=>k!=="_meta"&&hasCompletedReviewValue(v)).map(([k,v])=>'<div class="completed-review-row"><strong>'+esc(reviewLabels[k]||k.replace(/_/g," "))+'</strong><div>'+reviewRows(v)+'</div></div>').join("");
+  if(value&&typeof value==="object")return Object.entries(value).filter(([k,v])=>k!=="_meta"&&hasCompletedReviewValue(v)).map(([k,v])=>'<div class="completed-review-row"><strong>'+esc(reviewLabels[k]||k.replace(/_/g," "))+'</strong><div>'+reviewRows(reviewDisplayValue(k,v))+'</div></div>').join("");
   if(typeof value==="boolean")return esc(value?"نعم":"لا");return esc(reviewValue(value));
  }
  function renderMedicalHistory(diseases){
