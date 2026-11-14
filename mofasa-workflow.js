@@ -50,7 +50,7 @@
  }
  function renderHseHazardList(){
   const el=$("mh-hazard-list");if(!el)return;
-  el.innerHTML=hseHazards.length?'<table><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>التكرار (1–5)</th><th>المدة (1–5)</th><th>الاحتمالية (1–5)</th><th>فعالية التحكم</th><th>الضوابط</th><th>الخطر المتبقي</th><th></th></tr></thead><tbody>'+hseHazards.map((x,i)=>'<tr><td>'+hseEsc(x.category)+' / '+hseEsc(x.name)+'</td><td>'+(x.severity_label||["","منخفض","متوسط","مرتفع","شديد"][Number(x.severity)])+(x.severity_description?" — "+hseEsc(x.severity_description):"")+'</td><td>'+exposureLabels[x.frequency]+'</td><td>'+(x.frequency_scale??"—")+'</td><td>'+(x.duration_scale??"—")+'</td><td>'+(x.probability_scale??"—")+'</td><td>'+(x.control_effectiveness??"—")+'</td><td>'+hseEsc(x.controls||"—")+'</td><td>'+hseEsc(x.residual||"—")+'</td><td><button type="button" class="secondary" data-hse-remove="'+i+'">حذف</button></td></tr>').join("")+'</tbody></table>':'لم تتم إضافة أخطار بعد.';
+  el.innerHTML=hseHazards.length?'<table><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th></th></tr></thead><tbody>'+hseHazards.map((x,i)=>'<tr><td>'+hseEsc(x.category)+' / '+hseEsc(x.name)+'</td><td>'+(x.severity_label||["","منخفض","متوسط","مرتفع","شديد"][Number(x.severity)])+(x.severity_description?" — "+hseEsc(x.severity_description):"")+'</td><td>'+(exposureLabels[x.frequency]||"—")+'</td><td><button type="button" class="secondary" data-hse-remove="'+i+'">حذف</button></td></tr>').join("")+'</tbody></table>':'لم تتم إضافة أخطار بعد.';
   el.querySelectorAll("[data-hse-remove]").forEach(b=>b.onclick=()=>{hseHazards.splice(Number(b.dataset.hseRemove),1);renderHseHazardList();});
  }
  function collectHseData(){
@@ -481,11 +481,10 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const residualLabels={low:"منخفض",moderate:"متوسط",high:"مرتفع",critical:"حرج",not_assessed:"لم يقيّم"};
   const rows=items.map(x=>{
    const severity=(x.severity_label||(["","منخفض","متوسط","مرتفع","شديد / حرج","كارثي"][Number(x.severity)]||""))+(x.severity_description?" — "+x.severity_description:"");
-   const effectiveness=x.control_effectiveness===undefined||x.control_effectiveness===null||x.control_effectiveness===""?"":Number(x.control_effectiveness).toFixed(2);
-   return "<tr><td>"+esc([x.category,x.name].filter(Boolean).join(" / "))+"</td><td>"+esc(severity)+"</td><td>"+esc(x.frequency?(exposureLabels[x.frequency]||reviewValue(x.frequency)):"")+"</td><td>"+esc(x.frequency_scale??"")+"</td><td>"+esc(x.duration_scale??"")+"</td><td>"+esc(x.probability_scale??"")+"</td><td>"+esc(effectiveness)+"</td><td>"+esc(x.controls||"")+"</td><td>"+esc(x.residual?(residualLabels[x.residual]||x.residual):"")+"</td></tr>";
+    return "<tr><td>"+esc([x.category,x.name].filter(Boolean).join(" / "))+"</td><td>"+esc(severity)+"</td><td>"+esc(x.frequency?(exposureLabels[x.frequency]||reviewValue(x.frequency)):"")+"</td></tr>";
   }).join("");
   const notes=h.section_data.hazards?.notes;
-  return '<section class="specialist-section jem-review"><h4>سجل الأخطار المهنية JEM</h4><div class="table-wrap"><table class="jem-table"><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>التكرار (1–5)</th><th>المدة (1–5)</th><th>الاحتمالية (1–5)</th><th>فعالية التحكم</th><th>الضوابط</th><th>الخطر المتبقي</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(notes?'<div class="completed-review-row"><strong>ملاحظات عامة على تقييم الأخطار</strong><div>'+esc(notes)+'</div></div>':"")+'</section>';
+  return '<section class="specialist-section jem-review"><h4>سجل الأخطار المهنية JEM</h4><div class="table-wrap"><table class="jem-table"><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(notes?'<div class="completed-review-row"><strong>ملاحظات عامة على تقييم الأخطار</strong><div>'+esc(notes)+'</div></div>':"")+'</section>';
  }
  function renderSelectedDemands(demands){
   const selected=Array.isArray(demands?.selected)?demands.selected:[];
