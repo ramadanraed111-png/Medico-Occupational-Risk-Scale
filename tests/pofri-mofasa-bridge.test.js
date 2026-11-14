@@ -24,7 +24,7 @@ assert.equal(hse.tra.residual,"moderate");
 assert.equal(hse.emergency.care_access,"moderate");
 assert.equal(hse.preliminary_analysis.status,"awaiting_physician_review");
 assert.equal(bridge.scoreInput(hse,{diseases:{items:[],reviewed:false},capacity:{items:[]}},"fit").complete,false);
-const medical={diseases:{items:[],reviewed:true},capacity:{items:[{status:"met"},{status:"met"}]}};
+const medical={diseases:{items:[],reviewed:true},medical_fit:"compatible",capacity:{items:[{status:"met"},{status:"met"}]}};
 const prepared=bridge.scoreInput(hse,medical,"fit");
 assert.equal(prepared.complete,true);
 assert.equal(prepared.data["medical-fit"],"compatible");
