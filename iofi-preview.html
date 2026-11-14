@@ -40,22 +40,22 @@ const families=[
 ["Drilling & Well Services","الحفر وخدمات الآبار","started"],
 ["Production Operations","عمليات الإنتاج","started"],
 ["Processing & Refinery","المعالجة والتكرير","started"],
-["Maintenance (Mechanical / Electrical / I&C)","الصيانة (الميكانيكية والكهربائية والتحكم)","started"],
+["Mechanical Maintenance","الصيانة الميكانيكية","started"],
+["Electrical Maintenance","الصيانة الكهربائية","started"],
+["Instrumentation & Control","الأجهزة والتحكم","started"],
 ["HSE & Occupational Health","الصحة والسلامة والصحة المهنية","started"],
 ["Laboratory & Quality Control","المعامل ومراقبة الجودة","started"],
-["Logistics & Transportation","اللوجستيات والنقل","pending"],
-["Security & Emergency Response","الأمن والاستجابة للطوارئ","pending"],
+["Logistics & Transportation","اللوجستيات والنقل","draft"],
+["Security & Emergency Response","الأمن والاستجابة للطوارئ","draft"],
 ["Engineering & Technical Support","الهندسة والدعم الفني","pending"],
 ["Administration & Management","الإدارة والشؤون الإدارية","pending"],
 ["Marine & Offshore Operations","العمليات البحرية والبحرية الخارجية","pending"],
 ["Construction & Projects","الإنشاءات والمشروعات","pending"],
-["Warehousing & Materials Handling","المخازن ومناولة المواد","pending"],
-["Well Intervention & Workover","التدخل في الآبار وإصلاحها","pending"],
-["Environmental & Waste Management","البيئة وإدارة المخلفات","pending"]
+["Warehousing & Materials Handling","المخازن ومناولة المواد","pending"]
 ];
 const steps=[["01","Worker / Job / Site","العامل / الوظيفة / الموقع"],["02","Tasks & JEM","المهام ومصفوفة التعرض"],["03","TRA & Controls","مخاطر السلامة والضوابط"],["04","Medical & Capacity","المراجعة الطبية والقدرة"],["05","IODE Review","مراجعة محرك القرار"]];
 let lang="ar";
-function renderFamilies(q=""){const host=document.getElementById("families");host.innerHTML="";families.forEach((f,i)=>{if(!(f[0]+" "+f[1]).toLowerCase().includes(q.toLowerCase()))return;const b=document.createElement("button");b.className="family";b.innerHTML="<b>"+(lang==="ar"?f[1]:f[0])+"</b><small>"+(lang==="ar"?f[0]:f[1])+"</small><em>"+(f[2]==="started"?(lang==="ar"?"بدأ التفصيل – يحتاج استكمالاً":"Detail started – completion pending"):(lang==="ar"?"لم يبدأ التفصيل":"Detail not started"))+"</em>";b.onclick=()=>{document.querySelectorAll(".family").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");document.getElementById("familyDetail").textContent=lang==="ar"?(f[2]==="started"?"بدأ إعداد الهيكل التفصيلي لهذه العائلة. يلزم استكمال المهام والتعرضات والمتطلبات ومراجعة المصادر قبل اعتمادها.":"هذه العائلة ضمن خطة المكتبة، ولم يبدأ تفصيلها بعد."):(f[2]==="started"?"The detailed structure has been started. Tasks, exposures, demands and source review remain before approval.":"This family is in the library plan; detailed profiling has not started yet.");};host.appendChild(b);});}
+function renderFamilies(q=""){const host=document.getElementById("families");host.innerHTML="";families.forEach((f,i)=>{if(!(f[0]+" "+f[1]).toLowerCase().includes(q.toLowerCase()))return;const b=document.createElement("button");b.className="family";b.innerHTML="<b>"+(lang==="ar"?f[1]:f[0])+"</b><small>"+(lang==="ar"?f[0]:f[1])+"</small><em>"+(f[2]==="started"?(lang==="ar"?"بدأ التفصيل – يحتاج استكمالاً":"Detail started – completion pending"):f[2]==="draft"?(lang==="ar"?"مسودة تفصيلية – بانتظار المراجعة":"Detailed draft – review pending"):(lang==="ar"?"لم يبدأ التفصيل":"Detail not started"))+"</em>";b.onclick=()=>{document.querySelectorAll(".family").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");document.getElementById("familyDetail").textContent=lang==="ar"?(f[2]==="started"?"بدأ إعداد الهيكل التفصيلي لهذه العائلة. يلزم استكمال المهام والتعرضات والمتطلبات ومراجعة المصادر قبل اعتمادها.":f[2]==="draft"?"أُعدت مسودة تفصيلية للوظائف والمهام والتعرضات الصحية ومخاطر السلامة ومتطلبات العمل والضوابط. ما زالت بحاجة إلى مراجعة ميدانية ومهنية قبل اعتمادها.":"هذه العائلة ضمن خطة المكتبة، ولم يبدأ تفصيلها بعد."):(f[2]==="started"?"The detailed structure has been started. Tasks, exposures, demands and source review remain before approval.":f[2]==="draft"?"A detailed draft of roles, tasks, health exposures, operational hazards, job demands and controls is available. Field and professional review is still required before approval.":"This family is in the library plan; detailed profiling has not started yet.");};host.appendChild(b);});}
 function renderSteps(){document.getElementById("steps").innerHTML=steps.map(s=>'<div class="step"><span>'+s[0]+'</span><b>'+(lang==="ar"?s[2]:s[1])+'</b></div>').join("");}
 function setLang(next){lang=next;document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.querySelectorAll("[data-ar]").forEach(el=>{const val=el.getAttribute("data-"+lang);if(val!==null)el.innerHTML=val;});document.getElementById("lang").textContent=lang==="ar"?"English":"العربية";document.getElementById("search").placeholder=lang==="ar"?"ابحث عن عائلة وظيفية":"Search job family";renderFamilies(document.getElementById("search").value);renderSteps();}
 document.getElementById("lang").onclick=()=>setLang(lang==="ar"?"en":"ar");
