@@ -357,11 +357,11 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function hasReviewValue(v){if(v===null||v===undefined||v==="")return false;if(typeof v==="string"&&v.trim()==="")return false;if(Array.isArray(v))return v.some(hasReviewValue);if(typeof v==="object")return Object.entries(v).some(([k,x])=>k!=="_meta"&&hasReviewValue(x));return true;}
  function hasCompletedReviewValue(v){
   if(v===null||v===undefined)return false;
-  if(typeof v==="string"){const s=v.trim();return !!s&&s.toLowerCase()!=="none"&&s!=="—"&&s!=="-"&&s.toLowerCase()!=="not_assessed"&&s.toLowerCase()!=="not assessed"&&s!=="لم يقيّم"&&!/^matrix_level_\\d+$/i.test(s);}
+  if(typeof v==="string"){const s=v.trim(),lower=s.toLowerCase();return !!s&&lower!=="none"&&s!=="—"&&s!=="-"&&lower!=="not_assessed"&&lower!=="not assessed"&&s!=="لم يقيّم"&&!lower.startsWith("matrix_level_");}
   if(typeof v==="number")return Number.isFinite(v);
   if(typeof v==="boolean")return true;
   if(Array.isArray(v))return v.some(hasCompletedReviewValue);
-  if(typeof v==="object")return Object.entries(v).some(([k,x])=>k!=="_meta"&&!(k==="status"&&typeof x==="string"&&/^matrix_level_\\d+$/i.test(x))&&hasCompletedReviewValue(x));
+  if(typeof v==="object")return Object.entries(v).some(([k,x])=>k!=="_meta"&&!(k==="status"&&typeof x==="string"&&x.toLowerCase().startsWith("matrix_level_"))&&hasCompletedReviewValue(x));
   return false;
  }
  function reviewCount(value){
