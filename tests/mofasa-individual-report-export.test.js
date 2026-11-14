@@ -17,18 +17,20 @@ assert.match(workflow, /buildFtwReportDocument\(id\)\.then\(html=>/,
 assert.match(workflow, /async function exportFtwWord\(id\)\s*\{\s*if\(!isAdmin\(\)\)return;\s*const html=await buildFtwReportDocument\(id\)/,
   "Word export must await the asynchronous report builder.");
 
-assert.match(workflow, /function renderPofriReport\(score\)/,
-  "The individual report must render a dedicated POFRI section.");
-assert.match(workflow, /0–24[\s\S]*منخفض مبدئياً[\s\S]*25–49[\s\S]*متوسط مبدئياً[\s\S]*50–74[\s\S]*مرتفع مبدئياً[\s\S]*75–100[\s\S]*مرتفع جداً مبدئياً/,
-  "The report must explain all four provisional POFRI interpretation bands.");
-assert.match(workflow, /0 يعني أقل مستوى قلق أو فجوة مرصودة، و100 يعني أعلى مستوى قلق أو فجوة/,
-  "The report must explain the direction and meaning of POFRI.");
-assert.match(workflow, /0\.30R \+ 0\.30M \+ 0\.25F \+ 0\.15E/,
-  "The report must show the weighted POFRI formula.");
+assert.match(workflow, /function renderPofriReport\(score\)[\s\S]*indicator-summary[\s\S]*score\.total[\s\S]*score\.band/,
+  "The report may show only the compact overall indicator result.");
+assert.doesNotMatch(workflow.slice(workflow.indexOf("function renderPofriReport(score)"), workflow.indexOf("async function buildFtwReportDocument(id)")), /0\.30R|components\.R|details\.hazard_count|site_breakdown|المعادلة والأوزان/,
+  "The compact indicator must not expose formulas, weights, or component breakdowns.");
 assert.match(workflow, /renderCompletedReview\(hseRow,medicalRow,\{includeScore:false,expanded:true\}\)/,
   "The PDF must render the complete HSE and medical review in expanded mode.");
 assert.match(workflow, /renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
-  "The PDF must append the saved POFRI score and interpretation.");
+  "The PDF may append only the compact overall indicator result.");
+assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwReportDocument(id)"), workflow.indexOf("function printFtwReport(id)")), /mofasa_audit_log|mofasa_archive_log|سجل التدقيق|سجل الأرشيف|auditHtml/,
+  "The individual report must not load or render audit or archive logs.");
+assert.match(workflow, /@page\{size:A4;margin:7mm 8mm\}/,
+  "The individual report must use compact A4 margins.");
+assert.match(workflow, /section\{break-inside:auto\}table,tr,.worker-card,.completed-review-row\{break-inside:avoid\}/,
+  "Long sections must flow across pages while keeping table rows intact.");
 assert.match(workflow, /reviewRows\(value,options=\{\}\)[\s\S]*options\.expanded\?' open'/,
   "Nested entries must be expanded in the PDF.");
 assert.match(workflow, /renderMedicalReviewGroups\(md,options\)\+renderMedicalHistory\(md\.diseases,options\)/,
