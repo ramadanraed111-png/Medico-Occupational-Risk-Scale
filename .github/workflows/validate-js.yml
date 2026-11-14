@@ -23,3 +23,10 @@ jobs:
             echo "Checking $file"
             node --check "$file"
           done
+      - name: Run assessment model tests
+        run: |
+          set -e
+          for file in tests/*.test.js; do
+            echo "Running $file"
+            node "$file"
+          done
