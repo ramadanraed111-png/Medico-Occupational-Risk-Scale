@@ -179,7 +179,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function ftwPrintHazards(items){
   const clean=(items||[]).filter(x=>[x.category,x.name,x.severity_label,x.severity,x.frequency,x.controls,x.residual,x.notes].some(v=>ftwPrintValue(v)));
   if(!clean.length)return "";
-  return '<section class="report-section"><h2>Hazardous Exposures</h2><table class="ftw-table"><thead><tr><th>Hazard Category</th><th>Hazard</th><th>Exposure Severity</th><th>Exposure Frequency</th><th>Controls</th><th>Residual Risk</th></tr></thead><tbody>'+clean.map(x=>'<tr>'+[x.category,x.name,x.severity_label||x.severity,exposureLabels[x.frequency]||x.frequency,x.controls,x.residual].map(v=>'<td>'+esc(ftwPrintValue(v)||"—")+'</td>').join("")+'</tr>').join("")+'</tbody></table></section>';
+  return '<section class="report-section"><h2>Hazardous Exposures</h2><table class="ftw-table"><thead><tr><th>Hazard Category</th><th>Hazard</th><th>Severity</th><th>Exposure Frequency</th><th>Frequency Scale</th><th>Duration Scale</th><th>Probability Scale</th><th>Control Effectiveness</th><th>Controls</th><th>Residual Risk</th></tr></thead><tbody>'+clean.map(x=>'<tr>'+[x.category,x.name,x.severity_label||x.severity,exposureLabels[x.frequency]||x.frequency,x.frequency_scale,x.duration_scale,x.probability_scale,x.control_effectiveness,x.controls,x.residual].map(v=>'<td>'+esc(ftwPrintValue(v)||"—")+'</td>').join("")+'</tr>').join("")+'</tbody></table></section>';
  }
  function buildFtwReportDocument(id){
   if(!canMedicalRead())return null;
