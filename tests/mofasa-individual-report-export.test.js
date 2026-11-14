@@ -57,8 +57,10 @@ assert.match(workflow, /section\{break-inside:auto\}table,tr,.worker-card,.compl
   "Long sections must flow across pages while keeping table rows intact.");
 assert.match(workflow, /reviewRows\(value,options=\{\},path=\[\]\)[\s\S]*options\.expanded\?' open'/,
   "Nested entries must be expanded in the PDF.");
-assert.match(workflow, /medical-review-section \.medical-review-subgroup>\.review-disclosure-body[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
-  "Clinical examination, vital signs, awareness, hearing competence and other medical subgroup values must use four columns.");
+assert.match(workflow, /report-clinical-three-columns[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,
+  "Clinical examination and vital-sign values must use three adjacent columns in the individual report.");
+assert.match(workflow, /report-fit-essentials[\s\S]*grid-auto-flow:column[\s\S]*grid-auto-columns:minmax\(0,1fr\)/,
+  "All completed fitness essentials must be displayed together in one horizontal row.");
 assert.match(workflow, /medical-review-section \.completed-review-list\{display:grid!important;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
   "Repeated medical assessment cards must use the same three-column layout.");
 assert.match(workflow, /report-no-label>strong\{display:none!important\}/,
