@@ -45,8 +45,8 @@ assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwRepo
   "The individual report must not load or render audit or archive logs.");
 assert.match(workflow, /@page\{size:A4 portrait;margin:5mm 6mm\}/,
   "The individual report must use compact A4 portrait margins.");
-assert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,
-  "Medical report sections must use three adjacent columns.");
+assert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
+  "Medical report sections must use four adjacent columns.");
 assert.match(workflow, /font:7\.1pt Tahoma,Arial,sans-serif[\s\S]*line-height:1\.14/,
   "The individual report must use compact, readable typography and spacing.");
 assert.match(workflow, /review-section,\.review-entry,\.report-section,\.report-audit\{[^}]*break-inside:auto/,
@@ -57,9 +57,9 @@ assert.match(workflow, /section\{break-inside:auto\}table,tr,.worker-card,.compl
   "Long sections must flow across pages while keeping table rows intact.");
 assert.match(workflow, /reviewRows\(value,options=\{\},path=\[\]\)[\s\S]*options\.expanded\?' open'/,
   "Nested entries must be expanded in the PDF.");
-assert.match(workflow, /medical-review-section \.medical-review-subgroup>\.review-disclosure-body[\s\S]*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,
-  "Clinical examination, vital signs, awareness, hearing competence and other medical subgroup values must use three columns.");
-assert.match(workflow, /medical-review-section \.completed-review-list\{display:grid!important;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)!important/,
+assert.match(workflow, /medical-review-section \.medical-review-subgroup>\.review-disclosure-body[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
+  "Clinical examination, vital signs, awareness, hearing competence and other medical subgroup values must use four columns.");
+assert.match(workflow, /medical-review-section \.completed-review-list\{display:grid!important;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
   "Repeated medical assessment cards must use the same three-column layout.");
 assert.match(workflow, /report-no-label>strong\{display:none!important\}/,
   "The print report must suppress the labels for registered items and the fitness form without dropping their values.");
