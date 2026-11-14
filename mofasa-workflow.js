@@ -386,7 +386,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const reviewed=diseases?.reviewed===true;
   if(!cards.length&&!notes&&!reviewed)return "";
   const empty=reviewed&&!cards.length?'<p>تمت مراجعة التاريخ المرضي بواسطة الطبيب ولم تُسجل حالات طبية في هذه المراجعة.</p>':"";
-  return '<details class="review-disclosure review-group"'+(options.expanded?' open':'')+'><summary><strong>التاريخ المرضي والحالات الطبية</strong><span>'+cards.length+' حالة'+(reviewed?' — تمت المراجعة':'')+'</span></summary><div class="review-disclosure-body">'+cards.join("")+empty+(notes?'<div class="completed-review-row"><strong>ملاحظات الطبيب على التاريخ المرضي</strong><div>'+esc(notes)+'</div></div>':"")+'</div></details>';
+  return '<details class="review-disclosure review-group"'+(options.expanded?' open':'')+'><summary><strong>التاريخ المرضي والحالات الطبية</strong>'+(options.report?"":'<span>'+cards.length+' حالة'+(reviewed?' — تمت المراجعة':'')+'</span>')+'</summary><div class="review-disclosure-body">'+cards.join("")+empty+(notes?'<div class="completed-review-row"><strong>ملاحظات الطبيب على التاريخ المرضي</strong><div>'+esc(notes)+'</div></div>':"")+'</div></details>';
  }
  function renderJemReview(h){
   const source=Array.isArray(h?.section_data?.hazards?.items)?h.section_data.hazards.items:[];
