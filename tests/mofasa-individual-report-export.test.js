@@ -25,7 +25,7 @@ assert.match(workflow, /renderCompletedReview\(hseRow,medicalRow,\{includeScore:
   "The PDF must render the complete HSE and medical review in report-only mode.");
 assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
-assert.match(workflow, /options\.section==="medical"[\s\S]*department,worker_age,physician_name,physician_pr,assessment_type/,
+assert.match(workflow, /options\.section==="medical"[\s\S]*department","worker_age","physician_name","physician_pr","assessment_type"/,
   "The individual report must omit administrative and physician identity fields from the medical section.");
 assert.match(workflow, /path\.includes\("exam"\)&&path\.includes\("basic"\)&&\["blood_pressure","bp"\]/,
   "Blood pressure must be omitted from the basic clinical examination only.");
