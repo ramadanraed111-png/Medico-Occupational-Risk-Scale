@@ -25,13 +25,13 @@ assert.match(workflow, /0 يعني أقل مستوى قلق أو فجوة مرص
   "The report must explain the direction and meaning of the POFRI scale.");
 assert.match(workflow, /0\.30R \+ 0\.30M \+ 0\.25F \+ 0\.15E/,
   "The report must show the weighted POFRI formula.");
-assert.match(workflow, /renderCompletedReview\\(hseRow,medicalRow,\\{includeScore:false,expanded:true\\}\\)[\s\S]*renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
+assert.match(workflow, /renderCompletedReview\(hseRow,medicalRow,\{includeScore:false,expanded:true\}\)[\s\S]*renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
   "The PDF must show complete specialist review and the detailed saved POFRI result.");
 assert.match(workflow, /const body=reviewRows\(x,options\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
   "Medical history entries and physician notes must be fully rendered.");
 
 
-assert.match(workflow, /renderCompletedReview\(hseRow,medicalRow,\{includeScore:false,expanded:true\}\)/,
+assert.match(workflow, /renderCompletedReview\(hseRow,medicalRow,\{includeScore:false,expanded:true\}\)[\s\S]*renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
   "The PDF report must request expanded mode so all recorded details are visible without clicking.");
 assert.match(workflow, /reviewRows\(value,options=\{\}\)[\s\S]*options\.expanded\?' open'/,
   "Nested entries in the PDF must be expanded while the admin interface can retain collapsible sections.");
