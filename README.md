@@ -33,3 +33,7 @@ A separate, explicitly provisional numeric model is included in `pofri-score.js`
 
 ## IOFI development track (not yet production)
 The approved IOFI foundation is being developed on the separate branch `feature/iofi-foundation` and tracked in [Draft PR #45](https://github.com/ramadanraed111-png/Medico-Occupational-Risk-Scale/pull/45). It adds an evidence-completeness engine, four independent index structures and a non-compensatory critical safety gate. It does not change the production interface or database and is not yet connected to live assessments. See the IOFI architecture, proposed logical data model, validation plan and repository audit under `docs/IOFI-*.md`. Do not use the IOFI foundation for operational fitness decisions.
+
+
+### IOFI job/task library – additional families
+The working library now includes a detailed draft for families 01–06 and 09–10 in [IOFI Job & Task Library – Families 01–06 and 09–10](docs/IOFI-job-library-families-01-06-09-10.md). This complements the Logistics/Security families 07–08 and Engineering/Administration/Marine/Construction/Warehousing families 11–15. All entries remain subject to site evidence and professional review; no exposure is inferred from job title, and no weights, cut-offs or automated fitness decisions are introduced.
