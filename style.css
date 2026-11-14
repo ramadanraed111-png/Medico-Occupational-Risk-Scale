@@ -62,6 +62,20 @@ body.is-admin .admin-only{display:inline-flex}
 .medical-step-title h4{margin:0 0 2px}.medical-step-title p{margin:0;font-size:12px}
 .medical-step>label{margin-bottom:4px}
 .medical-review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+/* Worker-file completed results: compact, full-width vertical sections */
+.completed-review .medical-review-grid{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.completed-review .review-section{width:100%;min-width:0;margin:0;border:1px solid #dce7ea;border-radius:10px;background:#fff;overflow:hidden;box-shadow:0 1px 3px rgba(18,59,74,.04)}
+.completed-review .review-section>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:linear-gradient(180deg,#f7fbfc,#eef5f6);color:var(--navy);cursor:pointer;list-style-position:inside;font-size:13px;font-weight:800}
+.completed-review .review-section>summary span{flex:0 0 auto;padding:3px 8px;border-radius:20px;background:#e1eef0;color:#315d68;font-size:10px;font-weight:700}
+.completed-review .review-section>.review-disclosure-body{padding:7px 12px 10px}
+.completed-review .review-disclosure-body{min-width:0}
+.completed-review .review-entry{margin:4px 0;border:1px solid #e6edef;border-radius:7px;background:#fbfdfd;overflow:hidden}
+.completed-review .review-entry>summary{padding:7px 9px;font-size:11px}
+.completed-review .review-entry>.review-disclosure-body{padding:4px 9px 7px}
+.completed-review .completed-review-row{grid-template-columns:minmax(125px, .42fr) minmax(0,1fr);gap:8px;padding:5px 0;font-size:11px;line-height:1.55}
+.completed-review .completed-review-row>div{min-width:0;overflow-wrap:anywhere}
+.completed-review .specialist-help{font-size:10px;margin:7px 2px 2px}
+@media(max-width:650px){.completed-review .completed-review-row{grid-template-columns:1fr;gap:1px}.completed-review .review-section>summary{padding:9px 10px}}
 .medical-review-card{padding:14px;border:1px solid var(--line);border-radius:11px;background:#fff;min-width:0}
 .medical-review-card h5{margin:0 0 8px;color:var(--navy);font-size:14px}
 .medical-review-card p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink);font-size:13px;line-height:1.8}
