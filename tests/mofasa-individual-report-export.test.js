@@ -33,6 +33,10 @@ assert.match(workflow, /path\.includes\("vitals"\)&&\["glucose","hba1c"\]/,
   "Glucose and HbA1c must be omitted from the vital-signs subsection.");
 assert.match(workflow, /path\.includes\("capacity"\)\|\|path\.includes\("functional_capacity"\).*key==="item"/,
   "The functional capacity report must omit the repeated functional-requirement row.");
+assert.match(workflow, /path.includes\("diseases"\)&&\["hazard","name","level","severity","severity_label","severity_description","risk_category","category","category_label","risk_level"\]/,
+  "The individual report must omit disease risk labels and severity levels from medical-history entries.");
+assert.match(workflow, /reviewRows\(x,options,\["diseases"\]\)/,
+  "Medical-history entries must be rendered in the disease-specific report context.");
 assert.match(workflow, /options\.report\?"":'<span>'/,
   "The exported report must not show item-count labels.");
 assert.match(workflow, /renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
