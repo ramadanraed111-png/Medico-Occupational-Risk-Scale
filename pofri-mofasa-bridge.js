@@ -110,9 +110,9 @@
     const conditions=medical.diseases?.items||[];
     const reviewed=medical.diseases?.reviewed===true||conditions.length>0;
     if(!reviewed)return {complete:false,reason:"لم يكتمل توثيق مراجعة MCM بواسطة الطبيب."};
-    const fit=mapDecision(decision);
+    const fit=({compatible:"compatible",restricted:"restricted",temporary:"temporary",incompatible:"incompatible",pending:"pending"})[medical.medical_fit]||mapDecision(decision);
     const capacity=capacitySummary(medical.capacity?.items);
-    if(!fit||capacity==="unknown")return {complete:false,reason:"يلزم استكمال الرأي الطبي وتقييم القدرة الوظيفية قبل حساب المؤشر."};
+    if(!fit||capacity==="unknown")return {complete:false,reason:"يلزم تسجيل التوافق الطبي الأولي واستكمال تقييم القدرة الوظيفية قبل حساب المؤشر."};
     return {complete:true,data:{
       physical:job.physical,
       cognitive:job.cognitive,
