@@ -454,3 +454,4 @@ html[dir="ltr"] .module-nav{direction:ltr}
 @media(max-width:760px){
  #mofasa-hse-form>.specialist-grid{grid-template-columns:1fr}
 }
+\n/* After medical submission, show the completed-data review instead of the entry matrix. */\n#mofasa-med-form:has(input:disabled)>.medical-step,#mofasa-med-form:has(input:disabled)>.specialist-grid,#mofasa-med-form:has(input:disabled)>.specialist-actions{display:none!important}\n#mofasa-med-form:has(input:disabled)>.specialist-help{margin:0;padding:7px 10px;border:1px solid #d7e7df;background:#f2f8f4;color:#315d49;font-size:11px}\n
