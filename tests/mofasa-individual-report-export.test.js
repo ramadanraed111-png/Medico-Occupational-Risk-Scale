@@ -45,8 +45,8 @@ assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwRepo
   "The individual report must not load or render audit or archive logs.");
 assert.match(workflow, /@page\{size:A4 portrait;margin:5mm 6mm\}/,
   "The individual report must use compact A4 portrait margins.");
-assert.match(workflow, /medical-review-section>\.review-disclosure-body\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
-  "Medical subsections must use a compact two-column print layout.");
+assert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
+  "All medical report sections must use four adjacent columns.");
 assert.match(workflow, /font:7\.1pt Tahoma,Arial,sans-serif[\s\S]*line-height:1\.14/,
   "The individual report must use compact, readable typography and spacing.");
 assert.match(workflow, /review-section,\.review-entry,\.report-section,\.report-audit\{[^}]*break-inside:auto/,
@@ -57,10 +57,12 @@ assert.match(workflow, /section\{break-inside:auto\}table,tr,.worker-card,.compl
   "Long sections must flow across pages while keeping table rows intact.");
 assert.match(workflow, /reviewRows\(value,options=\{\},path=\[\]\)[\s\S]*options\.expanded\?' open'/,
   "Nested entries must be expanded in the PDF.");
-assert.match(workflow, /oneColumn=options\.report&&group\.keys\.some\(k=>\["ftw","exam","vitals","capacity","functional_capacity"\]\.includes\(k\)\)/,
-  "Clinical examination, vital signs, and functional capacity groups must use the report's one-column layout.");
-assert.match(workflow, /report-one-column \.completed-review-row\{display:block!important;grid-template-columns:1fr!important\}/,
-  "One-column report groups must stack labels and entered values vertically.");
+assert.match(workflow, /medical-review-section \.medical-review-subgroup>\.review-disclosure-body[\s\S]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
+  "Medical subgroup values must be arranged in four columns.");
+assert.match(workflow, /report-no-label>strong\{display:none!important\}/,
+  "The print report must suppress the labels for registered items and the fitness form without dropping their values.");
+assert.match(workflow, /report-no-heading>summary\{display:none!important\}/,
+  "The functional-capacity heading must be omitted from the print report.");
 assert.match(workflow, /renderMedicalReviewGroups\(md,options\)\+renderMedicalHistory\(md\.diseases,options\)/,
   "Expanded mode must propagate through all medical groups and conditions.");
 assert.match(workflow, /const hseDisplay=\{tasks:hd\.tasks,tra:hd\.tra,job_task:hd\.job_task,emergency:hd\.emergency,ftw:hd\.ftw,notes:hd\.notes\}/,
@@ -69,8 +71,14 @@ assert.match(workflow, /effective:"فعالة ومتحقق منها"[\s\S]*remot
   "HSE and site-readiness enum values must be translated into Arabic.");
 assert.match(workflow, /bp:"ضغط الدم",hr:"معدل النبض"/,
   "Vital signs must have clear Arabic labels.");
-assert.match(workflow, /medical-review-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/,
-  "The individual report must use a compact two-column page layout.");
+assert.match(workflow, /const signatures='<section class="report-signatures">[\s\S]*توقيع الطبيب[\s\S]*توقيع مسؤول السلامة/,
+  "The individual report must end with separate physician and HSE signature fields.");
+assert.match(workflow, /report-signatures\{display:grid;grid-template-columns:1fr 1fr/,
+  "The two signature fields must be aligned side by side.");
+assert.match(workflow, /options\.report\?"":'<h4>استعراض النقاط المستكملة فقط<\/h4><p class="specialist-help">/,
+  "The report must omit the introductory completed-items heading and explanatory paragraph.");
+assert.match(workflow, /const worker=.*?worker-meta[\s\S]*?تاريخ التقييم[\s\S]*?\/div><\/div><\/section>/,
+  "The report header must not display HSE or medical submission status labels.");
 assert.match(workflow, /border-right:3px solid #17495a/,
   "The worker header and report sections must use a refined visual hierarchy.");
 assert.match(workflow, /const body=reviewRows\(x,options,\["diseases"\]\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
