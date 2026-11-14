@@ -195,6 +195,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(!score||typeof score!=="object")return '<section class="pofri-report"><h2>المؤشر الرقمي التجريبي POFRI</h2><p class="pofri-incomplete">لا توجد نتيجة محفوظة للمؤشر في هذا الملف.</p></section>';
   const valid=score.total!==null&&score.total!==undefined&&Number.isFinite(Number(score.total));
   const components=score.components||{},details=score.details||{};
+  const bandRanges='<div class="pofri-bands"><div><strong>0–24</strong><span>منخفض مبدئياً</span></div><div><strong>25–49</strong><span>متوسط مبدئياً</span></div><div><strong>50–74</strong><span>مرتفع مبدئياً</span></div><div><strong>75–100</strong><span>مرتفع جداً مبدئياً</span></div></div>';
   const componentRows=[
    ["R","الخطر المهني المتبقي",components.R,"يعكس ملف الأخطار المهنية ونتيجة الخطر المتبقي في تقييم المهمة."],
    ["M","التوافق الطبي",components.M,"يعكس التوافق الطبي المسجل ومستوى الحالات الطبية التي راجعها الطبيب."],
@@ -215,7 +216,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   return '<section class="pofri-report"><h2>المؤشر الرقمي التجريبي POFRI</h2>'+
    (valid?'<div class="pofri-result"><span>النتيجة المحسوبة</span><strong>'+esc(score.total)+' <small>/ 100</small></strong><b>'+esc(score.band||"دون تفسير محفوظ")+'</b></div>':'<div class="pofri-incomplete"><strong>المؤشر غير مكتمل</strong><p>'+esc(score.reason||score.note||"لم تستوفَ جميع المدخلات المطلوبة لحساب المؤشر.")+'</p></div>')+
    '<div class="pofri-explanation"><h3>كيف تُقرأ النتيجة؟</h3><p>'+esc(score.meaning||"المؤشر يصف مستوى القلق أو الفجوات المحتملة في ملاءمة العامل للمهمة وظروف الموقع.")+'</p><p><strong>اتجاه المقياس:</strong> 0 يعني أقل مستوى قلق أو فجوة مرصودة، و100 يعني أعلى مستوى قلق أو فجوة وفق المدخلات. لا تعني الدرجة نسبة اللياقة أو احتمال الإصابة.</p>'+
-   (valid?'<p><strong>تفسير النطاق:</strong> '+esc(score.band||"")+'</p>':"")+
+   (valid?'<p><strong>تفسير النطاق:</strong> '+esc(score.band||"")+'</p>'+bandRanges:"")+
    '<p><strong>ملاحظة المعايرة:</strong> '+esc(score.band_note||"النطاقات وصفية وافتراضية للنقاش وليست حدوداً سريرية أو مهنية مُعايرة.")+'</p></div>'+
    '<h3>المعادلة والأوزان</h3><p class="pofri-formula">'+esc(score.formula||"0.30R + 0.30M + 0.25F + 0.15E")+'</p><table class="pofri-table"><thead><tr><th>الرمز</th><th>المكوّن</th><th>الدرجة</th><th>ما الذي يمثله؟</th></tr></thead><tbody>'+componentHtml+'</tbody></table>'+
    '<h3>تفصيل المكونات المسجل</h3>'+(detailRows?'<table class="pofri-table"><tbody>'+detailRows+'</tbody></table>':'<p>لا تتوافر تفاصيل فرعية محفوظة.</p>')+
