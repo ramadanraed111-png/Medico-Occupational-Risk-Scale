@@ -133,7 +133,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function renderFtwHse(data={}){
   const obs=["Reduced Concentration","Reduced Physical Capability","Behavioral Changes","Frequent Absence","Fatigue","Difficulty Performing Duties","Safety Concern","Security Concern","Other"];
   const checked=(arr,v)=>Array.isArray(arr)&&arr.includes(v)?" checked":"";
-  $("mh-ftw-hse-editor").innerHTML='<div class="specialist-section ftw-subsection"><h4>Fitness to Work Form — Supervisor & HSE Input</h4><fieldset class="specialist-fieldset"><legend>Supervisor Observations / ملاحظات المشرف</legend><div class="ftw-observation-checks">'+obs.map(x=>'<label class="ftw-observation-check"><input type="checkbox" data-ftw-hse-observation value="'+hseEsc(x)+'"'+checked(data.supervisor_observations,x)+'><span>'+hseEsc(x)+'</span></label>').join("")+'</div></fieldset><div class="specialist-grid"><label>HSE Health Risk Category<select data-ftw-hse="risk_category"><option value="">اختر</option><option value="I — High Risk">I — High Risk</option><option value="II — Medium Risk">II — Medium Risk</option><option value="III — Low Risk">III — Low Risk</option></select></label><label>Safety-Critical Decision Maker<select data-ftw-hse="safety_critical"><option value="">اختر</option><option value="yes">Yes</option><option value="no">No</option></select></label><label>Specify Safety-Critical Role<input data-ftw-hse="safety_critical_specify"></label><label>Emergency Response Duties<select data-ftw-hse="emergency_duties"><option value="">اختر</option><option value="yes">Yes</option><option value="no">No</option></select></label><label>Specify Emergency Duties<input data-ftw-hse="emergency_specify"></label></div></div>';
+  $("mh-ftw-hse-editor").innerHTML='<div class="specialist-section ftw-subsection"><h4>Fitness to Work Form — Supervisor & HSE Input</h4><fieldset class="specialist-fieldset"><legend>Supervisor Observations / ملاحظات المشرف</legend><div class="ftw-observation-checks">'+obs.map(x=>'<label class="ftw-observation-check"><input type="checkbox" data-ftw-hse-observation value="'+hseEsc(x)+'"'+checked(data.supervisor_observations,x)+'><span>'+hseEsc(x)+'</span></label>').join("")+'</div></fieldset><div class="specialist-grid"><label>HSE Health Risk Category<select data-ftw-hse="risk_category"><option value="">اختر</option><option value="I — High Risk">I — High Risk</option><option value="II — Medium Risk">II — Medium Risk</option><option value="III — Low Risk">III — Low Risk</option></select></label><label>Safety-Critical Decision Maker<select data-ftw-hse="safety_critical"><option value="">اختر</option><option value="yes">Yes</option><option value="no">No</option></select></label><label>Specify Safety-Critical Role<input data-ftw-hse="safety_critical_specify"></label><label>Emergency Response Duties<select data-ftw-hse="emergency_duties"><option value="">اختر</option><option value="yes">Yes</option><option value="no">No</option></select></label><label>Specify Emergency Duties<input data-ftw-hse="emergency_specify"></label><label>HSE Representative Name<input data-ftw-hse="hse_name"></label><label>HSE Reference Number<input data-ftw-hse="hse_pr"></label></div></div>';
   document.querySelectorAll("#mh-ftw-hse-editor [data-ftw-hse]").forEach(el=>el.value=data[el.dataset.ftwHse]||"");
  }
  function collectFtwHse(){
@@ -157,58 +157,137 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   out.functional_capacity=[...document.querySelectorAll("#mm-ftw-medical [data-ftw-functional]:checked")].map(x=>x.value);
   out.additional_investigations=[...document.querySelectorAll("#mm-ftw-medical [data-ftw-test]:checked")].map(x=>x.value);return out;
  }
- function ftwPrintValue(v){return esc(v||"—").replace(/\n/g,"<br>");}
- function ftwPrintTable(rows){return '<table class="ftw-table"><tbody>'+rows.map(([k,v])=>'<tr><th>'+esc(k)+'</th><td>'+ftwPrintValue(Array.isArray(v)?v.join("، "):v)+'</td></tr>').join("")+'</tbody></table>';}
- function printFtwReport(id){
-  if(!canMedicalRead())return;
-  const en=window.MOFASA_I18N?.getLanguage?.()==="en",p=parent,h=hseRow?.section_data||{},m=medicalRow?.section_data||{},hf=h.ftw||{},mf=m.ftw||{},exam=m.exam||{},v=mf.vitals||{};
+ function ftwPrintValue(v){
+  if(v===null||v===undefined)return "";
+  if(Array.isArray(v))return v.map(ftwPrintValue).filter(Boolean).join(" · ");
+  if(typeof v==="object")return Object.entries(v).map(([k,x])=>x!==""&&x!==null&&x!==undefined?k+": "+ftwPrintValue(x):"").filter(Boolean).join(" · ");
+  return String(v).trim();
+ }
+ function ftwPrintTable(rows){
+  const clean=(rows||[]).map(([k,v])=>[k,ftwPrintValue(v)]).filter(([,v])=>v!==""&&v!=="—");
+  if(!clean.length)return "";
+  return '<table class="ftw-table"><tbody>'+clean.map(([k,v])=>'<tr><th>'+esc(k)+'</th><td>'+esc(v).replace(/\n/g,"<br>")+'</td></tr>').join("")+'</tbody></table>';
+ }
+ function ftwPrintSection(title,rows){
+  const table=ftwPrintTable(rows);
+  return table?'<section class="report-section"><h2>'+esc(title)+'</h2>'+table+'</section>':"";
+ }
+ function ftwPrintHazards(items){
+  const clean=(items||[]).filter(x=>[x.category,x.name,x.severity_label,x.severity,x.frequency,x.controls,x.residual,x.notes].some(v=>ftwPrintValue(v)));
+  if(!clean.length)return "";
+  return '<section class="report-section"><h2>Hazardous Exposures</h2><table class="ftw-table"><thead><tr><th>Hazard Category</th><th>Hazard</th><th>Exposure Severity</th><th>Exposure Frequency</th><th>Controls</th><th>Residual Risk</th></tr></thead><tbody>'+clean.map(x=>'<tr>'+[x.category,x.name,x.severity_label||x.severity,exposureLabels[x.frequency]||x.frequency,x.controls,x.residual].map(v=>'<td>'+esc(ftwPrintValue(v)||"—")+'</td>').join("")+'</tr>').join("")+'</tbody></table></section>';
+ }
+ function buildFtwReportDocument(id){
+  if(!canMedicalRead())return null;
+  const en=window.MOFASA_I18N?.getLanguage?.()==="en",p=parent||{},h=hseRow?.section_data||{},m=medicalRow?.section_data||{},hf=h.ftw||{},mf=m.ftw||{},exam=m.exam||{},v=mf.vitals||{};
   const hazards=h.hazards?.items||[],tasks=h.tasks?.items||[],demands=h.demands?.selected||[],fitness=m.capacity?.items||[],labs=m.labs?.items||[];
   const decision=({fit:"FIT",fit_with_restrictions:"FIT with Restrictions",unfit:"Unfit",temporarily_unfit:"Temporary Unfit",specialist_review:"Specialist Review"})[medicalRow?.final_decision]||"Pending";
   const clinicalValue=(group,key)=>exam[group]?.[key]??"";
+  const norm=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");
   const labValue=(keys)=>{
-    const norm=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-    const wanted=keys.map(norm);
-    const stored=Object.entries(exam.labs_basic||{}).find(([k,vv])=>wanted.includes(norm(k))&&String(vv||"").trim());
-    if(stored)return stored[1];
-    const item=labs.find(x=>norm(x.test)&&wanted.some(k=>norm(x.test).includes(k)||k.includes(norm(x.test))));
-    return item?[item.result,item.unit,item.status].filter(Boolean).join(" — "):"";
+   const wanted=keys.map(norm);
+   const stored=Object.entries(exam.labs_basic||{}).find(([k,vv])=>wanted.includes(norm(k))&&String(vv||"").trim());
+   if(stored)return stored[1];
+   const item=labs.find(x=>norm(x.test)&&wanted.some(k=>norm(x.test).includes(k)||k.includes(norm(x.test))));
+   return item?[item.result,item.unit,item.status].filter(Boolean).join(" — "):"";
   };
   const clinical=[
-    ["General Examination",clinicalValue("basic","general")],
-    ["Blood Pressure",v.bp||clinicalValue("basic","blood_pressure")],
-    ["BMI",v.bmi],
-    ["Cardiovascular System",clinicalValue("basic","cardiovascular")],
-    ["Musculoskeletal System",clinicalValue("basic","musculoskeletal")],
-    ["Respiratory System",clinicalValue("basic","respiratory")],
-    ["Neurological System",clinicalValue("basic","neurological")],
-    ["Vision",clinicalValue("basic","vision")],
-    ["Hearing",clinicalValue("basic","hearing")],
-    ["Balance & Coordination",clinicalValue("basic","balance")],
-    ["ALT",labValue(["alt"])],
-    ["AST",labValue(["ast"])],
-    ["Creatinine",labValue(["creatinine","creat"])],
-    ["Fasting Blood Glucose",labValue(["fbs","fastingbloodglucose","glucose"])||v.glucose],
-    ["HbA1c",labValue(["hba1c"])||v.hba1c],
-    ["CBC",labValue(["cbc","completebloodcount"])],
-    ["Lipid Profile",labValue(["lipid","lipidprofile"])],
-    ["Chest X-Ray",labValue(["chestxray","xray"])],
-    ["Ultrasound",labValue(["ultrasound","us"])],
-    ["ECG",labValue(["ecg","electrocardiogram"])||clinicalValue("additional","ecg")],
-    ["Audiometry",labValue(["audiometry","hearingtest"])||clinicalValue("additional","audiometry")],
-    ["Spirometry",labValue(["spirometry","pulmonaryfunction"])||clinicalValue("additional","spirometry")],
+   ["General Examination",clinicalValue("basic","general")],
+   ["Blood Pressure",v.bp||clinicalValue("basic","blood_pressure")],
+   ["Heart Rate",v.hr],["SpO2",v.spo2],["BMI",v.bmi],
+   ["Cardiovascular System",clinicalValue("basic","cardiovascular")],
+   ["Respiratory System",clinicalValue("basic","respiratory")],
+   ["Musculoskeletal System",clinicalValue("basic","musculoskeletal")],
+   ["Neurological System",clinicalValue("basic","neurological")],
+   ["Vision",clinicalValue("basic","vision")],["Hearing",clinicalValue("basic","hearing")],
+   ["Balance & Coordination",clinicalValue("basic","balance")],
+   ["ALT",labValue(["alt"])],["AST",labValue(["ast"])],["Creatinine",labValue(["creatinine","creat"])],
+   ["Blood Glucose",labValue(["fbs","fastingbloodglucose","glucose"])||v.glucose],
+   ["HbA1c",labValue(["hba1c"])||v.hba1c],["CBC",labValue(["cbc","completebloodcount"])],
+   ["Lipid Profile",labValue(["lipid","lipidprofile"])],["Chest X-Ray",labValue(["chestxray","xray"])],
+   ["Ultrasound",labValue(["ultrasound","us"])],["ECG",labValue(["ecg","electrocardiogram"])||clinicalValue("additional","ecg")],
+   ["Spirometry",labValue(["spirometry","pulmonaryfunction"])||clinicalValue("additional","spirometry")],
+   ["Audiometry",labValue(["audiometry","hearingtest"])||clinicalValue("additional","audiometry")]
   ];
   for(const [g,title] of [["basic_other","Other Clinical Findings"],["labs_basic_other","Other Laboratory / Imaging Findings"],["additional_other","Other Additional Investigations"],["required","Job-specific Required Investigations"]]){
-    (Array.isArray(exam[g])?exam[g]:[]).forEach(x=>{if(x.name||x.value)clinical.push([x.name||title,x.value||""]);});
+   (Array.isArray(exam[g])?exam[g]:[]).forEach(x=>{if(x.name||x.value)clinical.push([x.name||title,x.value]);});
   }
   for(const [g,title] of [["basic","Other Basic Examination Notes"],["labs_basic","Other Laboratory / Imaging Notes"],["additional","Other Additional Investigation Notes"]]){
-    if(exam[g]?.other?.trim())clinical.push([title,exam[g].other.trim()]);
+   if(exam[g]?.other?.trim())clinical.push([title,exam[g].other.trim()]);
   }
   clinical.push(["Clinical Examination Notes",exam.notes||""]);
+  const info=ftwPrintSection("Employee Information",[
+   ["Name",p.worker_name],["Pay Roll / Registration No.",p.registration_number],["Age",mf.worker_age],
+   ["Job Title",p.job_title],["Department",mf.department],["Location",p.site],
+   ["Task",p.task_name],["Type of Assessment",mf.assessment_type],["Date of Assessment",p.assessment_date],
+   ["Shift Duration",p.shift_duration]
+  ]);
+  const hse=ftwPrintSection("HSE Output — Job Demands",[
+   ["Core Tasks",tasks],["Employee Safety-Critical Duties",h.tasks?.safety_critical],["Safety-Critical Decision Maker",hf.safety_critical],["Safety-Critical Role Details",hf.safety_critical_specify],
+   ["Job Demands",demands],["Other Job Demands",h.demands?.other],["Task Notes",h.tasks?.notes],["Demand Notes",h.demands?.notes]
+  ])+ftwPrintHazards(hazards)+ftwPrintSection("Site Evaluation",[
+   ["Site Category",h.emergency?.site_category],["Access to Medical Care",h.emergency?.care_access],
+   ["Evacuation Arrangements",h.emergency?.evacuation],["Emergency Response Duties",hf.emergency_duties],
+   ["Emergency Duty Details",hf.emergency_specify],["Emergency Communications",h.emergency?.communications],
+   ["Medical Support",h.emergency?.medical_support],["Referral Facility",h.emergency?.referral_facility],
+   ["Evacuation Time",h.emergency?.evacuation_time],["Transport",h.emergency?.transport],
+   ["Last Emergency Drill",h.emergency?.last_drill_date],["Site / Emergency Notes",h.emergency?.notes],
+   ["HSE Notes",h.notes]
+  ])+ftwPrintSection("HSE Review & Sign-off",[
+   ["HSE Representative",hf.hse_name],["HSE Ref. Number",hf.hse_pr],
+   ["HSE Account",h._meta?.last_edited_by_email],["HSE Section Status",hseRow?.status]
+  ]);
+  const diseases=(m.diseases?.items||[]).map(x=>[x.disease||x.name,x.level?"Level "+x.level:"",x.status,x.impact,x.treatment].filter(Boolean).join(" — "));
+  const med=ftwPrintSection("Medical Department Output — History Findings",[
+   ["Medical History Findings",mf.medical_history],["Current Diseases",diseases],
+   ["Occupational History",mf.occupational_history],["Medication Review",mf.medication_review],
+   ["Mental Status Screening",clinicalValue("basic","mental_status")||mf.mental_status]
+  ]);
+  const vitals=ftwPrintSection("General Examination & Vital Signs",[
+   ["Blood Pressure",v.bp],["Heart Rate",v.hr],["PO2 / SpO2",v.spo2],
+   ["BMI",v.bmi],["Blood Glucose",v.glucose],["HbA1c",v.hba1c],
+   ["Weight (kg)",v.weight],["Height (cm)",v.height]
+  ]);
+  const clin=ftwPrintSection("Clinical Examination Findings",clinical);
+  const func=ftwPrintSection("Functional Capacity Assessment",[
+   ["Physical / Functional Capacity",mf.functional_capacity],
+   ["Cognitive Capacity",mf.cognitive_capacity],
+   ["Fitness Essentials",fitness.map(x=>{
+    const bilingual=String(x.item||"").split("/");
+    const item=(bilingual.length>1?bilingual.slice(1).join("/").trim():({"Normal Consciousness":"Normal consciousness","No Uncontrolled Epilepsy":"No uncontrolled epilepsy","Adequate Mobility":"Adequate mobility","Safe Ladder Climbing":"Safe ladder climbing","Normal Balance":"Normal balance","Adequate Hearing":"Adequate hearing","Adequate Vision":"Adequate vision","Ability to Wear Respirator":"Ability to wear respirator","Cardiovascular Fitness":"Cardiovascular fitness"}[String(x.item||"").trim()]||x.item));
+    const status=({met:"Met",restricted:"Met with Restrictions",not_met:"Not Met",not_assessed:"Not Assessed"})[x.status]||"Not Assessed";
+    return (bilingual.length>1?bilingual[0].trim():item)+" — "+status+(x.evidence?" — "+x.evidence:"");
+   })],["Functional Capacity Notes",m.capacity?.notes]
+  ]);
+  const investigations=ftwPrintSection("Labs & Imaging Findings",labs.map(x=>[x.test,[x.result,x.unit,x.status,x.date].filter(Boolean).join(" — ")]));
+  const additional=ftwPrintSection("Additional Investigations",[
+   ["Investigations",mf.additional_investigations],["Investigation Details",mf.additional_investigation_details],
+   ["Other Investigations",exam.additional?.other]
+  ]);
+  const final=ftwPrintSection("Fitness to Work Decision",[
+   ["Fitness to Work Decision",decision],["Restrictions / Justification",m.restrictions],
+   ["Medical Rationale",m.notes],["Review Date",mf.review_date],
+   ["Physician Name",mf.physician_name],["Physician Ref. Number",mf.physician_pr]
+  ]);
+  const signatures='<section class="signatures"><div><strong>Physician</strong><p>Name: '+esc(ftwPrintValue(mf.physician_name)||"")+'</p><p>Ref. Number: '+esc(ftwPrintValue(mf.physician_pr)||"")+'</p><p>Signature: __________________________</p></div><div><strong>HSE</strong><p>Name: '+esc(ftwPrintValue(hf.hse_name)||"")+'</p><p>Ref. Number: '+esc(ftwPrintValue(hf.hse_pr)||"")+'</p><p>Signature: __________________________</p></div></section>';
+  const report='<header class="report-header"><h1>Individual FTW Examination Report</h1><p>MOFASA — Medico-Occupational Fitness Assessment Scale Advance</p><p>Confidential Occupational Health Record</p></header>'+info+hse+med+vitals+clin+func+investigations+additional+final+signatures+'<footer>Preliminary and recorded assessment information only. The final fitness determination is the responsibility of the authorized physician. Experimental indicators, if any, are not a substitute for clinical judgment.</footer>';
+  return '<!doctype html><html><head><meta charset="utf-8"><title>Individual FTW Report — '+esc(p.registration_number||p.worker_name||id)+'</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font:10pt Arial,Tahoma,sans-serif;color:#182b33;direction:ltr;line-height:1.4;margin:0}.report-header{text-align:center;border-bottom:2px solid #17495a;padding:0 0 10px;margin-bottom:12px}.report-header h1{font-size:18pt;margin:0;color:#123b4a}.report-header p{margin:3px 0;font-size:8.5pt;color:#526a72}.report-section{break-inside:avoid;margin:0 0 10px}.report-section h2{font-size:11.5pt;color:#17495a;border-bottom:1px solid #b9cbd0;padding:4px 0;margin:10px 0 5px}.ftw-table{width:100%;border-collapse:collapse;margin:4px 0 7px;font-size:8.7pt;table-layout:fixed}.ftw-table th,.ftw-table td{border:1px solid #cbd8dc;padding:5px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere;white-space:normal}.ftw-table th{background:#eef4f5;width:29%}.ftw-table thead th{background:#dfecee}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:18px 0 10px;break-inside:avoid}.signatures>div{border:1px solid #cbd8dc;padding:9px}.signatures p{margin:8px 0}.signatures strong{color:#17495a}.report-section:last-of-type{margin-bottom:8px}footer{border-top:1px solid #cbd8dc;margin-top:15px;padding-top:7px;font-size:8pt;color:#526a72}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>'+report+'</body></html>';
+ }
+ function printFtwReport(id){
+  if(!canMedicalRead())return;
+  const html=buildFtwReportDocument(id);if(!html)return;
   const pop=window.open("","_blank","width=1000,height=800");if(!pop){msg("يرجى السماح بالنوافذ المنبثقة لطباعة التقرير.","error");return;}
-  const page1='<section class="page"><header><h1>Fitness to Work Evaluation Form</h1><p>MOFASA — Medico-Occupational Fitness Assessment Scale Advance</p></header><h2>Worker & Job Information</h2>'+ftwPrintTable([["Name",p.worker_name],["Pay Roll / Registration No.",p.registration_number],["Active Role",p.job_title],["Task",p.task_name],["Assessment Date",p.assessment_date],["Age",mf.worker_age],["Location",p.site],["Department",mf.department],["Assessment Type",mf.assessment_type],["Shift Duration",p.shift_duration]])+'<h2>Current Job Demand</h2>'+ftwPrintTable([["Core Tasks",tasks.join(" · ")],["Physical / Cognitive / Functional Demands",demands.join(" · ")],["Safety-Critical Duties",(h.tasks?.safety_critical||[]).join(" · ")],])+'<h2>Job Hazards / Exposure Level</h2><table class="ftw-table"><thead><tr><th>Hazard Category</th><th>Hazard</th><th>Exposure Severity</th><th>Frequency</th><th>Controls</th><th>Residual Risk</th></tr></thead><tbody>'+hazards.map(x=>'<tr><td>'+esc(x.category)+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.severity_label||x.severity)+'</td><td>'+esc(exposureLabels[x.frequency]||x.frequency)+'</td><td>'+esc(x.controls||"—")+'</td><td>'+esc(x.residual||"—")+'</td></tr>').join("")+'</tbody></table>'+ftwPrintTable([["HSE Health Risk Category",hf.risk_category],["Safety-Critical Decision Maker",hf.safety_critical+" — "+hf.safety_critical_specify],["Emergency Response Duties",hf.emergency_duties+" — "+hf.emergency_specify],["HSE Editor Email",h._meta?.last_edited_by_email||(hseRow?.updated_by===user?.id?user?.email:"Not available for edits made before this update")]])+'</section>';
-  const page2='<section class="page"><header><h1>Fitness to Work Evaluation Form</h1><p>Medical Department Input — '+esc(p.worker_name)+' / '+esc(p.registration_number)+'</p></header><h2>Medical Department Input — History Findings</h2>'+ftwPrintTable([["Medical History Findings",mf.medical_history],["Current Diseases",(m.diseases?.items||[]).map(x=>x.disease||x.name).join(" · ")+" "+(mf.current_diseases||"")],["Occupational History",mf.occupational_history],["Medication Review",mf.medication_review]])+'<h2>General Examination</h2>'+ftwPrintTable([["BP",v.bp],["HR",v.hr],["PO2 / SpO2",v.spo2],["Blood Glucose",v.glucose],["HbA1c",v.hba1c],["Weight",v.weight],["Height",v.height],["BMI",v.bmi]])+'<h2>Clinical Examination Findings</h2>'+ftwPrintTable(clinical.length?clinical:[["Clinical examination","Not recorded"]])+'<h2>Functional Capacity Assessment</h2>'+ftwPrintTable([["Functional Capacity",mf.functional_capacity],["Fitness Essentials",fitness.map(x=>{const bilingual=String(x.item||"").split("/");const item=(bilingual.length>1?bilingual.slice(1).join("/").trim():( {"Normal Consciousness":"مستوى وعي طبيعي","No Uncontrolled Epilepsy":"عدم وجود صرع غير مسيطر عليه","Adequate Mobility":"قدرة حركية مناسبة","Safe Ladder Climbing":"القدرة على صعود السلالم بأمان","Normal Balance":"اتزان طبيعي","Adequate Hearing":"كفاءة سمعية مناسبة","Adequate Vision":"كفاءة إبصار مناسبة","Ability to Wear Respirator":"القدرة على ارتداء جهاز التنفس","Cardiovascular Fitness":"الكفاءة القلبية الوعائية"}[String(x.item||"").trim()]||x.item));const status=en?({met:"Met",restricted:"Met with Restrictions",not_met:"Not Met",not_assessed:"Not Assessed"})[x.status]||"Not Assessed":({met:"مستوفٍ",restricted:"مستوفٍ بقيود",not_met:"غير مستوفٍ",not_assessed:"لم يقيّم"})[x.status]||"لم يقيّم";const displayItem=en?(bilingual.length>1?bilingual[0].trim():item):item;return displayItem+" — "+status+(x.evidence?" — "+x.evidence:"");}).join(" · ")],["Functional Notes",m.capacity?.notes]])+'<h2>Labs & Imaging Findings</h2>'+ftwPrintTable(labs.map(x=>[x.test,(x.result||"")+" "+(x.unit||"")+" — "+(x.status||"")]).concat([["Additional Investigations",(mf.additional_investigations||[]).join(" · ")],["Additional Investigation Details",mf.additional_investigation_details]]))+'<h2>Fitness to Work Category & Recommendations</h2>'+ftwPrintTable([["Fitness to Work Category",decision],["Recommendations / Restrictions",m.restrictions],["Medical Rationale",m.notes],["Assessment Date",p.assessment_date],["Review Date",mf.review_date],["Physician Name / PR",[mf.physician_name,mf.physician_pr].filter(Boolean).join(" / ")],["CRI (Experimental — not a fitness decision)",window.MOFASA_CRI?.calculate({hse:h,medical:m})?.label||"Not available"]])+'<footer><p>Confidential occupational health record. This report documents recorded assessment data; final fitness determination remains the responsibility of the authorized site physician.</p><div class="signatures"><span>Physician Signature: ____________________</span><span>Date: ____________________</span></div></footer></section>';
-  pop.document.write('<!doctype html><html><head><meta charset="utf-8"><title>FTW — '+esc(p.registration_number)+'</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font:10pt Arial,sans-serif;color:#182b33;direction:ltr}.page{page-break-after:always;min-height:270mm}.page:last-child{page-break-after:auto}header{text-align:center;border-bottom:2px solid #17495a;padding-bottom:8px;margin-bottom:12px}h1{font-size:18pt;margin:0;color:#123b4a}header p{margin:4px 0;font-size:9pt}h2{font-size:12pt;color:#17495a;border-bottom:1px solid #b9cbd0;padding:5px 0;margin:12px 0 6px}.ftw-table{width:100%;border-collapse:collapse;margin:5px 0 9px;font-size:9pt}.ftw-table th,.ftw-table td{border:1px solid #cbd8dc;padding:5px 7px;text-align:left;vertical-align:top}.ftw-table th{background:#eef4f5;width:27%}.ftw-table thead th{background:#dfecee}.ftw-table p{margin:0}footer{margin-top:12px;font-size:8pt}.signatures{display:flex;justify-content:space-between;margin-top:30px}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}</style></head><body>'+page1+page2+'<script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script></body></html>');
-  pop.document.close();
+  pop.document.open();pop.document.write(html.replace("</body>","<script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script></body>"));pop.document.close();
+ }
+ function exportFtwWord(id){
+  if(!canMedicalRead())return;
+  const html=buildFtwReportDocument(id);if(!html)return;
+  const blob=new Blob(["\ufeff",html],{type:"application/msword;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  const base=String(parent?.registration_number||parent?.worker_name||id).replace(/[^a-zA-Z0-9_-]+/g,"-");
+  a.href=url;a.download="MOFASA-Individual-FTW-"+base+".doc";document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  msg("تم تجهيز تقرير Word الفردي.","success");
  }
 
  function renderCriPreview(){
@@ -301,7 +380,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(canHseRead()){const q=await client.from("mofasa_hse_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)hseRow=q.data;}
   if(canMedicalRead()){const q=await client.from("mofasa_medical_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)medicalRow=q.data;}
   $("mofasa-selected").hidden=false;
-  $("mofasa-record-header").innerHTML='<div class="record-hero"><div><span class="eyebrow">ملف تقييم MOFASA</span><h3>'+esc(p.worker_name)+'</h3><p>'+esc(p.job_title)+' · '+esc(p.task_name)+'</p></div><div class="record-hero-id">'+esc(p.registration_number)+'</div></div><div class="summary-grid"><div class="summary-item"><span>الموقع</span><strong>'+esc(p.site)+'</strong></div><div class="summary-item"><span>تاريخ التقييم</span><strong>'+esc(p.assessment_date)+'</strong></div><div class="summary-item"><span>قسم السلامة</span><strong>'+statusLabel(p.hse_status)+'</strong></div><div class="summary-item"><span>القسم الطبي</span><strong>'+statusLabel(p.medical_status)+'</strong></div></div><div class="mofasa-toolbar">'+((isAdmin()||role==="medical_admin")?'<button type="button" id="mofasa-print-ftw">طباعة نموذج Fitness to Work (صفحتان)</button>': '')+(isAdmin()?'<button type="button" id="mofasa-export-one">تصدير ملف العامل التفصيلي (Excel)</button>': '')+(isAdmin()&&hseRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-hse">إعادة إلى مسؤول السلامة للاستكمال</button>':'')+(isAdmin()&&medicalRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-medical">إعادة إلى الطبيب للاستكمال</button>':'')+(isAdmin()&&p.archived_at?'<button type="button" class="secondary" id="mofasa-restore-current">استعادة السجل</button>':isAdmin()?'<button type="button" class="secondary" id="mofasa-archive-current">أرشفة السجل</button>':'')+'</div>';
+  $("mofasa-record-header").innerHTML='<div class="record-hero"><div><span class="eyebrow">ملف تقييم MOFASA</span><h3>'+esc(p.worker_name)+'</h3><p>'+esc(p.job_title)+' · '+esc(p.task_name)+'</p></div><div class="record-hero-id">'+esc(p.registration_number)+'</div></div><div class="summary-grid"><div class="summary-item"><span>الموقع</span><strong>'+esc(p.site)+'</strong></div><div class="summary-item"><span>تاريخ التقييم</span><strong>'+esc(p.assessment_date)+'</strong></div><div class="summary-item"><span>قسم السلامة</span><strong>'+statusLabel(p.hse_status)+'</strong></div><div class="summary-item"><span>القسم الطبي</span><strong>'+statusLabel(p.medical_status)+'</strong></div></div><div class="mofasa-toolbar">'+((isAdmin()||role==="medical_admin")?'<button type="button" id="mofasa-print-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (PDF)":"استخراج التقرير الفردي PDF")+'</button><button type="button" class="secondary" id="mofasa-word-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (Word)":"استخراج التقرير الفردي Word")+'</button>': '')+(isAdmin()?'<button type="button" id="mofasa-export-one">تصدير ملف العامل التفصيلي (Excel)</button>': '')+(isAdmin()&&hseRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-hse">إعادة إلى مسؤول السلامة للاستكمال</button>':'')+(isAdmin()&&medicalRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-medical">إعادة إلى الطبيب للاستكمال</button>':'')+(isAdmin()&&p.archived_at?'<button type="button" class="secondary" id="mofasa-restore-current">استعادة السجل</button>':isAdmin()?'<button type="button" class="secondary" id="mofasa-archive-current">أرشفة السجل</button>':'')+'</div>';
   $("mofasa-record-header").insertAdjacentHTML("beforeend",renderCompletedReview(hseRow,medicalRow));
   if(canHse()){const d=hseRow?.section_data||{};renderHseEditors(d);const locked=hseRow?.status==="submitted"||!!p.archived_at;["mofasa-hse-draft","mofasa-hse-submit"].forEach(id=>$(id).disabled=locked);const hseReturn=hseRow?.section_data?._meta?.admin_return_reason;$("mofasa-hse-lock").textContent=p.archived_at?"هذا السجل مؤرشف؛ العرض فقط دون تعديل.":locked?"تم إرسال قسم السلامة وأصبح مقفلاً.":hseReturn?"أُعيد القسم من المدير الأعلى للاستكمال: "+hseReturn:"يمكنك حفظ مسودة أو إرسال القسم بعد استكماله."; if(locked)document.querySelectorAll("#mofasa-hse-form input,#mofasa-hse-form select,#mofasa-hse-form textarea").forEach(x=>x.disabled=true);}
     
@@ -309,7 +388,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
 
   if(canHse()){$("mofasa-hse-draft").onclick=()=>saveSection("hse","draft");$("mofasa-hse-submit").onclick=()=>saveSection("hse","submitted");}
   if(canMedical()){const md=$("mofasa-med-draft"),ms=$("mofasa-med-submit");if(md)md.onclick=()=>saveSection("medical","draft");if(ms&&!isAdmin())ms.onclick=()=>saveSection("medical","submitted");}
-  const fp=$("mofasa-print-ftw");if(fp)fp.onclick=()=>printFtwReport(id);if(isAdmin()){loadAudit(id);const ex=$("mofasa-export-one"),ar=$("mofasa-archive-current"),rs=$("mofasa-restore-current");if(ex)ex.onclick=()=>exportOneAssessment(id);if(ar)ar.onclick=()=>archiveAssessment(id);if(rs)rs.onclick=()=>restoreAssessment(id);}
+  const fp=$("mofasa-print-ftw"),fw=$("mofasa-word-ftw");if(fp)fp.onclick=()=>printFtwReport(id);if(fw)fw.onclick=()=>exportFtwWord(id);if(isAdmin()){loadAudit(id);const ex=$("mofasa-export-one"),ar=$("mofasa-archive-current"),rs=$("mofasa-restore-current");if(ex)ex.onclick=()=>exportOneAssessment(id);if(ar)ar.onclick=()=>archiveAssessment(id);if(rs)rs.onclick=()=>restoreAssessment(id);}
   if(isAdmin()){const rh=$("mofasa-return-hse"),rm=$("mofasa-return-medical");if(rh)rh.onclick=()=>returnSectionToRole("hse");if(rm)rm.onclick=()=>returnSectionToRole("medical");}
   $("mofasa-selected").scrollIntoView({behavior:"smooth",block:"start"});
  }
