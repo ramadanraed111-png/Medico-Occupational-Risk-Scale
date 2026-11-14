@@ -1,7 +1,7 @@
 /* IOFI foundation engine v0.1: evidence completeness and non-compensatory gates only. */
 (function (root) {
  "use strict";
- const hasText = v => typeof v === "string" && v.trim().length > 0;
+ const hasText = v => (typeof v === "string" && v.trim().length > 0) || (typeof v === "number" && Number.isFinite(v));
  const list = v => Array.isArray(v) ? v : [];
  const status = missing => ({status: missing.length ? "incomplete" : "complete", complete: missing.length === 0, missing});
  function evaluate(input = {}) {
@@ -16,7 +16,7 @@
   const hm=[]; if(h.physician_review?.completed!==true)hm.push("health.physician_review.completed");
   ["review_date","reviewer_id"].forEach(k=>{if(!hasText(h.physician_review?.[k]))hm.push("health.physician_review."+k);});
   list(h.exposure_relevance).forEach((x,i)=>["exposure_id","health_effect_assessed","stability","functional_impact","accommodation"].forEach(k=>{if(!hasText(x[k]))hm.push("health.exposure_relevance["+i+"]."+k);}));
-  const cm=[]; if(c.reviewed!==true)cm.push("compatibility.reviewed");
+  const cm=[]; if(c.reviewed!==true)cm.push("compatibility.reviewed");\n  if(!list(c.tasks).length)cm.push("compatibility.tasks");
   list(c.tasks).forEach((x,i)=>{
    ["task_id","criticality","requirement","capacity_status","evidence"].forEach(k=>{if(!hasText(x[k]))cm.push("compatibility.tasks["+i+"]."+k);});
    if(x.capacity_status&&!["met","met_with_accommodation","not_met","not_assessed"].includes(x.capacity_status))cm.push("compatibility.tasks["+i+"].capacity_status_invalid");
