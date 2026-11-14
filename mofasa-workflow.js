@@ -234,7 +234,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const auditRows=(audit.data||[]).map(x=>'<tr><td>'+esc(x.section_name==="hse"?"السلامة":"الطب")+'</td><td>'+esc(x.action)+'</td><td>'+esc(x.actor_id||"—")+'</td><td>'+esc(x.changed_at?new Date(x.changed_at).toLocaleString("ar-EG"):"—")+'</td><td>'+esc(statusLabel(x.new_status))+'</td><td>—</td></tr>');
   const archiveRows=(archive.data||[]).map(x=>'<tr><td>الأرشفة</td><td>'+esc(x.action==="archive"?"أرشفة":"استعادة")+'</td><td>'+esc(x.actor_id||"—")+'</td><td>'+esc(x.changed_at?new Date(x.changed_at).toLocaleString("ar-EG"):"—")+'</td><td>—</td><td>'+esc(x.reason||"—")+'</td></tr>');
   const auditHtml='<section class="report-audit"><h2>سجل التدقيق</h2>'+(auditError?'<p class="audit-warning">تعذر تحميل سجل التدقيق: '+esc(auditError.message)+'</p>':(auditRows.length||archiveRows.length?'<table><thead><tr><th>القسم</th><th>العملية</th><th>المستخدم</th><th>التاريخ</th><th>الحالة</th><th>السبب</th></tr></thead><tbody>'+auditRows.concat(archiveRows).join("")+'</tbody></table>':'<p>لا توجد تغييرات مسجلة.</p>'))+'</section>';
-  const review=renderCompletedReview(hseRow,medicalRow,{includeScore:false}).replace("تظهر هنا البيانات التي تم إدخالها أو تقييمها فقط. افتح كل قائمة لعرض تفاصيلها؛ وتظل صلاحيات الاطلاع الخاصة بكل دور كما هي.","يعرض هذا التقرير جميع البيانات المدخلة والمكتملة فقط في قسمي السلامة والطب.");
+  const review=renderCompletedReview(hseRow,medicalRow,{includeScore:false,expanded:true}).replace("تظهر هنا البيانات التي تم إدخالها أو تقييمها فقط. افتح كل قائمة لعرض تفاصيلها؛ وتظل صلاحيات الاطلاع الخاصة بكل دور كما هي.","يعرض هذا التقرير جميع البيانات المدخلة والمكتملة فقط في قسمي السلامة والطب.");
   const logo='<svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-label="MOFASA"><path d="M32 3 55 16v28L32 61 9 44V16Z" fill="#123b4a"/><path d="M19 43V22l13 12 13-12v21" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 49h16" stroke="#9bc5c8" stroke-width="3" stroke-linecap="round"/></svg>';
   const header='<header class="report-header" dir="rtl"><div class="brand-lockup">'+logo+'<div><strong>MOFASA</strong><span>نظام التقييم الطبي والمهني المتكامل للياقة للعمل</span><small>Medico-Occupational Fitness Assessment Scale Advance</small></div></div><div class="report-title"><h1>ملف تقييم MOFASA</h1><span>تقرير فردي سري</span></div></header>';
   const worker='<section class="worker-card"><div class="worker-main"><span class="eyebrow">بيانات العامل</span><h2>'+esc(p.worker_name||"—")+'</h2><p>'+esc(p.job_title||"—")+' · '+esc(p.task_name||"—")+'</p></div><div class="worker-id">'+esc(p.registration_number||"—")+'</div><div class="worker-meta"><div><span>الموقع</span><strong>'+esc(p.site||"—")+'</strong></div><div><span>تاريخ التقييم</span><strong>'+esc(p.assessment_date||"—")+'</strong></div><div><span>قسم السلامة</span><strong>'+esc(statusLabel(p.hse_status))+'</strong></div><div><span>القسم الطبي</span><strong>'+esc(statusLabel(p.medical_status))+'</strong></div></div></section>';
@@ -275,7 +275,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    if(demands)rows.push(demands.replace('<h4>متطلبات أداء الوظيفة</h4>','<h2>متطلبات أداء الوظيفة</h2>'));
   }else{
    if(medicalRow?.status!=="submitted")return null;
-   const groups=renderMedicalReviewGroups(md)+renderMedicalHistory(md.diseases);
+   const groups=renderMedicalReviewGroups(md,options)+renderMedicalHistory(md.diseases,options);
    if(groups)rows.push('<section class="report-section"><h2>البيانات الطبية المستكملة</h2>'+groups+'</section>');
    const score=md.preliminary_analysis||{};
    if(score.total!==null&&score.total!==undefined)rows.push('<section class="report-section"><h2>المؤشر الرقمي التجريبي للمحاور الستة</h2><div class="completed-review-row"><strong>النتيجة</strong><div>'+esc(score.total+' / 100 — '+(score.band||""))+'</div></div><div class="completed-review-row"><strong>المعادلة</strong><div>'+esc(score.formula||"")+'</div></div><p>مؤشر تجريبي غير معاير؛ لا يمثل تشخيصاً أو قرار لياقة ولا يحل محل الحكم الطبي.</p></section>');
@@ -387,31 +387,31 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   }
   return value;
  }
- function reviewRows(value){
+ function reviewRows(value,options={}){
   if(Array.isArray(value)){
    const items=value.filter(x=>hasCompletedReviewValue(x)&&!(x&&typeof x==="object"&&String(x.status||"").toLowerCase()==="not_assessed"));if(!items.length)return "";
    if(items.every(x=>typeof x!=="object"))return '<ul>'+items.map(x=>'<li>'+esc(reviewValue(x))+'</li>').join("")+'</ul>';
    return '<div class="completed-review-list">'+items.map(x=>{
     const title=x.disease||x.name||x.test||(x.item?reviewDisplayValue("item",x.item):"")||x.task||x.hazard||x.category_label||"تفاصيل مسجلة";
-    const body=reviewRows(x);
-    return body?'<details class="review-disclosure review-entry"><summary><strong>'+esc(title)+'</strong></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
+    const body=reviewRows(x,options);
+    return body?'<details class="review-disclosure review-entry"'+(options.expanded?' open':'')+'><summary><strong>'+esc(title)+'</strong></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
    }).join("")+'</div>';
   }
-  if(value&&typeof value==="object")return Object.entries(value).filter(([k,v])=>k!=="_meta"&&hasCompletedReviewValue(v)).map(([k,v])=>'<div class="completed-review-row"><strong>'+esc(reviewLabels[k]||k.replace(/_/g," "))+'</strong><div>'+reviewRows(reviewDisplayValue(k,v))+'</div></div>').join("");
+  if(value&&typeof value==="object")return Object.entries(value).filter(([k,v])=>k!=="_meta"&&hasCompletedReviewValue(v)).map(([k,v])=>'<div class="completed-review-row"><strong>'+esc(reviewLabels[k]||k.replace(/_/g," "))+'</strong><div>'+reviewRows(reviewDisplayValue(k,v),options)+'</div></div>').join("");
   if(typeof value==="boolean")return esc(value?"نعم":"لا");return esc(reviewValue(value));
  }
- function renderMedicalHistory(diseases){
+ function renderMedicalHistory(diseases,options={}){
   const items=Array.isArray(diseases?.items)?diseases.items:Array.isArray(diseases)?diseases:[];
   const cards=items.filter(x=>hasCompletedReviewValue(x)&&String(x.status||"").toLowerCase()!=="not_assessed").map(x=>{
    const disease=x.disease||x.name||x.condition||"حالة طبية مسجلة";
-   const body=reviewRows(x);
-   return body?'<details class="review-disclosure review-entry"><summary><strong>'+esc(disease)+'</strong></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
+   const body=reviewRows(x,options);
+   return body?'<details class="review-disclosure review-entry"'+(options.expanded?' open':'')+'><summary><strong>'+esc(disease)+'</strong></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
   }).filter(Boolean);
   const notes=String(diseases?.notes||"").trim();
   const reviewed=diseases?.reviewed===true;
   if(!cards.length&&!notes&&!reviewed)return "";
   const empty=reviewed&&!cards.length?'<p>تمت مراجعة التاريخ المرضي بواسطة الطبيب ولم تُسجل حالات طبية في هذه المراجعة.</p>':"";
-  return '<details class="review-disclosure review-group"><summary><strong>التاريخ المرضي والحالات الطبية</strong><span>'+cards.length+' حالة'+(reviewed?' — تمت المراجعة':'')+'</span></summary><div class="review-disclosure-body">'+cards.join("")+empty+(notes?'<div class="completed-review-row"><strong>ملاحظات الطبيب على التاريخ المرضي</strong><div>'+esc(notes)+'</div></div>':"")+'</div></details>';
+  return '<details class="review-disclosure review-group"'+(options.expanded?' open':'')+'><summary><strong>التاريخ المرضي والحالات الطبية</strong><span>'+cards.length+' حالة'+(reviewed?' — تمت المراجعة':'')+'</span></summary><div class="review-disclosure-body">'+cards.join("")+empty+(notes?'<div class="completed-review-row"><strong>ملاحظات الطبيب على التاريخ المرضي</strong><div>'+esc(notes)+'</div></div>':"")+'</div></details>';
  }
  function renderJemReview(h){
   const source=Array.isArray(h?.section_data?.hazards?.items)?h.section_data.hazards.items:[];
@@ -437,7 +437,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(!groups&&!extras)return "";
   return '<section class="specialist-section demand-review"><h4>متطلبات أداء الوظيفة</h4>'+groups+extras+'</section>';
  }
- function renderMedicalReviewGroups(md){
+ function renderMedicalReviewGroups(md,options={}){
   const groups=[
    {title:"الفحص السريري والعلامات الحيوية",keys:["ftw","exam","vitals"]},
    {title:"التحاليل والفحوصات",keys:["labs"]},
@@ -448,20 +448,20 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const blocks=groups.map(group=>{
    const data={};group.keys.forEach(k=>{if(Object.prototype.hasOwnProperty.call(md,k)){data[k]=md[k];used.add(k);}});
    if(!hasCompletedReviewValue(data))return "";
-   const count=reviewCount(data),body=reviewRows(data);
-   return body?'<details class="review-disclosure review-entry medical-review-subgroup"><summary><strong>'+group.title+'</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
+   const count=reviewCount(data),body=reviewRows(data,options);
+   return body?'<details class="review-disclosure review-entry medical-review-subgroup"'+(options.expanded?' open':'')+'><summary><strong>'+group.title+'</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
   }).join("");
   const other={};Object.entries(md||{}).forEach(([k,v])=>{if(!used.has(k)&&k!=="_meta"&&k!=="iofi"&&hasCompletedReviewValue(v))other[k]=v;});
-  const otherBody=reviewRows(other);
-  const extras=otherBody?'<details class="review-disclosure review-entry medical-review-subgroup"><summary><strong>بيانات طبية إضافية</strong><span>'+reviewCount(other)+' عناصر</span></summary><div class="review-disclosure-body">'+otherBody+'</div></details>':"";
+  const otherBody=reviewRows(other,options);
+  const extras=otherBody?'<details class="review-disclosure review-entry medical-review-subgroup"'+(options.expanded?' open':'')+'><summary><strong>بيانات طبية إضافية</strong><span>'+reviewCount(other)+' عناصر</span></summary><div class="review-disclosure-body">'+otherBody+'</div></details>':"";
   return blocks+extras;
  }
  function renderCompletedReview(h,m,options={}){
   const sections=[],hd=h?.section_data||{},md=m?.section_data||{};
   if(canHseRead()&&hasCompletedReviewValue(hd)){
-   const hseDisplay={...hd};delete hseDisplay.hazards;delete hseDisplay.demands;
+   const hseDisplay={tasks:hd.tasks,tra:hd.tra,job_task:hd.job_task,emergency:hd.emergency,ftw:hd.ftw,notes:hd.notes};
    const count=reviewCount(hseDisplay);
-   if(hasCompletedReviewValue(hseDisplay))sections.push('<details class="review-disclosure review-section"><summary><strong>البيانات المكتملة – قسم السلامة (HSE)</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+reviewRows(hseDisplay)+'</div></details>');
+   if(hasCompletedReviewValue(hseDisplay))sections.push('<details class="review-disclosure review-section"'+(options.expanded?' open':'')+'><summary><strong>البيانات المكتملة – قسم السلامة (HSE)</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+reviewRows(hseDisplay,options)+'</div></details>');
    const demandsReview=renderSelectedDemands(hd.demands);
    if(demandsReview)sections.push(demandsReview);
   }
@@ -470,7 +470,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    const medicalContent=renderMedicalReviewGroups(md)+renderMedicalHistory(md.diseases)+scoreReview+(m?.final_decision?'<div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(m.final_decision))+'</div></div>':"");
    if(medicalContent){
     const count=reviewCount(md)+reviewCount(md.diseases)+(m?.final_decision?1:0);
-    sections.push('<details class="review-disclosure review-section medical-review-section"><summary><strong>البيانات المكتملة – القسم الطبي</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+medicalContent+'</div></details>');
+    sections.push('<details class="review-disclosure review-section medical-review-section"'+(options.expanded?' open':'')+'><summary><strong>البيانات المكتملة – القسم الطبي</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+medicalContent+'</div></details>');
    }
   }
   const jemReview=renderJemReview(h);
