@@ -398,11 +398,24 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(!cards.length)return "";
   return '<details class="review-disclosure review-group"><summary><strong>التاريخ المرضي والحالات الطبية</strong><span>'+cards.length+' حالة</span></summary><div class="review-disclosure-body">'+cards.join("")+'</div></details>';
  }
+ function renderJemReview(h){
+  const items=Array.isArray(h?.section_data?.hazards?.items)?h.section_data.hazards.items:[];
+  if(!items.length)return "";
+  const residualLabels={low:"منخفض",moderate:"متوسط",high:"مرتفع",critical:"حرج",not_assessed:"لم يقيّم"};
+  const rows=items.map(x=>{
+   const severity=(x.severity_label||(["","منخفض","متوسط","مرتفع","شديد / حرج","كارثي"][Number(x.severity)]||""))+(x.severity_description?" — "+x.severity_description:"");
+   const effectiveness=x.control_effectiveness===undefined||x.control_effectiveness===null?"—":Number(x.control_effectiveness).toFixed(2);
+   return "<tr><td>"+esc((x.category||"")+" / "+(x.name||""))+"</td><td>"+esc(severity||"—")+"</td><td>"+esc(exposureLabels[x.frequency]||reviewValue(x.frequency||"—"))+"</td><td>"+esc(x.frequency_scale??"—")+"</td><td>"+esc(x.duration_scale??"—")+"</td><td>"+esc(x.probability_scale??"—")+"</td><td>"+esc(effectiveness)+"</td><td>"+esc(x.controls||"—")+"</td><td>"+esc(residualLabels[x.residual]||x.residual||"—")+"</td></tr>";
+  }).join("");
+  const notes=h.section_data.hazards?.notes;
+  return '<section class="specialist-section jem-review"><h4>سجل الأخطار المهنية JEM</h4><div class="table-wrap"><table class="jem-table"><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>التكرار (1–5)</th><th>المدة (1–5)</th><th>الاحتمالية (1–5)</th><th>فعالية التحكم</th><th>الضوابط</th><th>الخطر المتبقي</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(notes?'<div class="completed-review-row"><strong>ملاحظات عامة على تقييم الأخطار</strong><div>'+esc(notes)+'</div></div>':"")+'</section>';
+ }
  function renderCompletedReview(h,m){
   const sections=[],hd=h?.section_data||{},md=m?.section_data||{};
   if(canHseRead()&&hasCompletedReviewValue(hd)){
-   const count=reviewCount(hd);
-   sections.push('<details class="review-disclosure review-section"><summary><strong>البيانات المكتملة – قسم السلامة (HSE)</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+reviewRows(hd)+'</div></details>');
+   const hseDisplay={...hd};delete hseDisplay.hazards;
+   const count=reviewCount(hseDisplay);
+   if(hasCompletedReviewValue(hseDisplay))sections.push('<details class="review-disclosure review-section"><summary><strong>البيانات المكتملة – قسم السلامة (HSE)</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+reviewRows(hseDisplay)+'</div></details>');
   }
   if(canMedicalRead()&&(hasCompletedReviewValue(md)||m?.final_decision)){
    const medicalData={...md};delete medicalData.diseases;
@@ -412,13 +425,15 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
     sections.push('<details class="review-disclosure review-section"><summary><strong>البيانات المكتملة – القسم الطبي</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+medicalContent+'</div></details>');
    }
   }
+  const jemReview=renderJemReview(h);
+  if(jemReview)sections.unshift(jemReview);
   return sections.length?'<section class="specialist-section completed-review"><h4>استعراض النقاط المستكملة فقط</h4><p class="specialist-help">تظهر هنا البيانات التي تم إدخالها أو تقييمها فقط. افتح كل قائمة لعرض تفاصيلها؛ وتظل صلاحيات الاطلاع الخاصة بكل دور كما هي.</p><div class="medical-review-grid">'+sections.join("")+'</div></section>':"";
  }
  async function openAssessment(id){
   const {data:p,error}=await client.from("mofasa_assessments").select("*").eq("id",id).single();
   if(error){msg("تعذر فتح الملف: "+error.message,"error");return;}
   selected=id;parent=p;hseRow=null;medicalRow=null;
-  if(canHseRead()){const q=await client.from("mofasa_hse_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)hseRow=q.data;}
+  if(canHseRead()||canMedicalRead()){const q=await client.from("mofasa_hse_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)hseRow=q.data;}
   if(canMedicalRead()){const q=await client.from("mofasa_medical_sections").select("*").eq("assessment_id",id).maybeSingle();if(!q.error)medicalRow=q.data;}
   $("mofasa-selected").hidden=false;
   $("mofasa-record-header").innerHTML='<div class="record-hero"><div><span class="eyebrow">ملف تقييم MOFASA</span><h3>'+esc(p.worker_name)+'</h3><p>'+esc(p.job_title)+' · '+esc(p.task_name)+'</p></div><div class="record-hero-id">'+esc(p.registration_number)+'</div></div><div class="summary-grid"><div class="summary-item"><span>الموقع</span><strong>'+esc(p.site)+'</strong></div><div class="summary-item"><span>تاريخ التقييم</span><strong>'+esc(p.assessment_date)+'</strong></div><div class="summary-item"><span>قسم السلامة</span><strong>'+statusLabel(p.hse_status)+'</strong></div><div class="summary-item"><span>القسم الطبي</span><strong>'+statusLabel(p.medical_status)+'</strong></div></div><div class="mofasa-toolbar">'+((isAdmin()||role==="medical_admin")?'<button type="button" id="mofasa-print-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (PDF)":"استخراج التقرير الفردي PDF")+'</button><button type="button" class="secondary" id="mofasa-word-ftw">'+(window.MOFASA_I18N?.getLanguage?.()==="en"?"Export Individual Report (Word)":"استخراج التقرير الفردي Word")+'</button>': '')+(isAdmin()?'<button type="button" id="mofasa-export-one">تصدير ملف العامل التفصيلي (Excel)</button>': '')+(isAdmin()&&hseRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-hse">إعادة إلى مسؤول السلامة للاستكمال</button>':'')+(isAdmin()&&medicalRow?.status==="submitted"?'<button type="button" class="secondary" id="mofasa-return-medical">إعادة إلى الطبيب للاستكمال</button>':'')+(isAdmin()&&p.archived_at?'<button type="button" class="secondary" id="mofasa-restore-current">استعادة السجل</button>':isAdmin()?'<button type="button" class="secondary" id="mofasa-archive-current">أرشفة السجل</button>':'')+'</div>';
