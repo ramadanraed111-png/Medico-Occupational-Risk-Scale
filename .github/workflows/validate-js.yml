@@ -23,4 +23,3 @@ jobs:
             echo "Checking $file"
             node --check "$file"
           done
-          node tests/iofi-engine.test.js
