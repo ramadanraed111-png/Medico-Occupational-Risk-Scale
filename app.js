@@ -83,11 +83,22 @@ function preview(){
  }
  return {d,r,score};
 }
+let sessionPromise=null;
+let activeSessionUserId=null;
 async function session(u){
- user=u;const {data,error}=await client.from("app_users").select("role,email").eq("user_id",u.id).maybeSingle();
- if(error||!data){await client.auth.signOut();user=null;show("auth");msg("login-message","تعذر التحقق من صلاحية الحساب. راجع مسؤول النظام.","error");return;}
- role=data.role;show("work");document.dispatchEvent(new Event("pofri-session-ready"));const roleNames={admin:"Super Admin",hse_admin:"HSE",medical_admin:"Physician",data_entry:"Data Entry"};$("top-user-info").textContent=(data.email||u.email)+" — "+(roleNames[role]||"Unknown Role");
- $("admin-panel").hidden=role!=="admin";today();if(role==="admin")loadRecords();
+ if(!u)return;
+ if(activeSessionUserId===u.id&&role)return;
+ if(sessionPromise)return sessionPromise;
+ sessionPromise=(async()=>{
+  user=u;
+  const {data,error}=await client.from("app_users").select("role,email").eq("user_id",u.id).maybeSingle();
+  if(error||!data){user=null;role=null;activeSessionUserId=null;await client.auth.signOut();show("auth");msg("login-message","تعذر التحقق من صلاحية الحساب. راجع مسؤول النظام.","error");return;}
+  role=data.role;activeSessionUserId=u.id;show("work");document.dispatchEvent(new Event("pofri-session-ready"));
+  const roleNames={admin:"Super Admin",hse_admin:"HSE",medical_admin:"Physician",data_entry:"Data Entry"};
+  $("top-user-info").textContent=(data.email||u.email)+" — "+(roleNames[role]||"Unknown Role");
+  $("admin-panel").hidden=role!=="admin";today();if(role==="admin")loadRecords();
+ })();
+ try{return await sessionPromise;}finally{sessionPromise=null;}
 }
 $("login-form").addEventListener("submit",async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;const {data,error}=await client.auth.signInWithPassword({email:value("login-email"),password:value("login-password")});b.disabled=false;if(error){msg("login-message","تعذر تسجيل الدخول: "+error.message,"error");return;}await session(data.user);});
 $("forgot-password").addEventListener("click",async()=>{const email=value("login-email").trim();if(!email){msg("login-message","أدخل البريد الإلكتروني أولاً.");return;}const {error}=await client.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});msg("login-message",error?"تعذر إرسال الرابط: "+error.message:"إذا كان البريد مسجلاً فستصلك رسالة لاستعادة كلمة المرور.");});
@@ -138,5 +149,18 @@ async function loadRecords(){
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 $("refresh-button").addEventListener("click",loadRecords);
 $("export-button").addEventListener("click",()=>{const rows=[["تاريخ التقييم","العامل","الرقم الوظيفي","الوظيفة","المهمة","الموقع","حالة قسم السلامة","حالة القسم الطبي","الرأي الطبي النهائي"],...records.map(x=>[x.assessment_date,x.worker_name,x.registration_number,x.job_title,x.task_name,x.site,x.hse_status,x.medical_status,x.medical_record?.final_decision||"لم يعتمد بعد"])];const csv="\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="MOFASA-new-assessments.csv";a.click();URL.revokeObjectURL(a.href);});
-client.auth.onAuthStateChange((event,s)=>{if(event==="PASSWORD_RECOVERY"){recoveryMode=true;user=s?.user||null;show("recovery");msg("recovery-message","أدخل كلمة المرور الجديدة ثم احفظها لإكمال الاستعادة.");return;}if(recoveryMode){show("recovery");return;}if(event==="SIGNED_OUT"){user=null;role=null;show("auth");return;}if(s?.user&&!user)session(s.user)});
-(async()=>{const {data}=await client.auth.getSession();if(recoveryMode){show("recovery");}else if(data.session?.user){await session(data.session.user);}else show("auth");})();
+// Start authentication restoration only after every page module has registered its listeners.
+// This prevents an existing Supabase session from opening the workspace before MOFASA is ready.
+document.addEventListener("DOMContentLoaded",()=>{
+ client.auth.onAuthStateChange((event,s)=>{
+  if(event==="PASSWORD_RECOVERY"){recoveryMode=true;user=s?.user||null;show("recovery");msg("recovery-message","أدخل كلمة المرور الجديدة ثم احفظها لإكمال الاستعادة.");return;}
+  if(recoveryMode){show("recovery");return;}
+  if(event==="SIGNED_OUT"){user=null;role=null;activeSessionUserId=null;sessionPromise=null;show("auth");return;}
+  if(event==="SIGNED_IN"&&s?.user)queueMicrotask(()=>session(s.user));
+ });
+ client.auth.getSession().then(({data,error})=>{
+  if(recoveryMode){show("recovery");return;}
+  if(error){show("auth");msg("login-message","تعذر استعادة جلسة الدخول. حاول تسجيل الدخول مرة أخرى.","error");return;}
+  if(data.session?.user)session(data.session.user);else show("auth");
+ }).catch(error=>{show("auth");msg("login-message","تعذر بدء جلسة التطبيق: "+(error?.message||"خطأ غير معروف"),"error");});
+},{once:true});
