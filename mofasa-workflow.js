@@ -410,12 +410,26 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const notes=h.section_data.hazards?.notes;
   return '<section class="specialist-section jem-review"><h4>سجل الأخطار المهنية JEM</h4><div class="table-wrap"><table class="jem-table"><thead><tr><th>الفئة / الخطر</th><th>الشدة</th><th>التعرض</th><th>التكرار (1–5)</th><th>المدة (1–5)</th><th>الاحتمالية (1–5)</th><th>فعالية التحكم</th><th>الضوابط</th><th>الخطر المتبقي</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(notes?'<div class="completed-review-row"><strong>ملاحظات عامة على تقييم الأخطار</strong><div>'+esc(notes)+'</div></div>':"")+'</section>';
  }
+ function renderSelectedDemands(demands){
+  const selected=Array.isArray(demands?.selected)?demands.selected:[];
+  const groups=Object.entries(demandGroups).map(([group,items])=>{
+   const chosen=items.filter(item=>selected.includes(item));
+   return chosen.length?'<div class="completed-review-row"><strong>'+esc(group)+'</strong><ul>'+chosen.map(item=>'<li>'+esc(item)+'</li>').join("")+'</ul></div>':"";
+  }).join("");
+  const other=String(demands?.other||"").trim();
+  const notes=String(demands?.notes||"").trim();
+  const extras=(other?'<div class="completed-review-row"><strong>متطلبات أخرى</strong><div>'+esc(other)+'</div></div>':"")+(notes?'<div class="completed-review-row"><strong>مستوى المجهود / طبيعة العمل</strong><div>'+esc(notes)+'</div></div>':"");
+  if(!groups&&!extras)return "";
+  return '<section class="specialist-section demand-review"><h4>متطلبات أداء الوظيفة</h4>'+groups+extras+'</section>';
+ }
  function renderCompletedReview(h,m){
   const sections=[],hd=h?.section_data||{},md=m?.section_data||{};
   if(canHseRead()&&hasCompletedReviewValue(hd)){
-   const hseDisplay={...hd};delete hseDisplay.hazards;
+   const hseDisplay={...hd};delete hseDisplay.hazards;delete hseDisplay.demands;
    const count=reviewCount(hseDisplay);
    if(hasCompletedReviewValue(hseDisplay))sections.push('<details class="review-disclosure review-section"><summary><strong>البيانات المكتملة – قسم السلامة (HSE)</strong><span>'+count+' عناصر</span></summary><div class="review-disclosure-body">'+reviewRows(hseDisplay)+'</div></details>');
+   const demandsReview=renderSelectedDemands(hd.demands);
+   if(demandsReview)sections.push(demandsReview);
   }
   if(canMedicalRead()&&(hasCompletedReviewValue(md)||m?.final_decision)){
    const medicalData={...md};delete medicalData.diseases;
