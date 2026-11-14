@@ -33,3 +33,17 @@ A separate, explicitly provisional numeric model is included in `pofri-score.js`
 
 ## IOFI development track (not yet production)
 The approved IOFI foundation is being developed on the separate branch `feature/iofi-foundation` and tracked in [Draft PR #45](https://github.com/ramadanraed111-png/Medico-Occupational-Risk-Scale/pull/45). It adds an evidence-completeness engine, four independent index structures and a non-compensatory critical safety gate. It does not change the production interface or database and is not yet connected to live assessments. See the IOFI architecture, proposed logical data model, validation plan and repository audit under `docs/IOFI-*.md`. Do not use the IOFI foundation for operational fitness decisions.
+
+
+## Individual FTW Examination Report
+
+The MOFASA assessment record supports an individual report aligned with the supplied **Individual FTW Examination Report** template. From an employee assessment, authorized System Admin and Medical Admin users can:
+
+- Generate a print-ready A4 report and use the browser print dialog to save it as PDF.
+- Export a Microsoft Word-compatible `.doc` report.
+- View only populated assessment fields and sections; empty clinical and HSE entries are omitted.
+- Include employee/job details, HSE output, job demands, safety-critical and emergency duties, hazardous exposures and controls, site evaluation, medical history, medication review, clinical examination, functional capacity, investigations, FTW decision, review date and physician/HSE sign-off fields.
+
+The report follows existing section-level access controls. HSE-only users do not receive the combined medical report. Medical data remains restricted to authorized medical roles and system administration. The report documents entered information and the physician's recorded decision; it does not turn the experimental CRI into a fitness decision.
+
+**Word export note:** the download is a Word-compatible `.doc` document (HTML-based), not a native OOXML `.docx` file. PDF output is produced through the browser print dialog.
