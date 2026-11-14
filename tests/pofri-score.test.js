@@ -29,5 +29,5 @@ const critical = calculate({...baseline,
 });
 assert.ok(critical.total > elevated.total);
 assert.ok(critical.total >= 75);
-assert.equal(critical.model,"POFRI-WEIGHTED-DRAFT-1.0");
+assert.equal(critical.model,"POFRI-WEIGHTED-DRAFT-1.1");
 console.log("POFRI weighted score tests passed:",{low:low.total,elevated:elevated.total,critical:critical.total});
