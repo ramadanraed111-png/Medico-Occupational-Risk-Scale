@@ -49,6 +49,10 @@ assert.match(workflow, /section\{break-inside:auto\}table,tr,.worker-card,.compl
   "Long sections must flow across pages while keeping table rows intact.");
 assert.match(workflow, /reviewRows\(value,options=\{\},path=\[\]\)[\s\S]*options\.expanded\?' open'/,
   "Nested entries must be expanded in the PDF.");
+assert.match(workflow, /oneColumn=options\.report&&group\.keys\.some\(k=>\["ftw","exam","vitals","capacity","functional_capacity"\]\.includes\(k\)\)/,
+  "Clinical examination, vital signs, and functional capacity groups must use the report's one-column layout.");
+assert.match(workflow, /report-one-column \.completed-review-row\{display:block!important;grid-template-columns:1fr!important\}/,
+  "One-column report groups must stack labels and entered values vertically.");
 assert.match(workflow, /renderMedicalReviewGroups\(md,options\)\+renderMedicalHistory\(md\.diseases,options\)/,
   "Expanded mode must propagate through all medical groups and conditions.");
 assert.match(workflow, /const hseDisplay=\{tasks:hd\.tasks,tra:hd\.tra,job_task:hd\.job_task,emergency:hd\.emergency,ftw:hd\.ftw,notes:hd\.notes\}/,
