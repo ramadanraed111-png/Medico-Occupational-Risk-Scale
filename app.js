@@ -22,7 +22,7 @@ function calculateAge(){
 $("date-of-birth").addEventListener("change",calculateAge);
 $("assessment-date").addEventListener("change",calculateAge);
 function readForm(){
- const ids=["employee-name","registration-number","date-of-birth","age-years","job-title","task-name","assessment-date","site","evaluator-name","duration","physical","cognitive","height","confined","isolated","driving","chem","noise","heat","bio","physical-hazard","frequency","inherent-risk","controls","residual-risk","permit","tra-notes","medical-fit","capacity","medical-restrictions","medical-followup","care-access","evacuation","communications","site-support","decision-notes","recommendations"];
+ const ids=["employee-name","registration-number","date-of-birth","age-years","job-title","task-name","assessment-date","site","site-category","evaluator-name","duration","physical","cognitive","height","confined","isolated","driving","chem","noise","heat","bio","physical-hazard","frequency","inherent-risk","controls","residual-risk","permit","tra-notes","medical-fit","capacity","medical-restrictions","medical-followup","care-access","evacuation","communications","site-support","decision-notes","recommendations"];
  const data=Object.fromEntries(ids.map(id=>[id,value(id)]));
  data.age_years=calculateAge();
  data.jem_items=window.POFRI_JEM?.getItems?.()||[];
@@ -55,15 +55,21 @@ function analyze(d){
  return {code:cls,label,reasons,tone:cls==="C"||cls==="D"?"critical":cls==="B"?"conditional":""};
 }
 function preview(){
- const d=readForm();const r=analyze(d);
+ const d=readForm();
+ const r={
+  code:"PENDING_MEDICAL",
+  label:"تم إدخال المحاور المهنية الأولية — بانتظار استكمال التقييم الطبي",
+  reasons:["تم حفظ الوظيفة والمهام والتعرضات ومخاطر المهمة وجاهزية الموقع ضمن ملف العامل.","لا يصدر تصنيف للياقة قبل استكمال الطبيب لمصفوفة الحالات الطبية والقدرة الوظيفية والرأي الطبي النهائي."],
+  tone:"conditional"
+ };
  const score=window.POFRI_EXPERIMENTAL_SCORE?.calculate(d)||null;
  const box=$("decision-preview");box.hidden=false;box.className="decision "+r.tone;
  $("decision-label").textContent=r.label;$("decision-reasons").textContent=r.reasons.join(" • ");
- $("decision-caution").textContent="تصنيف A/B/C/D ناتج عن قواعد الفرز الحالية. المؤشر الرقمي أدناه تجريبي للعرض والمناقشة فقط، ولا يغيّر التصنيف أو يتجاوز بوابات السلامة أو الحكم الطبي.";
+ $("decision-caution").textContent="المؤشر الرقمي التجريبي لا يكتمل في هذه المرحلة؛ سيُعاد حسابه بعد استكمال MCM والقدرة الوظيفية بواسطة طبيب الموقع. لا يمثل تشخيصاً أو قرار لياقة.";
  const scoreBox=$("score-preview");
  if(scoreBox&&score){
    scoreBox.hidden=false;
-   $("score-total").textContent=score.total===null?"غير مكتمل — استكمل مدخلات المحاور المطلوبة":score.total+" / 100 — مستوى القلق: "+score.band;
+   $("score-total").textContent=score.total===null?"غير مكتمل — ينتظر استكمال الطبيب":score.total+" / 100 — مستوى القلق: "+score.band;
    $("score-formula").textContent=score.formula;
    $("score-meaning").textContent=score.meaning+" "+score.band_note;
    $("score-components").innerHTML=[
@@ -89,14 +95,29 @@ $("recovery-form").addEventListener("submit",async e=>{e.preventDefault();if(val
 $("logout").addEventListener("click",async()=>{await client.auth.signOut();user=null;role=null;show("auth")});
 $("preview-button").addEventListener("click",()=>{if(!$("assessment-form").reportValidity())return;preview()});
 $("assessment-form").addEventListener("submit",async e=>{
- e.preventDefault();if(!user||!role){msg("assessment-message","انتهت الجلسة؛ سجل الدخول مجدداً.","error");return;}
+ e.preventDefault();
+ if(!user||role!=="hse_admin"){msg("assessment-message","إنشاء التقييم الأولي متاح لمسؤول السلامة فقط. سجل الدخول بالحساب المخصص لذلك.","error");return;}
  if(!$("assessment-form").reportValidity())return;
- const {d,r,score}=preview();if(d.age_years===null){msg("assessment-message","تحقق من تاريخ الميلاد؛ يجب أن يكون صحيحاً وألا يتجاوز تاريخ التقييم.","error");$("date-of-birth").focus();return;}if(!d.duration.trim()||!d.recommendations.trim()){msg("assessment-message","يجب إدخال مدة المهمة/الوردية والقيود والتوصيات النهائية قبل حفظ التقييم. لا تقبل الحقول الفارغة أو المسافات فقط.","error");$( !d.duration.trim() ? "duration" : "recommendations").focus();return;}const payload={employee_name:d["employee-name"],registration_number:d["registration-number"],job_title:d["job-title"],task_name:d["task-name"],assessment_date:d["assessment-date"],site:d.site,evaluator_name:d["evaluator-name"],duration:d.duration,job_task:{physical:d.physical,cognitive:d.cognitive,height:d.height,confined_space:d.confined,isolated_work:d.isolated,driving:d.driving},exposures:{items:d.jem_items,chemical:d.chem,noise_vibration:d.noise,heat_weather:d.heat,biological:d.bio,physical_mechanical:d["physical-hazard"],frequency:d.frequency},task_risk:{inherent:d["inherent-risk"],controls:d.controls,residual:d["residual-risk"],permit:d.permit,notes:d["tra-notes"]},medical:{fit:d["medical-fit"],capacity:d.capacity,conditions:d.mcm_items,medical_review_required:d.mcm_items.some(c=>c.level===4),restrictions:d["medical-restrictions"],followup:d["medical-followup"],worker_profile:{date_of_birth:d["date-of-birth"],age_years:d.age_years}},location_emergency:{care_access:d["care-access"],evacuation:d.evacuation,communications:d.communications,site_support:d["site-support"]},decision:{code:r.code,label:r.label,reasons:r.reasons,notes:d["decision-notes"],recommendations:d.recommendations,experimental_score:score},algorithm_version:"POFRI-WEIGHTED-1.1-DRAFT",created_by:user.id};
- const b=$("save-button");b.disabled=true;b.textContent="جارٍ الحفظ...";
- const {error}=await client.from("pofri_assessments").insert(payload);
- b.disabled=false;b.textContent="حفظ تقييم POFRI";
- if(error){msg("assessment-message","لم يُحفظ التقييم. قد يلزم تطبيق ملف SQL الخاص بجدول POFRI وسياسات الصلاحيات. التفاصيل: "+error.message,"error");return;}
- $("assessment-form").reset();window.POFRI_JEM?.clear?.();window.POFRI_MCM?.clear?.();today();$("decision-preview").hidden=true;msg("assessment-message","تم حفظ تقييم POFRI بنجاح.","success");if(role==="admin")loadRecords();
+ const {d}=preview();
+ if(d.age_years===null){msg("assessment-message","تحقق من تاريخ الميلاد؛ يجب أن يكون صحيحاً وألا يتجاوز تاريخ التقييم.","error");$("date-of-birth").focus();return;}
+ if(!d.duration.trim()){msg("assessment-message","أدخل مدة المهمة أو الوردية.","error");$("duration").focus();return;}
+ if(!d.jem_items.length){msg("assessment-message","أضف خطراً مهنياً واحداً على الأقل في مصفوفة التعرضات.","error");$("jem-category").focus();return;}
+ if(!d["site-category"]){msg("assessment-message","حدد نوع الموقع ضمن مصفوفة الموقع والطوارئ.","error");$("site-category").focus();return;}
+ const parent=window.MOFASA_POFriBridge.toParent(d);
+ const section=window.MOFASA_POFriBridge.toHseSection(d);
+ const b=$("save-button");b.disabled=true;b.textContent="جارٍ إنشاء ملف MOFASA...";
+ const {data,error}=await client.rpc("mofasa_create_assessment_with_hse",{
+   p_assessment:parent,
+   p_section_data:section
+ });
+ b.disabled=false;b.textContent="إنشاء ملف MOFASA وحفظ التقييم الأولي";
+ if(error){msg("assessment-message","تعذر إنشاء ملف MOFASA. تحقق من نشر تحديث قاعدة البيانات وصلاحية مسؤول السلامة: "+error.message,"error");return;}
+ const id=typeof data==="string"?data:data?.id||data?.assessment_id||null;
+ if(!id){msg("assessment-message","لم تُرجع قاعدة البيانات رقم الملف؛ لم يتم تأكيد إنشاء السجل. حدّث قائمة الملفات قبل إعادة المحاولة.","error");return;}
+ $("assessment-form").reset();window.POFRI_JEM?.clear?.();window.POFRI_MCM?.clear?.();today();
+ $("decision-preview").hidden=true;
+ msg("assessment-message","تم إنشاء ملف MOFASA وحفظ بيانات المحاور المهنية الأولية. انتقل الملف الآن إلى مسار استكمال مسؤول السلامة والطبيب.","success");
+ document.dispatchEvent(new CustomEvent("mofasa-assessment-created",{detail:{id}}));
 });
 async function loadRecords(){
  msg("admin-message","جارٍ تحميل ملفات تقييم MOFASA الجديدة...");
