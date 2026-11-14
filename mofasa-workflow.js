@@ -360,10 +360,31 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(value&&typeof value==="object")return Object.entries(value).filter(([k,v])=>k!=="_meta"&&hasReviewValue(v)).map(([k,v])=>'<div class="completed-review-row"><strong>'+esc(reviewLabels[k]||k.replace(/_/g," "))+'</strong><div>'+reviewRows(v)+'</div></div>').join("");
   if(typeof value==="boolean")return esc(value?"نعم":"لا");return esc(reviewValue(value));
  }
+ function renderAdminMedicalHistory(diseases){
+  const items=Array.isArray(diseases?.items)?diseases.items:Array.isArray(diseases)?diseases:[];
+  const categoryNames={ENT:"أمراض الأنف والأذن والحنجرة والسمع والاتزان",Psychiatric:"الاضطرابات النفسية"};
+  const levelNames={1:"المستوى 1",2:"المستوى 2",3:"المستوى 3",4:"المستوى 4"};
+  const cards=items.filter(x=>hasReviewValue(x.disease||x.name)||hasReviewValue(x.level)||hasReviewValue(x.description)||hasReviewValue(x.category_label||x.category)).map(x=>{
+   const disease=x.disease||x.name||"حالة طبية مسجلة";
+   const category=x.category_label||categoryNames[x.category]||x.category||"";
+   const level=x.level!==undefined&&x.level!==null&&x.level!==""?(levelNames[Number(x.level)]||("المستوى "+x.level)):"";
+   const description=x.description&&String(x.description).toLowerCase()!=="none"?x.description:"";
+   return '<article class="medical-review-card"><h5>'+esc(disease)+'</h5><div class="completed-review-row"><strong>مستوى الحالة</strong><div>'+esc(level||"غير محدد")+'</div></div>'+(description?'<div class="completed-review-row"><strong>الوصف</strong><div>'+esc(description)+'</div></div>':"")+(category?'<div class="completed-review-row"><strong>فئة الخطر</strong><div>'+esc(category)+'</div></div>':"")+'</article>';
+  });
+  if(!cards.length)return "";
+  return '<section class="medical-history-review"><h4>التاريخ المرضي والحالات الطبية</h4><p class="specialist-help">العناصر الطبية المسجلة في الملف.</p><div class="completed-review-list">'+cards.join("")+'</div></section>';
+ }
  function renderCompletedReview(h,m){
   const sections=[],hd=h?.section_data||{},md=m?.section_data||{};
   if(canHseRead()&&hasReviewValue(hd))sections.push('<article class="medical-review-card"><h4>البيانات المكتملة – قسم السلامة (HSE)</h4>'+reviewRows(hd)+'</article>');
-  if(canMedicalRead()&&(hasReviewValue(md)||m?.final_decision))sections.push('<article class="medical-review-card"><h4>البيانات المكتملة – القسم الطبي</h4>'+reviewRows(md)+(m?.final_decision?'<div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(m.final_decision))+'</div></div>':"")+'</article>');
+  if(canMedicalRead()&&(hasReviewValue(md)||m?.final_decision)){
+   if(isAdmin()){
+    const adminMedical={...md};delete adminMedical.diseases;
+    sections.push('<article class="medical-review-card"><h4>البيانات المكتملة – القسم الطبي</h4>'+reviewRows(adminMedical)+renderAdminMedicalHistory(md.diseases)+(m?.final_decision?'<div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(m.final_decision))+'</div></div>':"")+'</article>');
+   }else{
+    sections.push('<article class="medical-review-card"><h4>البيانات المكتملة – القسم الطبي</h4>'+reviewRows(md)+(m?.final_decision?'<div class="completed-review-row"><strong>الرأي الطبي النهائي</strong><div>'+esc(reviewValue(m.final_decision))+'</div></div>':"")+'</article>');
+   }
+  }
   return sections.length?'<section class="specialist-section completed-review"><h4>استعراض النقاط التي تم استكمالها</h4><p class="specialist-help">يعرض هذا الملخص الحقول التي تحتوي على بيانات فقط، ويخفي الحقول الفارغة. وتُعرض لكل مستخدم الأقسام المسموح له بالاطلاع عليها فقط.</p><div class="medical-review-grid">'+sections.join("")+'</div></section>':"";
  }
  async function openAssessment(id){
