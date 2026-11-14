@@ -133,7 +133,8 @@
     if(!prepared.complete)return {total:null,band:"غير مكتمل",status:"incomplete",reason:prepared.reason};
     const engine=globalThis.POFRI_EXPERIMENTAL_SCORE;
     if(!engine?.calculate)return {total:null,band:"غير متاح",status:"engine_unavailable",reason:"محرك المؤشر التجريبي غير محمل."};
-    return {...engine.calculate(prepared.data),status:"calculated"};
+    const result=engine.calculate(prepared.data);
+    return {...result,status:result.total===null?"incomplete":"calculated",reason:result.total===null?(result.gaps||[]).join("؛ "):""};
   }
   globalThis.MOFASA_POFriBridge={toParent,toHseSection,scoreInput,calculate,capacitySummary};
 })();
