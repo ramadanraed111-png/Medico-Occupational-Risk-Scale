@@ -307,13 +307,14 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function printRoleSectionReport(section,id){
   const html=buildRoleSectionReport(section,id);if(!html)return;
   const pop=window.open("","_blank","width=1000,height=800");if(!pop){msg("يرجى السماح بالنوافذ المنبثقة لطباعة التقرير.","error");return;}
-  pop.document.open();pop.document.write(html.replace("</body>","<script>window.onload=()=>setTimeout(()=>window.print(),350)<\\/script></body>"));pop.document.close();
+  pop.document.open();pop.document.write(html);pop.document.close();
+  setTimeout(()=>{try{pop.focus();pop.print();}catch(e){msg("تعذر بدء الطباعة؛ استخدم أمر الطباعة من النافذة الجديدة.","error");}},500);
  }
  function exportRoleSectionWord(section,id){
   const html=buildRoleSectionReport(section,id);if(!html)return;
   const base=String(parent?.registration_number||parent?.worker_name||id).replace(/[^a-zA-Z0-9_-]+/g,"-");
   const name=section==="hse"?"MOFASA-HSE-Report-":"MOFASA-Medical-Report-";
-  const blob=new Blob(["\\ufeff",html],{type:"application/msword;charset=utf-8"});
+  const blob=new Blob(["\uFEFF",html],{type:"application/msword;charset=utf-8"});
   const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name+base+".doc";document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);msg("تم تجهيز التقرير المنفصل بنجاح.","success");
  }
