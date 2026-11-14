@@ -195,7 +195,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function buildFtwReportDocument(id){
   if(!canMedicalRead())return null;
   const en=window.MOFASA_I18N?.getLanguage?.()==="en",p=parent||{},h=hseRow?.section_data||{},m=medicalRow?.section_data||{},hf=h.ftw||{},mf=m.ftw||{},exam=m.exam||{},v=mf.vitals||{};
-  const hazards=h.hazards?.items||[],tasks=h.tasks?.items||[],demands=h.demands?.selected||[],fitness=m.capacity?.items||[],labs=m.labs?.items||[];
+  const hazards=h.hazards?.items||[],tasks=h.tasks?.items||[],demands=h.demands?.selected||[],fitness=m.capacity?.items||[],labs=m.labs?.items||[],jobTask=h.job_task||{},tra=h.tra||{};
   const decision=({fit:"FIT",fit_with_restrictions:"FIT with Restrictions",unfit:"Unfit",temporarily_unfit:"Temporary Unfit",specialist_review:"Specialist Review"})[medicalRow?.final_decision]||"Pending";
   const clinicalValue=(group,key)=>exam[group]?.[key]??"";
   const norm=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");
@@ -228,12 +228,11 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   }
   clinical.push(["Clinical Examination Notes",exam.notes||""]);
   const info=ftwPrintSection("Employee Information",[
-   ["Name",p.worker_name],["Pay Roll / Registration No.",p.registration_number],["Age",mf.worker_age],
+   ["Name",p.worker_name],["Pay Roll / Registration No.",p.registration_number],["Date of Birth",jobTask.worker_profile?.date_of_birth],["Age",mf.worker_age||jobTask.worker_profile?.age_years],
    ["Job Title",p.job_title],["Department",mf.department],["Location",p.site],
    ["Task",p.task_name],["Type of Assessment",mf.assessment_type],["Date of Assessment",p.assessment_date],
    ["Shift Duration",p.shift_duration]
   ]);
-  const jobTask=h.job_task||{},tra=h.tra||{};
   const hse=ftwPrintSection("HSE Output — Job Demands",[
    ["Core Tasks",tasks],["Employee Safety-Critical Duties",h.tasks?.safety_critical],["Safety-Critical Decision Maker",hf.safety_critical],["Safety-Critical Role Details",hf.safety_critical_specify],
    ["Physical Effort",jobTask.physical],["Cognitive / Attention Demand",jobTask.cognitive],["Work at Heights",jobTask.height],["Confined Space Work",jobTask.confined_space],["Isolated Work",jobTask.isolated_work],["Driving / Equipment Operation",jobTask.driving],
