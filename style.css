@@ -424,3 +424,33 @@ html[dir="ltr"] .module-nav{direction:ltr}
 .completed-review .medical-review-subgroup>.review-disclosure-body{padding:5px 10px 8px}
 .completed-review .medical-review-section>.review-disclosure-body{padding:8px}
 .completed-review .medical-review-section>.review-disclosure-body>.medical-review-subgroup:first-child{margin-top:0}
+
+
+/* HSE form: focused compact entry; submitted section becomes results-only */
+#mofasa-hse-form{gap:7px}
+#mofasa-hse-form>h4{font-size:15px;line-height:1.35}
+#mofasa-hse-form>.specialist-help{padding:6px 9px;font-size:10px;line-height:1.5}
+#mofasa-hse-form>.specialist-grid{gap:7px;grid-template-columns:repeat(2,minmax(0,1fr))}
+#mofasa-hse-form .specialist-section{padding:8px;border:1px solid #e2eaec;border-radius:9px;background:#fff}
+#mofasa-hse-form .specialist-section h4{font-size:12px;line-height:1.4;margin:0 0 4px}
+#mofasa-hse-form .specialist-section>p{font-size:10px;line-height:1.45;margin:0 0 5px}
+#mofasa-hse-form label{font-size:10px;line-height:1.35;gap:3px;margin:0 0 5px}
+#mofasa-hse-form input,#mofasa-hse-form select{min-height:30px;padding:4px 7px;font-size:11px}
+#mofasa-hse-form textarea{min-height:38px;padding:5px 7px;font-size:11px}
+#mofasa-hse-form .specialist-fieldset{padding:6px;margin:5px 0}
+#mofasa-hse-form .specialist-fieldset legend{font-size:10px}
+#mofasa-hse-form .specialist-check{padding:4px 6px;font-size:10px;line-height:1.35}
+#mofasa-hse-form .specialist-check input{min-height:13px;width:13px;height:13px}
+#mofasa-hse-form .specialist-actions{gap:6px}
+#mofasa-hse-form .specialist-actions button{min-height:32px;padding:5px 10px;font-size:11px}
+#mofasa-hse-form #mh-hazards-editor .table-wrap{max-height:180px}
+#mofasa-hse-form #mh-hazards-editor th,#mofasa-hse-form #mh-hazards-editor td{font-size:9px;padding:4px 5px;line-height:1.35}
+#mofasa-hse-form #mh-notes{min-height:42px}
+/* Once submitted/locked, the completed-review panel above is the sole HSE display.
+   Hide the disabled data-entry controls to avoid repeating empty choices and fields. */
+#mofasa-hse-form:has(#mh-task-items:disabled)>.specialist-grid,
+#mofasa-hse-form:has(#mh-task-items:disabled)>.specialist-actions{display:none!important}
+#mofasa-hse-form:has(#mh-task-items:disabled)>.specialist-help:last-child{margin:0;padding:7px 10px;border:1px solid #d7e7df;background:#f2f8f4;color:#315d49;font-size:11px}
+@media(max-width:760px){
+ #mofasa-hse-form>.specialist-grid{grid-template-columns:1fr}
+}
