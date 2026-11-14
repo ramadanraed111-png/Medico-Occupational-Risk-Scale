@@ -538,18 +538,13 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const target=isH?"مسؤول السلامة":"طبيب الموقع";
   const reason=prompt("اكتب سبب إعادة الملف إلى "+target+" لاستكماله:");
   if(reason===null)return;
-  const meta={...(row.section_data?._meta||{}),admin_returned_at:new Date().toISOString(),admin_returned_by:user.id,admin_returned_by_email:user.email||"",admin_return_reason:reason.trim()||"يرجى مراجعة البيانات واستكمال النواقص",return_target:isH?"hse_admin":"medical_admin"};
-  const payload={section_data:{...(row.section_data||{}),_meta:meta},status:"draft",submitted_at:null,updated_by:user.id};
-  if(!isH)payload.final_decision=null;
-  const table=isH?"mofasa_hse_sections":"mofasa_medical_sections";
-  const {error}=await client.from(table).update(payload).eq("id",row.id).eq("status","submitted");
+  const {error}=await client.rpc("mofasa_return_section",{
+    p_assessment_id:selected,
+    p_section:section,
+    p_reason:reason.trim()
+  });
   if(error){msg("تعذرت إعادة القسم للاستكمال: "+error.message,"error");return;}
-  if(isH&&medicalRow?.status==="submitted"){
-   const medMeta={...(medicalRow.section_data?._meta||{}),admin_returned_at:new Date().toISOString(),admin_returned_by:user.id,admin_returned_by_email:user.email||"",admin_return_reason:"أعيد قسم السلامة للمراجعة؛ يلزم إعادة مراجعة واعتماد الرأي الطبي بعد استكماله.",return_target:"medical_admin"};
-   const medUpdate=await client.from("mofasa_medical_sections").update({section_data:{...(medicalRow.section_data||{}),_meta:medMeta},status:"draft",submitted_at:null,final_decision:null,updated_by:user.id}).eq("id",medicalRow.id).eq("status","submitted");
-   if(medUpdate.error){msg("أُعيد قسم السلامة، لكن تعذر إلغاء الاعتماد الطبي السابق: "+medUpdate.error.message+"؛ يرجى مراجعة الطبيب يدوياً.","error");return;}
-  }
-  msg("أُعيد القسم إلى "+target+" وأصبح متاحاً للاستكمال. سبب الإعادة: "+meta.admin_return_reason,"success");
+  msg(isH?"تمت إعادة قسم السلامة، وأُعيدت المراجعة الطبية للطبيب عند الحاجة.":"تمت إعادة القسم الطبي إلى طبيب الموقع للاستكمال.","success");
   await loadList();await openAssessment(selected);
  }
  async function saveSection(section,status){
