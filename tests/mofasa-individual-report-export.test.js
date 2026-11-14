@@ -33,6 +33,10 @@ assert.match(workflow, /path\.includes\("vitals"\)&&\["glucose","hba1c"\]/,
   "Glucose and HbA1c must be omitted from the vital-signs subsection.");
 assert.match(workflow, /path\.includes\("capacity"\)\|\|path\.includes\("functional_capacity"\).*key==="item"/,
   "The functional capacity report must omit the repeated functional-requirement row.");
+assert.match(workflow, /path.includes\("diseases"\)&&\["hazard","name","level","severity","severity_label","severity_description","risk_category","category","category_label","risk_level"\]/,
+  "The individual report must omit disease risk labels and severity levels from medical-history entries.");
+assert.match(workflow, /reviewRows\(x,options,\["diseases"\]\)/,
+  "Medical-history entries must be rendered in the disease-specific report context.");
 assert.match(workflow, /options\.report\?"":'<span>'/,
   "The exported report must not show item-count labels.");
 assert.match(workflow, /renderPofriReport\(medicalRow\?\.section_data\?\.preliminary_analysis\)/,
@@ -57,7 +61,7 @@ assert.match(workflow, /grid-template-columns:1fr;gap:7px;align-items:start/,
   "Individual report sections must print in a clear single-column sequence.");
 assert.match(workflow, /border-right:3px solid #17495a/,
   "The worker header and report sections must use a refined visual hierarchy.");
-assert.match(workflow, /const body=reviewRows\(x,options\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
-  "Medical history entries and physician notes must be fully rendered.");
+assert.match(workflow, /const body=reviewRows\(x,options,\["diseases"\]\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
+  "Medical history entries and physician notes must be fully rendered in the disease-specific report context.");
 
 console.log("MOFASA individual PDF/Word export regression tests passed.");

@@ -354,6 +354,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function shouldHideReportField(key,path,options){
   if(!options.report)return false;
   if(options.section==="hse"&&path.includes("worker_profile")&&["age_years","date_of_birth"].includes(key))return true;
+  if(path.includes("diseases")&&["hazard","name","level","severity","severity_label","severity_description","risk_category","category","category_label","risk_level"].includes(key))return true;
   if(options.section==="medical"){
    if(["department","worker_age","physician_name","physician_pr","assessment_type"].includes(key))return true;
    if(path.includes("exam")&&path.includes("basic")&&["blood_pressure","bp"].includes(key))return true;
@@ -379,7 +380,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   const items=Array.isArray(diseases?.items)?diseases.items:Array.isArray(diseases)?diseases:[];
   const cards=items.filter(x=>hasCompletedReviewValue(x)&&String(x.status||"").toLowerCase()!=="not_assessed").map(x=>{
    const disease=x.disease||x.name||x.condition||"حالة طبية مسجلة";
-   const body=reviewRows(x,options);
+   const body=reviewRows(x,options,["diseases"]);
    return body?'<details class="review-disclosure review-entry"'+(options.expanded?' open':'')+'><summary><strong>'+esc(disease)+'</strong></summary><div class="review-disclosure-body">'+body+'</div></details>':"";
   }).filter(Boolean);
   const notes=String(diseases?.notes||"").trim();
