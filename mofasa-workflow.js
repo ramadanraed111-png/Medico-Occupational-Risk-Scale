@@ -246,10 +246,26 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    ["Weight (kg)",v.weight],["Height (cm)",v.height]
   ]);
   const clin=ftwPrintSection("Clinical Examination Findings",clinical);
-  const func=ftwPrintSection("Functional Capacity Assessment",[
-   ["Cognitive Capacity",mf.cognitive_capacity],
-   ["Functional Capacity Notes",m.capacity?.notes]
-  ]);
+  const functionalLabels={
+   "Normal Consciousness":"\u0645\u0633\u062a\u0648\u0649 \u0648\u0639\u064a \u0637\u0628\u064a\u0639\u064a",
+   "Adequate Mobility":"\u0642\u062f\u0631\u0629 \u062d\u0631\u0643\u064a\u0629 \u0645\u0646\u0627\u0633\u0628\u0629",
+   "Adequate Hearing":"\u0643\u0641\u0627\u0621\u0629 \u0633\u0645\u0639\u064a\u0629 \u0645\u0646\u0627\u0633\u0628\u0629",
+   "Adequate Vision":"\u0643\u0641\u0627\u0621\u0629 \u0625\u0628\u0635\u0627\u0631 \u0645\u0646\u0627\u0633\u0628\u0629",
+   "No Uncontrolled Epilepsy":"\u0639\u062f\u0645 \u0648\u062c\u0648\u062f \u0635\u0631\u0639 \u063a\u064a\u0631 \u0645\u0633\u064a\u0637\u0631 \u0639\u0644\u064a\u0647",
+   "Safe Ladder Climbing":"\u0627\u0644\u0642\u062f\u0631\u0629 \u0639\u0644\u0649 \u0635\u0639\u0648\u062f \u0627\u0644\u0633\u0644\u0627\u0644\u0645 \u0628\u0623\u0645\u0627\u0646",
+   "Normal Balance":"\u0627\u062a\u0632\u0627\u0646 \u0637\u0628\u064a\u0639\u064a",
+   "Ability to Wear Respirator":"\u0627\u0644\u0642\u062f\u0631\u0629 \u0639\u0644\u0649 \u0627\u0631\u062a\u062f\u0627\u0621 \u062c\u0647\u0627\u0632 \u0627\u0644\u062a\u0646\u0641\u0633",
+   "Cardiovascular Fitness":"\u0627\u0644\u0643\u0641\u0627\u0621\u0629 \u0627\u0644\u0642\u0644\u0628\u064a\u0629 \u0627\u0644\u0648\u0639\u0627\u0626\u064a\u0629"
+  };
+  const functionalStatuses={met:"\u0645\u0633\u062a\u0648\u0641\u0649",restricted:"\u0645\u0633\u062a\u0648\u0641\u0649 \u0628\u0642\u064a\u0648\u062f",not_met:"\u063a\u064a\u0631 \u0645\u0633\u062a\u0648\u0641\u0649",not_assessed:"\u0644\u0645 \u064a\u0642\u064a\u0651\u0645"};
+  const functionalItems=fitness.map(x=>{
+   const raw=String(x.item||"").trim(), english=raw.split("/")[0].trim();
+   const arabic=raw.includes("/")?raw.split("/").slice(1).join("/").trim():(functionalLabels[english]||raw);
+   const status=functionalStatuses[x.status]||String(x.status||"");
+   return '<div class="functional-item"><h3>'+esc(arabic)+'</h3><p><strong>'+esc(status)+'</strong></p></div>';
+  }).join("");
+  const notes=ftwPrintValue(m.capacity?.notes);
+  const func=(functionalItems||notes)?'<section class="report-section" dir="rtl"><h2>\u0627\u0644\u0642\u062f\u0631\u0629 \u0627\u0644\u0648\u0638\u064a\u0641\u064a\u0629</h2>'+functionalItems+(notes?'<p><strong>\u0645\u0644\u0627\u062d\u0638\u0627\u062a:</strong> '+esc(notes)+'</p>':'')+'</section>':"";
   const investigations=ftwPrintSection("Labs & Imaging Findings",labs.map(x=>[x.test,[x.result,x.unit,x.status,x.date].filter(Boolean).join(" — ")]));
   const additional=ftwPrintSection("Additional Investigations",[
    ["Investigations",mf.additional_investigations],["Investigation Details",mf.additional_investigation_details],
