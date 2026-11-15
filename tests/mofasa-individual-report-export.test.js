@@ -21,8 +21,14 @@ assert.match(workflow, /function renderPofriReport\(score\)[\s\S]*indicator-summ
   "The report may show only the compact overall indicator result.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("function renderPofriReport(score)"), workflow.indexOf("async function buildFtwReportDocument(id)")), /0\.30R|components\.R|details\.hazard_count|site_breakdown|المعادلة والأوزان/,
   "The compact indicator must not expose formulas, weights, or component breakdowns.");
-assert.match(workflow, /renderCompletedReview\(hseRow,medicalRow,\{includeScore:false,expanded:true,report:true\}\)/,
-  "The PDF must render the complete HSE and medical review in report-only mode.");
+assert.match(workflow, /const adminData=\{[\s\S]*?const adminSection=renderReportKeyValueTable\(adminData/,
+  "The PDF must begin with a dedicated administrative information section.");
+assert.match(workflow, /ثانياً: البيانات المهنية[\s\S]*renderJemReview\(hseRow\)[\s\S]*renderSelectedDemands\(hd\.demands\)/,
+  "The professional section must group job, HSE, JEM, and job-demand information.");
+assert.match(workflow, /ثالثاً: البيانات الطبية[\s\S]*renderMedicalHistory\(md\.diseases[\s\S]*renderMedicalReviewGroups\(md/,
+  "The medical section must follow the professional section and contain medical information.");
+assert.match(workflow, /report-kv-table th:last-child,\.report-kv-table td:last-child\{width:76%;white-space:nowrap\}/,
+  "The report value column must use most of the table width and keep values on one line where possible.");
 assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
 assert.match(workflow, /options\.section==="medical"[\s\S]*department","worker_age","physician_name","physician_pr","assessment_type"/,
@@ -85,8 +91,8 @@ assert.match(workflow, /report-signatures\{display:grid;grid-template-columns:1f
   "The two signature fields must be aligned side by side.");
 assert.match(workflow, /options\.report\?"":'<h4>استعراض النقاط المستكملة فقط<\/h4><p class="specialist-help">/,
   "The report must omit the introductory completed-items heading and explanatory paragraph.");
-assert.match(workflow, /const workerRows=\[[\s\S]*?\["تاريخ التقييم",p\.assessment_date\][\s\S]*?const worker=/,
-  "The worker header must include the assessment date through its structured metadata rows.");
+assert.match(workflow, /const adminData=\{[\s\S]*?"تاريخ التقييم":p\.assessment_date[\s\S]*?const adminSection=/,
+  "Administrative details, including assessment date, must be shown in the first report section.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("const workerRows="), workflow.indexOf("const signatures=")), /hse_status|medical_status/,
   "The worker header must not display HSE or medical submission status labels.");
 assert.match(workflow, /border-right:3px solid #17495a/,
