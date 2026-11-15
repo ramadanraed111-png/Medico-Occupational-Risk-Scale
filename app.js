@@ -127,7 +127,7 @@ $("assessment-form").addEventListener("submit",async e=>{
  if(!id){msg("assessment-message","لم تُرجع قاعدة البيانات رقم الملف؛ لم يتم تأكيد إنشاء السجل. حدّث قائمة الملفات قبل إعادة المحاولة.","error");return;}
  $("assessment-form").reset();window.POFRI_JEM?.clear?.();window.POFRI_MCM?.clear?.();today();
  $("decision-preview").hidden=true;
- msg("assessment-message","تم إنشاء ملف MOFASA وحفظ بيانات المحاور المهنية الأولية. انتقل الملف الآن إلى مسار استكمال مسؤول السلامة والطبيب.","success");
+ msg("assessment-message","تم إنشاء ملف MOFASA وحفظ بيانات التقييم الأولي. يستكمل مسؤول السلامة قسمه ويرسله بصورة مستقلة، ثم يمكنه طباعة تقرير السلامة دون انتظار الطبيب. ويستكمل الطبيب القسم الطبي ويرسله بصورة مستقلة عن حالة قسم السلامة.","success");
  document.dispatchEvent(new CustomEvent("mofasa-assessment-created",{detail:{id}}));
 });
 async function loadRecords(){
