@@ -53,6 +53,7 @@ assert.match(workflow, /const report=header\+worker[\s\S]*\+signatures\+[\s\S]*<
   "Signature fields must appear before the final report disclaimer.");
 assert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
   "Medical report sections must use four adjacent columns.");
+assert.match(workflow, /review-section,\.review-entry,\.report-section,\.report-audit\{[^}]*break-inside:auto/,
   "Sections must remain flowable rather than being clipped to force a page break.");
 assert.match(workflow, /\.medical-review-section>\.review-disclosure-body>\.review-group\{grid-column:1\/-1\}/,
   "Long medical-history groups must retain full width in the compact layout.");
