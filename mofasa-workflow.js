@@ -501,9 +501,8 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    ["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases"].forEach(k=>{if(Object.prototype.hasOwnProperty.call(md||{},k)&&hasCompletedReviewValue(md[k]))reportTableRows(md[k],rows);});
    Object.entries(md||{}).forEach(([k,v])=>{if(!["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases","preliminary_analysis","_meta","iofi"].includes(k)&&hasCompletedReviewValue(v))reportTableRows(v,rows);});
    const movedFields=["worker_age","department","assessment_type","physician_name","physician_pr","medical_history"];
-   const movedLabels=movedFields.map(k=>reviewLabels[k]||k.replace(/_/g," "));
-   const movedValues=new Set(movedFields.map(k=>String(md?.ftw?.[k]??"").trim()).filter(Boolean));
-   const filteredRows=rows.filter(([label,value])=>!movedLabels.some(k=>String(label).toLowerCase().endsWith(k.toLowerCase()))&&!movedValues.has(String(value??"").trim()));
+   const movedLabels=movedFields.flatMap(k=>[reviewLabels[k]||k.replace(/_/g," "),k,k.replace(/_/g," ")]);
+   const filteredRows=rows.filter(([label])=>!movedLabels.some(k=>String(label).toLowerCase().endsWith(k.toLowerCase())));
    return renderReportRowsTable(filteredRows,"report-medical-flat-table");
   }
 
