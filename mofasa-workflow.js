@@ -491,7 +491,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  function renderReportRowsTable(rows,sectionClass=""){
   if(!rows.length)return "";
   return '<div class="report-kv-wrap '+sectionClass+'"><table class="report-kv-table"><tbody>'+rows.map(([label,value])=>'<tr><td>'+esc(label)+'</td><td>'+esc(value)+'</td></tr>').join("")+'</tbody></table></div>';
- }(md,options={}){
+ function renderMedicalReviewGroups(md,options={}){
   if(options.report){
    const rows=[];
    ["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases"].forEach(k=>{if(Object.prototype.hasOwnProperty.call(md||{},k)&&hasCompletedReviewValue(md[k]))reportTableRows(md[k],rows);});
