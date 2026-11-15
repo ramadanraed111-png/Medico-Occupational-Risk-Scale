@@ -85,8 +85,10 @@ assert.match(workflow, /report-signatures\{display:grid;grid-template-columns:1f
   "The two signature fields must be aligned side by side.");
 assert.match(workflow, /options\.report\?"":'<h4>استعراض النقاط المستكملة فقط<\/h4><p class="specialist-help">/,
   "The report must omit the introductory completed-items heading and explanatory paragraph.");
-assert.match(workflow, /const worker=.*?worker-meta[\s\S]*?تاريخ التقييم[\s\S]*?\/div><\/div><\/section>/,
-  "The report header must not display HSE or medical submission status labels.");
+assert.match(workflow, /const workerRows=\[[\s\S]*?\["تاريخ التقييم",p\.assessment_date\][\s\S]*?const worker=/,
+  "The worker header must include the assessment date through its structured metadata rows.");
+assert.doesNotMatch(workflow.slice(workflow.indexOf("const workerRows="), workflow.indexOf("const signatures=")), /hse_status|medical_status/,
+  "The worker header must not display HSE or medical submission status labels.");
 assert.match(workflow, /border-right:3px solid #17495a/,
   "The worker header and report sections must use a refined visual hierarchy.");
 assert.match(workflow, /const body=reviewRows\(x,options,\["diseases"\]\);[\s\S]*ملاحظات الطبيب على التاريخ المرضي/,
