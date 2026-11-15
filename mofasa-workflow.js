@@ -199,8 +199,11 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(!isAdmin())return null;
   const p=parent||{};
   const hd=hseRow?.section_data||{},md=medicalRow?.section_data||{},adminFtw=md.ftw||{};
-  const adminData={"اسم العامل":p.worker_name,"الرقم الوظيفي":p.registration_number,"تاريخ التقييم":p.assessment_date,"الموقع":p.site,"نوع التقييم":adminFtw.assessment_type};
-  const professionalData={"المسمى الوظيفي":p.job_title,"المهمة":p.task_name,"مدة الوردية":p.shift_duration,"الإدارة":adminFtw.department};
+  const actorName=value=>{const raw=String(value||"").trim();if(!raw)return "";const part=raw.includes("@")?raw.split("@")[0]:raw;return part.replace(/[._-]+/g," ").trim();};
+  const hseOfficer=hd._meta?.safety_officer_name||hd.ftw?.safety_officer_name||actorName(hd._meta?.last_edited_by_email);
+  const physician=adminFtw.physician_name||actorName(md._meta?.last_edited_by_email);
+  const adminData={"اسم العامل":p.worker_name,"الرقم الوظيفي":p.registration_number,"العمر عند التقييم":adminFtw.worker_age,"تاريخ التقييم":p.assessment_date,"الموقع":p.site,"الإدارة":adminFtw.department,"نوع التقييم":adminFtw.assessment_type,"اسم الطبيب":physician,"اسم مسؤول السلامة":hseOfficer,"نتائج التاريخ المرضي":adminFtw.medical_history};
+  const professionalData={"المسمى الوظيفي":p.job_title,"المهمة":p.task_name,"مدة الوردية":p.shift_duration};
   const adminSection=renderReportKeyValueTable(adminData,"report-admin-table");
   const professionalRows=[];
   const professionalMeta=renderReportKeyValueTable(professionalData,"report-professional-table");
@@ -497,7 +500,11 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
    const rows=[];
    ["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases"].forEach(k=>{if(Object.prototype.hasOwnProperty.call(md||{},k)&&hasCompletedReviewValue(md[k]))reportTableRows(md[k],rows);});
    Object.entries(md||{}).forEach(([k,v])=>{if(!["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases","preliminary_analysis","_meta","iofi"].includes(k)&&hasCompletedReviewValue(v))reportTableRows(v,rows);});
-   return renderReportRowsTable(rows,"report-medical-flat-table");
+   const movedFields=["worker_age","department","assessment_type","physician_name","physician_pr","medical_history"];
+   const movedLabels=movedFields.map(k=>reviewLabels[k]||k.replace(/_/g," "));
+   const movedValues=new Set(movedFields.map(k=>String(md?.ftw?.[k]??"").trim()).filter(Boolean));
+   const filteredRows=rows.filter(([label,value])=>!movedLabels.some(k=>String(label).toLowerCase().endsWith(k.toLowerCase()))&&!movedValues.has(String(value??"").trim()));
+   return renderReportRowsTable(filteredRows,"report-medical-flat-table");
   }
 
   const groups=[
