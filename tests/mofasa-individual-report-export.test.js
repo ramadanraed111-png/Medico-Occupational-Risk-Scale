@@ -43,7 +43,15 @@ assert.match(workflow, /renderPofriReport\(medicalRow\?\.section_data\?\.prelimi
   "The PDF may append only the compact overall indicator result.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwReportDocument(id)"), workflow.indexOf("function printFtwReport(id)")), /mofasa_audit_log|mofasa_archive_log|سجل التدقيق|سجل الأرشيف|auditHtml/,
   "The individual report must not load or render audit or archive logs.");
-assert.match(workflow, /@page\{size:A4 portrait;margin:9mm 9mm 10mm\}/,\n  "The individual report must use balanced A4 portrait margins for reading and printing.");\nassert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
+assert.match(workflow, /@page\{size:A4 portrait;margin:9mm 9mm 10mm\}/,
+  "The individual report must use balanced A4 portrait margins for reading and printing.");
+assert.match(workflow, /body\{font:8pt\/1\.32 Tahoma,Arial,sans-serif;color:#203640\}/,
+  "The individual report must use legible typography and balanced line spacing.");
+assert.match(workflow, /\.jem-table th,\.jem-table td[\s\S]*background:#e5eef0/,
+  "The report tables must share a consistent, readable JEM-inspired visual style.");
+assert.match(workflow, /const report=header\+worker[\s\S]*\+signatures\+[\s\S]*<footer>/,
+  "Signature fields must appear before the final report disclaimer.");
+assert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
   "Medical report sections must use four adjacent columns.");
 assert.match(workflow, /body\{font:8pt\/1\.32 Tahoma,Arial,sans-serif;color:#203640\}/,\n  "The individual report must use legible typography and balanced line spacing.");\nassert.match(workflow, /\.jem-table th,\.jem-table td[\s\S]*background:#e5eef0/,\n  "The report tables must share a consistent, readable JEM-inspired visual style.");\nassert.match(workflow, /const report=header\+worker[\s\S]*\+signatures\+[\s\S]*<footer>/,\n  "Signature fields must appear before the final report disclaimer.");\nassert.match(workflow, /review-section,\.review-entry,\.report-section,\.report-audit\{[^}]*break-inside:auto/,
   "Sections must remain flowable rather than being clipped to force a page break.");
