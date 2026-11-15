@@ -473,7 +473,19 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   return rows;
  }
  function renderReportKeyValueTable(data,sectionClass=""){
-  const rows=reportTableRows(data).filter(([label,value])=>String(label||"").trim()&&String(value??"").trim());
+  const rows=reportTableRows(data).filter(([label,value])=>{
+   const text=String(label||"").trim(),content=String(value??"").trim();
+   if(!text&&!content)return false;
+   // Keep the super-admin's consolidated report focused: omit redundant template headings
+   // and the generic default consciousness item, without changing stored assessment data.
+   if(isAdmin()&&(
+    text==="نموذج اللياقة للعمل"||
+    text==="نموذج اللياقة للعمل — العلامات الحيوية"||
+    text==="الفحص السريري — الفحص الأساس"||
+    text.includes("Normal Consciousness")
+   ))return false;
+   return true;
+  });
   if(!rows.length)return "";
   return '<div class="report-kv-wrap '+sectionClass+'"><table class="report-kv-table"><thead><tr><th>المتغير</th><th>القيمة</th></tr></thead><tbody>'+rows.map(([label,value])=>'<tr><td>'+esc(label)+'</td><td>'+esc(value)+'</td></tr>').join("")+'</tbody></table></div>';
  }
