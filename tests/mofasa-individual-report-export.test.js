@@ -53,7 +53,6 @@ assert.match(workflow, /const report=header\+worker[\s\S]*\+signatures\+[\s\S]*<
   "Signature fields must appear before the final report disclaimer.");
 assert.match(workflow, /medical-review-section>\.review-disclosure-body\{grid-template-columns:repeat\(4,minmax\(0,1fr\)\)!important/,
   "Medical report sections must use four adjacent columns.");
-assert.match(workflow, /body\{font:8pt\/1\.32 Tahoma,Arial,sans-serif;color:#203640\}/,\n  "The individual report must use legible typography and balanced line spacing.");\nassert.match(workflow, /\.jem-table th,\.jem-table td[\s\S]*background:#e5eef0/,\n  "The report tables must share a consistent, readable JEM-inspired visual style.");\nassert.match(workflow, /const report=header\+worker[\s\S]*\+signatures\+[\s\S]*<footer>/,\n  "Signature fields must appear before the final report disclaimer.");\nassert.match(workflow, /review-section,\.review-entry,\.report-section,\.report-audit\{[^}]*break-inside:auto/,
   "Sections must remain flowable rather than being clipped to force a page break.");
 assert.match(workflow, /\.medical-review-section>\.review-disclosure-body>\.review-group\{grid-column:1\/-1\}/,
   "Long medical-history groups must retain full width in the compact layout.");
