@@ -198,8 +198,8 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  async function buildFtwReportDocument(id){
   if(!isAdmin())return null;
   const p=parent||{};
-  const hd=hseRow?.section_data||{},md=medicalRow?.section_data||{},ftw=md.ftw||{};
-  const adminData={"اسم العامل":p.worker_name,"الرقم الوظيفي":p.registration_number,"تاريخ التقييم":p.assessment_date,"الموقع":p.site,"نوع التقييم":ftw.assessment_type};
+  const hd=hseRow?.section_data||{},md=medicalRow?.section_data||{},adminFtw=md.ftw||{};
+  const adminData={"اسم العامل":p.worker_name,"الرقم الوظيفي":p.registration_number,"تاريخ التقييم":p.assessment_date,"الموقع":p.site,"نوع التقييم":adminFtw.assessment_type};
   const professionalData={"المسمى الوظيفي":p.job_title,"المهمة":p.task_name,"مدة الوردية":p.shift_duration,"الإدارة":ftw.department};
   const adminSection=renderReportKeyValueTable(adminData,"report-admin-table");
   const professionalRows=[];
