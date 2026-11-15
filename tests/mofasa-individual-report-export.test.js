@@ -77,8 +77,10 @@ assert.match(workflow, /report-no-label>strong\{display:none!important\}/,
   "The print report must suppress the labels for registered items and the fitness form without dropping their values.");
 assert.match(workflow, /report-no-heading>summary\{display:none!important\}/,
   "The functional-capacity heading must be omitted from the print report.");
-assert.match(workflow, /renderMedicalReviewGroups\(md,options\)\+renderMedicalHistory\(md\.diseases,options\)/,
+assert.match(workflow, /renderMedicalHistory\(md\.diseases,options\)\+renderMedicalReviewGroups\(md,options\)/,
   "Expanded mode must propagate through all medical groups and conditions.");
+assert.match(workflow, /const reportOptions=\{expanded:true,report:true\};[\s\S]*renderMedicalReviewGroups\(md,reportOptions\)\+renderMedicalHistory\(md\.diseases,reportOptions\)/,
+  "The standalone physician report must render the completed medical section with expanded report options.");
 assert.match(workflow, /const hseDisplay=\{tasks:hd\.tasks,tra:hd\.tra,job_task:hd\.job_task,emergency:hd\.emergency,ftw:hd\.ftw,notes:hd\.notes\}/,
   "The report must retain and order all completed HSE inputs while excluding internal intake metadata.");
 assert.match(workflow, /effective:"فعالة ومتحقق منها"[\s\S]*remote:"نائي \/ معزول"/,
