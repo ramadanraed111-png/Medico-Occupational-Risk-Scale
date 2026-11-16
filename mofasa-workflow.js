@@ -192,8 +192,9 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   return '<section class="report-section"><h2>Hazardous Exposures</h2><table class="ftw-table"><thead><tr><th>Hazard Category</th><th>Hazard</th><th>Severity</th><th>Exposure Frequency</th><th>Frequency Scale</th><th>Duration Scale</th><th>Probability Scale</th><th>Control Effectiveness</th><th>Controls</th><th>Residual Risk</th></tr></thead><tbody>'+clean.map(x=>'<tr>'+[x.category,x.name,x.severity_label||x.severity,exposureLabels[x.frequency]||x.frequency,x.frequency_scale,x.duration_scale,x.probability_scale,x.control_effectiveness,x.controls,x.residual].map(v=>'<td>'+esc(ftwPrintValue(v)||"—")+'</td>').join("")+'</tr>').join("")+'</tbody></table></section>';
  }
  function renderPofriReport(score){
+  const reportClass="indicator-summary";
   const scoreValue=score?.total,scoreBand=score?.band;
-  return '<section class="indicator-summary" data-score="'+esc(scoreValue??"")+'" data-band="'+esc(scoreBand??"")+'">'+renderIndexReport(hseRow?.section_data||{},medicalRow?.section_data||{})+'</section>';
+  return '<section class="'+reportClass+'" data-score="'+esc(scoreValue??"")+'" data-band="'+esc(scoreBand??"")+'">'+renderIndexReport(hseRow?.section_data||{},medicalRow?.section_data||{})+'</section>';
  }
 
  async function buildFtwReportDocument(id,language=reportLanguage){
