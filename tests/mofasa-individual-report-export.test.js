@@ -27,7 +27,7 @@ assert.match(workflow, /ثانياً: البيانات المهنية[\s\S]*rend
   "The professional section must group job, HSE, JEM, and job-demand information.");
 assert.match(workflow, /ثالثاً: البيانات الطبية[\s\S]*renderMedicalHistory\(md\.diseases[\s\S]*renderMedicalReviewGroups\(md/,
   "The medical section must follow the professional section and contain medical information.");
-assert.match(workflow, /report-kv-table th:last-child,\.report-kv-table td:last-child\{width:76%;white-space:nowrap\}/,
+assert.match(workflow, /report-kv-table td:first-child\{width:30%;font-weight:700;color:#31545e\}\.report-kv-table td:last-child\{width:70%\}/,
   "The report value column must use most of the table width and keep values on one line where possible.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("const adminData="), workflow.indexOf("const professionalData=")), /اسم العامل|الرقم الوظيفي|تاريخ التقييم|الموقع|نتائج التاريخ المرضي/,\n  "Worker identity and medical history must not be repeated in the administrative table.");\nassert.match(workflow, /const workerRows=\\[\\["الرقم الوظيفي",p\\.registration_number\\],\\["تاريخ التقييم",p\\.assessment_date\\],\\["الموقع",p\\.site\\]\\]/,\n  "Worker identity metadata must appear once in the report header card.");\nassert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
