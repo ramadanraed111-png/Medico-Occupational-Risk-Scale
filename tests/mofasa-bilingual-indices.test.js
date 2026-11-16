@@ -10,7 +10,7 @@ const pofri = read("pofri-score.js");
 
 assert.match(index, /<script src="pofri-mofasa-bridge\.js"><\/script><script src="cri-engine\.js"><\/script>/,
   "The CRI engine must load before the application workflow.");
-assert.match(cri, /window\\.MOFASA_CRI=\\{calculate\\}/,
+assert.ok(cri.includes("window.MOFASA_CRI={calculate}"),
   "The existing CRI engine must be exposed to the application.");
 assert.ok(cri.includes(".40*T+.30*H+.20*F+.10*S"),
   "The CRI calculation must retain its established experimental weights.");
