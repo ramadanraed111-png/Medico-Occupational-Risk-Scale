@@ -527,6 +527,37 @@
  "مسودة":"Draft",
  "تقييم MOFASA":"MOFASA Assessment",
  "ملف تقييم MOFASA":"MOFASA Assessment Record",
+ "منخفض مبدئياً":"Provisionally Low",
+ "متوسط مبدئياً":"Provisionally Moderate",
+ "مرتفع مبدئياً":"Provisionally High",
+ "مرتفع جداً مبدئياً":"Provisionally Very High",
+ "خطورة منخفضة – مقبولة":"Low Risk – Acceptable",
+ "خطورة متوسطة – تحتاج إلى قيود":"Moderate Risk – Restrictions Required",
+ "خطورة مرتفعة – تحتاج إلى بحث تفصيلي وتقييم متعمق":"High Risk – Detailed Review and In-Depth Assessment Required",
+ "خطورة حرجة – مطلوب وقف النشاط":"Critical Risk – Activity Suspension Required",
+ "غير مكتمل – لا تصدر توصية":"Incomplete – No Recommendation",
+ "غير مكتمل":"Incomplete",
+ "المؤشر الرقمي الاسترشادي":"Indicative Numerical Index",
+ "توقيع الطبيب":"Physician Signature",
+ "توقيع مسؤول السلامة":"HSE Officer Signature",
+ "الاسم:":"Name:",
+ "التوقيع:":"Signature:",
+ "التاريخ:":"Date:",
+ "الرقم الوظيفي":"Employee Number",
+ "تاريخ التقييم":"Assessment Date",
+ "الموقع":"Site",
+ "المسمى الوظيفي":"Job Title",
+ "المهمة":"Task",
+ "مدة الوردية":"Shift Duration",
+ "العمر عند التقييم":"Age at Assessment",
+ "الإدارة":"Department",
+ "نوع التقييم":"Assessment Type",
+ "اسم الطبيب":"Physician Name",
+ "اسم مسؤول السلامة":"HSE Officer Name",
+ "بيانات العامل":"Worker Details",
+ "بيانات السلامة والمهام":"HSE and Task Information",
+ "المؤشرات الرقمية الاسترشادية":"Indicative Numerical Indices",
+
  "أولاً: البيانات الإدارية":"I. Administrative Information",
  "ثانياً: البيانات المهنية":"II. Occupational Information",
  "ثالثاً: البيانات الطبية":"III. Medical Information",
@@ -615,6 +646,6 @@
  function apply(next){lang=next==="en"?"en":"ar";document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.body.dataset.language=lang;visit(document.body);const b=document.getElementById("language-toggle");if(b){b.textContent=lang==="ar"?"English":"العربية";b.setAttribute("aria-label",lang==="ar"?"Switch interface to English":"تغيير لغة الواجهة إلى العربية");}try{localStorage.setItem("mofasa-language",lang);}catch(_){} }
  function init(){const b=document.getElementById("language-toggle");if(!b)return;let saved="ar";try{saved=localStorage.getItem("mofasa-language")||"ar";}catch(_){}b.addEventListener("click",()=>apply(lang==="ar"?"en":"ar"));apply(saved);const observer=new MutationObserver(records=>{for(const r of records){if(r.type==="childList")r.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3){if(n.nodeType===3){if(!originalText.has(n))originalText.set(n,n.nodeValue);if(lang==="en"){const next=translateText(originalText.get(n));if(n.nodeValue!==next)n.nodeValue=next;}}else visit(n);}});else if(r.type==="characterData"&&r.target.nodeType===3){if(!originalText.has(r.target))originalText.set(r.target,r.target.nodeValue);if(lang==="en"){const next=translateText(originalText.get(r.target));if(r.target.nodeValue!==next)r.target.nodeValue=next;}}}});observer.observe(document.body,{childList:true,subtree:true,characterData:true});}
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
- function translateHtml(html,target="en"){const previous=lang;lang=target==="en"?"en":"ar";const box=document.createElement("div");box.innerHTML=String(html||"");visit(box);const result=box.innerHTML;lang=previous;return result;}
+ function translateHtml(html,target="en"){const previous=lang;lang=target==="en"?"en":"ar";const parsed=new DOMParser().parseFromString(String(html||""),"text/html");visit(parsed.head);visit(parsed.body);const result="<!doctype html>"+parsed.documentElement.outerHTML;lang=previous;return result;}
  window.MOFASA_I18N={setLanguage:apply,getLanguage:()=>lang,translateHtml};
 })();
