@@ -27,8 +27,18 @@ assert.match(workflow, /ثانياً: البيانات المهنية[\s\S]*rend
   "The professional section must group job, HSE, JEM, and job-demand information.");
 assert.match(workflow, /ثالثاً: البيانات الطبية[\s\S]*renderMedicalHistory\(md\.diseases[\s\S]*renderMedicalReviewGroups\(md/,
   "The medical section must follow the professional section and contain medical information.");
-assert.match(workflow, /report-kv-table th:last-child,\.report-kv-table td:last-child\{width:76%;white-space:nowrap\}/,
+assert.match(workflow, /report-kv-table td:first-child\{width:30%;font-weight:700;color:#31545e\}\.report-kv-table td:last-child\{width:70%\}/,
   "The report value column must use most of the table width and keep values on one line where possible.");
+assert.doesNotMatch(workflow.slice(workflow.indexOf("const adminData="), workflow.indexOf("const professionalData=")), /اسم العامل|الرقم الوظيفي|تاريخ التقييم|الموقع|نتائج التاريخ المرضي/,
+  "Worker identity and medical history must not be repeated in the administrative table.");
+assert.ok(workflow.includes('const workerRows=[["الرقم الوظيفي",p.registration_number],["تاريخ التقييم",p.assessment_date],["الموقع",p.site]]'),
+  "Worker identity metadata must appear once in the report header card.");
+assert.ok(!workflow.slice(workflow.indexOf("function renderMedicalReviewGroups"), workflow.indexOf("function renderJemReview")).includes('["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases"]'),
+  "Medical history must be rendered only once in its dedicated subsection.");
+assert.ok(!workflow.slice(workflow.indexOf("async function buildFtwReportDocument"), workflow.indexOf("function printFtwReport")).includes('المؤشر الرقمي التجريبي</strong><div>'),
+  "The experimental indicator must not be duplicated in the medical section.");
+assert.match(workflow, /options\.section==="hse"[\s\S]*key==="safety_officer_name"/,
+  "The safety officer identity must appear only in the administrative summary.");
 assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
 assert.match(workflow, /options\.section==="medical"[\s\S]*department","worker_age","physician_name","physician_pr","assessment_type"/,
@@ -77,7 +87,7 @@ assert.match(workflow, /report-no-label>strong\{display:none!important\}/,
   "The print report must suppress the labels for registered items and the fitness form without dropping their values.");
 assert.match(workflow, /report-no-heading>summary\{display:none!important\}/,
   "The functional-capacity heading must be omitted from the print report.");
-assert.match(workflow, /renderMedicalHistory\(md\.diseases,options\)\+renderMedicalReviewGroups\(md,options\)/,
+assert.match(workflow, /const history=renderMedicalHistory\(md\.diseases,\{expanded:true,report:true\}\);[\s\S]*const groups=renderMedicalReviewGroups\(md,\{expanded:true,report:true\}\)/,
   "Expanded mode must propagate through all medical groups and conditions.");
 assert.match(workflow, /const reportOptions=\{expanded:true,report:true\};[\s\S]*renderMedicalReviewGroups\(md,reportOptions\)\+renderMedicalHistory\(md\.diseases,reportOptions\)/,
   "The standalone physician report must render the completed medical section with expanded report options.");
@@ -93,7 +103,7 @@ assert.match(workflow, /report-signatures\{display:grid;grid-template-columns:1f
   "The two signature fields must be aligned side by side.");
 assert.match(workflow, /options\.report\?"":'<h4>استعراض النقاط المستكملة فقط<\/h4><p class="specialist-help">/,
   "The report must omit the introductory completed-items heading and explanatory paragraph.");
-assert.match(workflow, /const adminData=\{[\s\S]*?"تاريخ التقييم":p\.assessment_date[\s\S]*?const adminSection=/,
+assert.match(workflow, /const adminData=\{"العمر عند التقييم":adminFtw\.worker_age,[\s\S]*?const adminSection=/,
   "Administrative details, including assessment date, must be shown in the first report section.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("const workerRows="), workflow.indexOf("const signatures=")), /hse_status|medical_status/,
   "The worker header must not display HSE or medical submission status labels.");
