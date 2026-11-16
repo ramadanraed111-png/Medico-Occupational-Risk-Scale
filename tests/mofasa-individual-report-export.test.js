@@ -29,7 +29,11 @@ assert.match(workflow, /ثالثاً: البيانات الطبية[\s\S]*render
   "The medical section must follow the professional section and contain medical information.");
 assert.match(workflow, /report-kv-table td:first-child\{width:30%;font-weight:700;color:#31545e\}\.report-kv-table td:last-child\{width:70%\}/,
   "The report value column must use most of the table width and keep values on one line where possible.");
-assert.doesNotMatch(workflow.slice(workflow.indexOf("const adminData="), workflow.indexOf("const professionalData=")), /اسم العامل|الرقم الوظيفي|تاريخ التقييم|الموقع|نتائج التاريخ المرضي/,\n  "Worker identity and medical history must not be repeated in the administrative table.");\nassert.match(workflow, /const workerRows=\\[\\["الرقم الوظيفي",p\\.registration_number\\],\\["تاريخ التقييم",p\\.assessment_date\\],\\["الموقع",p\\.site\\]\\]/,\n  "Worker identity metadata must appear once in the report header card.");\nassert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
+assert.doesNotMatch(workflow.slice(workflow.indexOf("const adminData="), workflow.indexOf("const professionalData=")), /اسم العامل|الرقم الوظيفي|تاريخ التقييم|الموقع|نتائج التاريخ المرضي/,
+  "Worker identity and medical history must not be repeated in the administrative table.");
+assert.match(workflow, /const workerRows=\\[\\["الرقم الوظيفي",p\\.registration_number\\],\\["تاريخ التقييم",p\\.assessment_date\\],\\["الموقع",p\\.site\\]\\]/,
+  "Worker identity metadata must appear once in the report header card.");
+assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
 assert.match(workflow, /options\.section==="medical"[\s\S]*department","worker_age","physician_name","physician_pr","assessment_type"/,
   "The individual report must omit administrative and physician identity fields from the medical section.");
