@@ -265,7 +265,7 @@ function printFtwReport(id){
  async function exportFtwWord(id){
   if(!isAdmin())return;
   const html=await buildFtwReportDocument(id);if(!html)return;
-  const language=reportLanguage;
+  const language=html.includes('<html lang="en" dir="ltr">')?"en":"ar";
   const blob=new Blob(["\ufeff",html],{type:"application/msword;charset=utf-8"});
   const url=URL.createObjectURL(blob),a=document.createElement("a");
   const base=String(parent?.registration_number||parent?.worker_name||id).replace(/[^a-zA-Z0-9_-]+/g,"-");
