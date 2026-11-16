@@ -30,3 +30,19 @@
 ## Provisional weighted index for committee demonstration
 A separate, explicitly provisional numeric model is included in `pofri-score.js`. It calculates R/M/F/E using the draft weights 30%/30%/25%/15%, displays the result beside (not instead of) the existing A/B/C/D rule classification, and stores it inside the existing `decision` JSON object. The score does not override medical or safety gates. Its mappings, weights, and display bands are not validated. See [POFRI weighted model draft](docs/POFRI-weighted-model-draft.md). This is for expert-committee demonstration and discussion only, not real fitness decisions.
 
+
+
+## IOFI – Integrated Occupational Fitness Intelligence (separate development track)
+
+IOFI is being developed as a job-, task-, worksite- and date-specific framework with four independent profiles (OERI, IHVI, JTCI and WORM), a non-compensatory Critical Safety Gate and an occupational-physician review layer. It is not the current production assessment workflow and must not be used as an autonomous fitness decision system.
+
+The working library is documented in:
+- docs/IOFI-job-library-families-01-08.md
+- docs/IOFI-job-library-logistics-emergency.md
+- docs/IOFI-job-library-engineering-marine-construction-warehouse.md
+
+The static bilingual preview is iofi-preview.html. The isolated foundation engine only checks evidence completeness and non-compensatory gates; it does not calculate weighted scores, medical penalties, exposure limits or final fitness decisions.
+
+All 15 family documents are working drafts. Site applicability, measurements, controls, demands, emergency duties and Egyptian legal requirements require verification by the relevant operations, HSE/industrial-hygiene, occupational-medicine and legal reviewers. Missing data remain Unknown / Pending verification.
+
+This development track does not alter the live application entry point, Supabase schema/data, Auth users, roles, RLS policies or existing MORS/POFRI/MOFASA assessment records.
