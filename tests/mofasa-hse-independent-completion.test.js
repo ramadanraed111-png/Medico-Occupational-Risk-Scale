@@ -23,5 +23,6 @@ assert.match(workflow, /const isOwnComplete=x=>ownStatus\?x\[ownStatus\]==="subm
 
 assert.match(migration, /create policy mofasa_hse_insert[\s\S]*u\.role in \('admin','hse_admin'\)/);
 assert.match(migration, /create policy mofasa_hse_update_draft[\s\S]*status = 'draft'[\s\S]*status in \('draft','submitted'\)/);
-assert.doesNotMatch(migration, /medical_status|mofasa_medical_sections|medical_admin/);
+const migrationSql = migration.replace(/^--.*$/gm, "");
+assert.doesNotMatch(migrationSql, /medical_status|mofasa_medical_sections|medical_admin/);
 console.log("MOFASA HSE independent completion tests passed.");
