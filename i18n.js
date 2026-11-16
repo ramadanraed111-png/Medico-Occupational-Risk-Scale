@@ -527,6 +527,30 @@
  "مسودة":"Draft",
  "تقييم MOFASA":"MOFASA Assessment",
  "ملف تقييم MOFASA":"MOFASA Assessment Record",
+ "أولاً: البيانات الإدارية":"I. Administrative Information",
+ "ثانياً: البيانات المهنية":"II. Occupational Information",
+ "ثالثاً: البيانات الطبية":"III. Medical Information",
+ "بيانات السلامة والمهام":"HSE and Task Information",
+ "الرأي الطبي النهائي":"Final Medical Opinion",
+ "المؤشرات الرقمية الاسترشادية":"Indicative Numerical Indices",
+ "POFRI – مؤشر التوافق الطبي والمهني":"POFRI – Medical and Occupational Compatibility Index",
+ "MOFASA-CRI – مؤشر المخاطر المركب":"MOFASA-CRI – Composite Risk Index",
+ "المعادلة:":"Formula:",
+ "المحاور:":"Components:",
+ "النواقص:":"Missing Information:",
+ "نتيجة استرشادية":"Indicative Result",
+ "غير مكتمل – لا توجد نتيجة قابلة للحساب":"Incomplete – no score can be calculated",
+ "ملاحظة منهجية:":"Methodological Note:",
+ "المؤشران مستقلان ويقيس كل منهما أبعاداً مختلفة؛ لا يتم جمعهما أو حساب متوسط بينهما. ولا يحل أي منهما محل قرار الطبيب المختص أو قواعد السلامة الحرجة.":"The two indices are independent and assess different dimensions. They are not added or averaged. Neither replaces the responsible physician’s decision or critical safety rules.",
+ "يقيس مستوى القلق أو الفجوات المحتملة في توافق العامل مع المهمة وظروف الموقع. الصفر يعني أقل مستوى قلق وفق المدخلات، و100 أعلى مستوى قلق؛ ولا يمثل الرقم نسبة احتمال إصابة أو نسبة لياقة.":"Measures potential concern or gaps in the worker’s compatibility with the task and site conditions. Zero indicates the lowest concern based on entered data and 100 the highest; this is not an injury probability or a fitness percentage.",
+ "يقيس مستوى المخاطر المهنية والصحية والوظيفية وظروف الموقع وفق البيانات المسجلة. القيم الأعلى تعني مستوى قلق أعلى، ولا تمثل احتمالاً إحصائياً للإصابة أو تشخيصاً طبياً.":"Measures occupational, health, functional and site-condition concerns based on recorded data. Higher values indicate greater concern; the score is not a statistical injury probability or medical diagnosis.",
+ "مؤشر تجريبي غير معاير، ولا يغيّر قرار اللياقة أو تصنيف A/B/C/D.":"Experimental, uncalibrated index. It does not change the fitness decision or A/B/C/D classification.",
+ "مؤشر تجريبي غير مُعاير أو مُعتمد؛ لا يصدر قرار لياقة.":"Experimental, uncalibrated and unapproved index; it does not issue a fitness decision.",
+ "طباعة التقرير بالعربية (PDF)":"Print Arabic Report (PDF)",
+ "تقرير Word بالعربية":"Arabic Word Report",
+ "تقرير فردي سري":"Confidential Individual Report",
+ "لا توجد بيانات مكتملة مسجلة لهذا العامل.":"No completed information has been recorded for this worker.",
+
  "التقييم المشترك":"Shared Assessment",
  "معلومات التقييم":"Assessment Information",
  "بيانات العامل":"Worker Details",
@@ -591,5 +615,6 @@
  function apply(next){lang=next==="en"?"en":"ar";document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.body.dataset.language=lang;visit(document.body);const b=document.getElementById("language-toggle");if(b){b.textContent=lang==="ar"?"English":"العربية";b.setAttribute("aria-label",lang==="ar"?"Switch interface to English":"تغيير لغة الواجهة إلى العربية");}try{localStorage.setItem("mofasa-language",lang);}catch(_){} }
  function init(){const b=document.getElementById("language-toggle");if(!b)return;let saved="ar";try{saved=localStorage.getItem("mofasa-language")||"ar";}catch(_){}b.addEventListener("click",()=>apply(lang==="ar"?"en":"ar"));apply(saved);const observer=new MutationObserver(records=>{for(const r of records){if(r.type==="childList")r.addedNodes.forEach(n=>{if(n.nodeType===1||n.nodeType===3){if(n.nodeType===3){if(!originalText.has(n))originalText.set(n,n.nodeValue);if(lang==="en"){const next=translateText(originalText.get(n));if(n.nodeValue!==next)n.nodeValue=next;}}else visit(n);}});else if(r.type==="characterData"&&r.target.nodeType===3){if(!originalText.has(r.target))originalText.set(r.target,r.target.nodeValue);if(lang==="en"){const next=translateText(originalText.get(r.target));if(r.target.nodeValue!==next)r.target.nodeValue=next;}}}});observer.observe(document.body,{childList:true,subtree:true,characterData:true});}
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
- window.MOFASA_I18N={setLanguage:apply,getLanguage:()=>lang};
+ function translateHtml(html,target="en"){const previous=lang;lang=target==="en"?"en":"ar";const box=document.createElement("div");box.innerHTML=String(html||"");visit(box);const result=box.innerHTML;lang=previous;return result;}
+ window.MOFASA_I18N={setLanguage:apply,getLanguage:()=>lang,translateHtml};
 })();
