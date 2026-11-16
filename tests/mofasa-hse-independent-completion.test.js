@@ -17,8 +17,8 @@ const save = workflow.slice(saveStart, saveEnd);
 const hseBranch = save.slice(save.indexOf("if(isH){"), save.indexOf("\n  else{"));
 assert.doesNotMatch(hseBranch, /medicalRow|medical_status|final_decision|canMedical/);
 assert.match(save, /if\(section==="hse"&&role!=="hse_admin"\)/);
-assert.match(save, /saveSection\("hse","draft"\)/);
-assert.match(save, /saveSection\("hse","submitted"\)/);
+assert.match(workflow, /\$\("mofasa-hse-draft"\)\.onclick=\(\)=>saveSection\("hse","draft"\)/);
+assert.match(workflow, /\$\("mofasa-hse-submit"\)\.onclick=\(\)=>saveSection\("hse","submitted"\)/);
 assert.match(workflow, /const isOwnComplete=x=>ownStatus\?x\[ownStatus\]==="submitted":x\.hse_status==="submitted"&&x\.medical_status==="submitted"/);
 
 assert.match(migration, /create policy mofasa_hse_insert[\s\S]*u\.role in \('admin','hse_admin'\)/);
