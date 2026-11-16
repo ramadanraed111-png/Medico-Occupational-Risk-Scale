@@ -197,8 +197,9 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   return '<section class="'+reportClass+'" data-score="'+esc(scoreValue??"")+'" data-band="'+esc(scoreBand??"")+'">'+renderIndexReport(hseRow?.section_data||{},medicalRow?.section_data||{})+'</section>';
  }
 
- async function buildFtwReportDocument(id,language=reportLanguage){
+ async function buildFtwReportDocument(id){
   if(!isAdmin())return null;
+  const language=reportLanguage;
   const p=parent||{};
   const hd=hseRow?.section_data||{},md=medicalRow?.section_data||{},adminFtw=md.ftw||{};
   const actorName=value=>{const raw=String(value||"").trim();if(!raw)return "";const part=raw.includes("@")?raw.split("@")[0]:raw;return part.replace(/[._-]+/g," ").trim();};
