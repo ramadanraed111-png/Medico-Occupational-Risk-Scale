@@ -85,7 +85,7 @@ assert.match(workflow, /report-no-label>strong\{display:none!important\}/,
   "The print report must suppress the labels for registered items and the fitness form without dropping their values.");
 assert.match(workflow, /report-no-heading>summary\{display:none!important\}/,
   "The functional-capacity heading must be omitted from the print report.");
-assert.match(workflow, /renderMedicalHistory\(md\.diseases,options\)\+renderMedicalReviewGroups\(md,options\)/,
+assert.match(workflow, /const history=renderMedicalHistory\(md\.diseases,\{expanded:true,report:true\}\);[\s\S]*const groups=renderMedicalReviewGroups\(md,\{expanded:true,report:true\}\)/,
   "Expanded mode must propagate through all medical groups and conditions.");
 assert.match(workflow, /const reportOptions=\{expanded:true,report:true\};[\s\S]*renderMedicalReviewGroups\(md,reportOptions\)\+renderMedicalHistory\(md\.diseases,reportOptions\)/,
   "The standalone physician report must render the completed medical section with expanded report options.");
@@ -101,7 +101,7 @@ assert.match(workflow, /report-signatures\{display:grid;grid-template-columns:1f
   "The two signature fields must be aligned side by side.");
 assert.match(workflow, /options\.report\?"":'<h4>استعراض النقاط المستكملة فقط<\/h4><p class="specialist-help">/,
   "The report must omit the introductory completed-items heading and explanatory paragraph.");
-assert.match(workflow, /const adminData=\{[\s\S]*?"تاريخ التقييم":p\.assessment_date[\s\S]*?const adminSection=/,
+assert.match(workflow, /const adminData=\{"العمر عند التقييم":adminFtw\.worker_age,[\s\S]*?const adminSection=/,
   "Administrative details, including assessment date, must be shown in the first report section.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("const workerRows="), workflow.indexOf("const signatures=")), /hse_status|medical_status/,
   "The worker header must not display HSE or medical submission status labels.");
