@@ -387,7 +387,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  }
  function shouldHideReportField(key,path,options){
   if(!options.report)return false;
-  if(options.section==="hse"&&path.includes("worker_profile")&&["age_years","date_of_birth"].includes(key))return true;
+  if(options.section==="hse"&&((path.includes("worker_profile")&&["age_years","date_of_birth"].includes(key))||key==="safety_officer_name"))return true;
   if(path.includes("diseases")&&["hazard","name","level","severity","severity_label","severity_description","risk_category","category","category_label","risk_level"].includes(key))return true;
   if(options.section==="medical"){
    if(["department","worker_age","physician_name","physician_pr","assessment_type"].includes(key))return true;
