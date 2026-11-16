@@ -587,6 +587,8 @@
  "مؤشر تجريبي غير معاير، ولا يغيّر قرار اللياقة أو تصنيف A/B/C/D.":"Experimental, uncalibrated index. It does not change the fitness decision or A/B/C/D classification.",
  "مؤشر تجريبي غير مُعاير أو مُعتمد؛ لا يصدر قرار لياقة.":"Experimental, uncalibrated and unapproved index; it does not issue a fitness decision.",
  "طباعة التقرير بالعربية (PDF)":"Print Arabic Report (PDF)",
+ "طباعة التقرير بالإنجليزية (PDF)":"Print English Report (PDF)",
+ "تقرير Word بالإنجليزية":"English Word Report",
  "تقرير Word بالعربية":"Arabic Word Report",
  "تقرير فردي سري":"Confidential Individual Report",
  "لا توجد بيانات مكتملة مسجلة لهذا العامل.":"No completed information has been recorded for this worker.",
