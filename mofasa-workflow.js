@@ -250,8 +250,9 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   }
   return html;
  }
- function printFtwReport(id,language="ar"){
+ function printFtwReport(id){
   if(!isAdmin())return;
+  const language=arguments[1]==="en"?"en":"ar";
   const pop=window.open("","_blank","width=1000,height=800");if(!pop){msg("يرجى السماح بالنوافذ المنبثقة لطباعة التقرير.","error");return;}
   pop.document.open();pop.document.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>جارٍ تجهيز التقرير</title></head><body style="font:16px Tahoma;padding:30px;direction:rtl">جارٍ تجهيز تقرير العامل...</body></html>');pop.document.close();
   buildFtwReportDocument(id,language).then(html=>{if(!html){pop.close();return;}pop.document.open();pop.document.write(html);pop.document.close();}).catch(error=>{pop.document.body.textContent="تعذر تجهيز التقرير: "+(error?.message||"خطأ غير معروف");});
