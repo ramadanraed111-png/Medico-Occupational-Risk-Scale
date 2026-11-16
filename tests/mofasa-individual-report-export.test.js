@@ -37,7 +37,7 @@ assert.ok(!workflow.slice(workflow.indexOf("function renderMedicalReviewGroups")
   "Medical history must be rendered only once in its dedicated subsection.");
 assert.ok(!workflow.slice(workflow.indexOf("async function buildFtwReportDocument"), workflow.indexOf("function printFtwReport")).includes('المؤشر الرقمي التجريبي</strong><div>'),
   "The experimental indicator must not be duplicated in the medical section.");
-assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
+assert.match(workflow, /options\.section==="hse"[\s\S]*key==="safety_officer_name"/,\n  "The safety officer identity must appear only in the administrative summary.");\nassert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
 assert.match(workflow, /options\.section==="medical"[\s\S]*department","worker_age","physician_name","physician_pr","assessment_type"/,
   "The individual report must omit administrative and physician identity fields from the medical section.");
