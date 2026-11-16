@@ -33,9 +33,9 @@ assert.doesNotMatch(workflow.slice(workflow.indexOf("const adminData="), workflo
   "Worker identity and medical history must not be repeated in the administrative table.");
 assert.ok(workflow.includes('const workerRows=[["الرقم الوظيفي",p.registration_number],["تاريخ التقييم",p.assessment_date],["الموقع",p.site]]'),
   "Worker identity metadata must appear once in the report header card.");
-assert.doesNotMatch(workflow.slice(workflow.indexOf("function renderMedicalReviewGroups"), workflow.indexOf("function renderJemReview")), /"diseases"\\]/,
+assert.ok(!workflow.slice(workflow.indexOf("function renderMedicalReviewGroups"), workflow.indexOf("function renderJemReview")).includes('["ftw","exam","vitals","labs","capacity","functional_capacity","restrictions","notes","diseases"]'),
   "Medical history must be rendered only once in its dedicated subsection.");
-assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwReportDocument"), workflow.indexOf("function printFtwReport")), /المؤشر الرقمي التجريبي<\\/strong><div>/,
+assert.ok(!workflow.slice(workflow.indexOf("async function buildFtwReportDocument"), workflow.indexOf("function printFtwReport")).includes('المؤشر الرقمي التجريبي</strong><div>'),
   "The experimental indicator must not be duplicated in the medical section.");
 assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
