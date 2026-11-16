@@ -191,9 +191,17 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
   if(!clean.length)return "";
   return '<section class="report-section"><h2>Hazardous Exposures</h2><table class="ftw-table"><thead><tr><th>Hazard Category</th><th>Hazard</th><th>Severity</th><th>Exposure Frequency</th><th>Frequency Scale</th><th>Duration Scale</th><th>Probability Scale</th><th>Control Effectiveness</th><th>Controls</th><th>Residual Risk</th></tr></thead><tbody>'+clean.map(x=>'<tr>'+[x.category,x.name,x.severity_label||x.severity,exposureLabels[x.frequency]||x.frequency,x.frequency_scale,x.duration_scale,x.probability_scale,x.control_effectiveness,x.controls,x.residual].map(v=>'<td>'+esc(ftwPrintValue(v)||"—")+'</td>').join("")+'</tr>').join("")+'</tbody></table></section>';
  }
- function renderPofriReport(score){
-  if(!score||typeof score!=="object"||score.total===null||score.total===undefined||!Number.isFinite(Number(score.total)))return "";
-  return '<section class="indicator-summary"><strong>المؤشر الرقمي الاسترشادي</strong><span>'+esc(score.total)+' / 100</span><b>'+esc(score.band||"نتيجة استرشادية")+'</b></section>';
+ function renderIndexReport(hd={},md={}){
+  const calculated=window.MOFASA_POFriBridge?.calculate?.(hd,md,"")||null,stored=md.preliminary_analysis||{};
+  const pofri=calculated?.total!==null&&calculated?.total!==undefined?calculated:(Number.isFinite(Number(stored.total))?stored:calculated);
+  const cri=window.MOFASA_CRI?.calculate?.({hse:hd,medical:md})||null;
+  const componentText=items=>Object.entries(items||{}).filter(([,v])=>v!==null&&v!==undefined).map(([k,v])=>k+": "+v).join(" · ");
+  const card=(title,score,band,formula,components,meaning,notes,gaps)=>'<article class="index-report-card"><h3>'+esc(title)+'</h3>'+(score!==null&&score!==undefined&&Number.isFinite(Number(score))?'<div class="index-report-score"><strong>'+esc(score)+'</strong><span>/ 100</span></div><b class="index-report-band">'+esc(band||"نتيجة استرشادية")+'</b>':'<div class="index-report-incomplete">غير مكتمل – لا توجد نتيجة قابلة للحساب</div>')+(formula?'<p><strong>المعادلة:</strong> '+esc(formula)+'</p>':'')+(components?'<p><strong>المحاور:</strong> '+esc(components)+'</p>':'')+'<p>'+esc(meaning)+'</p>'+(gaps?'<p class="index-report-gaps"><strong>النواقص:</strong> '+esc(gaps)+'</p>':'')+(notes?'<p class="index-report-note">'+esc(notes)+'</p>':'')+'</article>';
+  const pofriGap=pofri?.reason||pofri?.gaps?.join("؛ ")||"يلزم استكمال بيانات المهمة والمخاطر والحالة الطبية والقدرة الوظيفية وجاهزية الموقع.";
+  const criGaps=Array.isArray(cri?.gaps)?cri.gaps.join("؛ "):"";
+  const pofriHtml=card("POFRI – مؤشر التوافق الطبي والمهني",pofri?.total,pofri?.band,pofri?.formula||"0.30R + 0.30M + 0.25F + 0.15E",componentText(pofri?.components),"يقيس مستوى القلق أو الفجوات المحتملة في توافق العامل مع المهمة وظروف الموقع. الصفر يعني أقل مستوى قلق وفق المدخلات، و100 أعلى مستوى قلق؛ ولا يمثل الرقم نسبة احتمال إصابة أو نسبة لياقة.",pofri?.band_note||pofri?.limitation||"مؤشر تجريبي غير معاير، ولا يغيّر قرار اللياقة أو تصنيف A/B/C/D.",pofri?.total===null?pofriGap:"");
+  const criHtml=card("MOFASA-CRI – مؤشر المخاطر المركب",cri?.total,cri?.label||cri?.band,cri?.formula||"CRI = 0.40T + 0.30H + 0.20F + 0.10S",componentText(cri?.components),"يقيس مستوى المخاطر المهنية والصحية والوظيفية وظروف الموقع وفق البيانات المسجلة. القيم الأعلى تعني مستوى قلق أعلى، ولا تمثل احتمالاً إحصائياً للإصابة أو تشخيصاً طبياً.",cri?.note||"مؤشر تجريبي غير مُعاير أو مُعتمد؛ لا يصدر قرار لياقة.",cri?.total===null?criGaps||"استكمل سجل الأخطار والمهام والحالات الطبية ومتطلبات اللياقة وجاهزية الموقع.":"");
+  return '<section class="report-data-section index-report"><h2>المؤشرات الرقمية الاسترشادية</h2><div class="index-report-grid">'+pofriHtml+criHtml+'</div><p class="index-separation-note"><strong>ملاحظة منهجية:</strong> المؤشران مستقلان ويقيس كل منهما أبعاداً مختلفة؛ لا يتم جمعهما أو حساب متوسط بينهما. ولا يحل أي منهما محل قرار الطبيب المختص أو قواعد السلامة الحرجة.</p></section>';
  }
  async function buildFtwReportDocument(id){
   if(!isAdmin())return null;
