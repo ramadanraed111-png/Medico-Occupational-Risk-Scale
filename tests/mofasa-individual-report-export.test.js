@@ -31,8 +31,12 @@ assert.match(workflow, /report-kv-table td:first-child\{width:30%;font-weight:70
   "The report value column must use most of the table width and keep values on one line where possible.");
 assert.doesNotMatch(workflow.slice(workflow.indexOf("const adminData="), workflow.indexOf("const professionalData=")), /اسم العامل|الرقم الوظيفي|تاريخ التقييم|الموقع|نتائج التاريخ المرضي/,
   "Worker identity and medical history must not be repeated in the administrative table.");
-assert.match(workflow, /const workerRows=\\[\\["الرقم الوظيفي",p\\.registration_number\\],\\["تاريخ التقييم",p\\.assessment_date\\],\\["الموقع",p\\.site\\]\\]/,
+assert.ok(workflow.includes('const workerRows=[["الرقم الوظيفي",p.registration_number],["تاريخ التقييم",p.assessment_date],["الموقع",p.site]]'),
   "Worker identity metadata must appear once in the report header card.");
+assert.doesNotMatch(workflow.slice(workflow.indexOf("function renderMedicalReviewGroups"), workflow.indexOf("function renderJemReview")), /"diseases"\\]/,
+  "Medical history must be rendered only once in its dedicated subsection.");
+assert.doesNotMatch(workflow.slice(workflow.indexOf("async function buildFtwReportDocument"), workflow.indexOf("function printFtwReport")), /المؤشر الرقمي التجريبي<\\/strong><div>/,
+  "The experimental indicator must not be duplicated in the medical section.");
 assert.match(workflow, /function shouldHideReportField\(key,path,options\)[\s\S]*worker_profile[\s\S]*age_years[\s\S]*date_of_birth/,
   "The individual report must omit worker age and date of birth from the HSE worker profile.");
 assert.match(workflow, /options\.section==="medical"[\s\S]*department","worker_age","physician_name","physician_pr","assessment_type"/,
