@@ -246,7 +246,7 @@ function renderMedicalRegisters(d={},job={},hse={}){const l=d.labs,c=d.diseases,
  }
   function renderIndexReport(hd={},md={}){
   const calculated=window.MOFASA_POFriBridge?.calculate?.(hd,md,"")||null,stored=md.preliminary_analysis||{};
-  const pofri=calculated?.total!==null&&calculated?.total!==undefined?calculated:(Number.isFinite(Number(stored.total))?stored:calculated);
+  const pofri=calculated?.total!==null&&calculated?.total!==undefined?calculated:(stored.total!==null&&stored.total!==undefined&&Number.isFinite(Number(stored.total))?stored:calculated);
   const cri=window.MOFASA_CRI?.calculate?.({hse:hd,medical:md})||null;
   const componentNames={R:"R – المخاطر المتبقية",M:"M – التوافق الطبي",F:"F – القدرة الوظيفية",E:"E – جاهزية الطوارئ",task_exposure:"التعرض والمهمة",health:"الحالة الصحية",functional:"القدرة الوظيفية",site:"ظروف الموقع"};
   const componentText=items=>Object.entries(items||{}).filter(([,v])=>v!==null&&v!==undefined).map(([k,v])=>(componentNames[k]||k)+": "+v).join(" · ");
